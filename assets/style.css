@@ -1297,7 +1297,11 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   pointer-events:none; z-index:0; display:block;
 }
 [data-r3d-host]{ position:relative; }
-[data-r3d-host] > *:not(.r3d-stage){ position:relative; z-index:1; }
+/* Lift real content above the canvas — but not the caption, which is
+   absolutely positioned inside the frame. Without excluding it, this rule
+   (specificity 0,2,0) outranks .r3d-caption (0,1,0) and forces it back into
+   flow at the top of the frame. */
+[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption){ position:relative; z-index:1; }
 
 /* A framed, interactive scene — used where the artwork is the subject rather
    than a backdrop. */
@@ -1547,3 +1551,189 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 @media(max-width:980px){
   .contact-grid .r3d-frame{ max-width:420px; }
 }
+
+/* An emphasised run is split per word so it can wrap; each word therefore
+   carries the gradient itself rather than inheriting a clip from the <em>. */
+.dark em .sr-word,
+.hero em .sr-word,
+.page-hero em .sr-word,
+.final-cta em .sr-word,
+.impact em .sr-word,
+.reviews em .sr-word,
+.work em .sr-word{
+  background:linear-gradient(135deg,#FF9A76,#F4C77E);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* Last two tap targets: the wordmark and the breadcrumb home link. */
+.brand{ min-height:44px; }
+.breadcrumb a{ min-height:44px; min-width:44px; display:inline-flex; align-items:center;
+  justify-content:center; padding:0 6px; margin-left:-6px; }
+.breadcrumb{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+/* ==========================================================================
+   AMBIENT MASKING FOR 3D BACKDROPS
+
+   A full-bleed particle field behind body copy destroys contrast — measured
+   at the hero, the brightest crests read lighter than the type sitting on
+   them. Each backdrop is therefore masked away from wherever the words are,
+   so the artwork frames the message instead of fighting it.
+   ========================================================================== */
+
+/* Home hero: text left, mockup right — the field lives on the right and
+   dissolves before it reaches the headline. */
+.hero > .r3d-stage{
+  opacity:.62;
+  -webkit-mask-image:linear-gradient(100deg, transparent 4%, rgba(0,0,0,.28) 34%, rgba(0,0,0,.85) 62%, #000 100%);
+  mask-image:linear-gradient(100deg, transparent 4%, rgba(0,0,0,.28) 34%, rgba(0,0,0,.85) 62%, #000 100%);
+}
+/* Stacked on mobile the copy spans the full width, so the field retreats to
+   the top and bottom edges instead of the right. */
+@media(max-width:980px){
+  .hero > .r3d-stage{
+    opacity:.5;
+    -webkit-mask-image:linear-gradient(180deg, #000 0%, rgba(0,0,0,.15) 26%, transparent 46%, transparent 72%, rgba(0,0,0,.5) 100%);
+    mask-image:linear-gradient(180deg, #000 0%, rgba(0,0,0,.15) 26%, transparent 46%, transparent 72%, rgba(0,0,0,.5) 100%);
+  }
+}
+
+/* Interior page heroes are single-column and centre-left aligned: fade the
+   field in from the right and keep it off the first screenful of text. */
+.page-hero > .r3d-stage{
+  -webkit-mask-image:linear-gradient(105deg, transparent 10%, rgba(0,0,0,.35) 45%, #000 95%);
+  mask-image:linear-gradient(105deg, transparent 10%, rgba(0,0,0,.35) 45%, #000 95%);
+}
+
+/* Dark content bands: hold the artwork to the edges, clear of the copy. */
+.signal-section > .r3d-stage,
+.work > .r3d-stage{
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 50%, transparent 18%, rgba(0,0,0,.55) 52%, #000 90%);
+  mask-image:radial-gradient(120% 90% at 50% 50%, transparent 18%, rgba(0,0,0,.55) 52%, #000 90%);
+}
+
+/* ==========================================================================
+   HERO RHYTHM ON SMALL SCREENS
+   ========================================================================== */
+@media(max-width:980px){
+  /* The fixed header is ~74px; the hero was reserving well over 200px of dead
+     space above the eyebrow before the headline began. */
+  .hero{ padding-top:104px; padding-bottom:60px; }
+  .hero-inner{ gap:36px; }
+  .eyebrow{ flex-wrap:wrap; row-gap:2px; line-height:1.5; }
+}
+@media(max-width:560px){
+  /* Two stacked full-width pills push the trust row off the first screen;
+     side by side they stay in view and read as a pair. */
+  .hero-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .hero-actions .btn{ flex:1 1 auto; justify-content:center; padding-left:20px; padding-right:20px; }
+  .trust-row{ gap:10px; }
+}
+
+/* The mobile contact dock floats over the page; content needs room to clear
+   it or the last element is permanently half-covered. */
+@media(max-width:700px){
+  body{ padding-bottom:calc(74px + env(safe-area-inset-bottom)); }
+  .site-footer{ margin-bottom:0; }
+}
+
+/* ==========================================================================
+   HERO MOCKUP LAYERING
+   The floating stat cards were positioned with fixed offsets that landed the
+   "Ranking" card directly on top of the mockup's call-to-action button — the
+   one element in the whole illustration that is meant to be read. They now
+   sit outside the mock's content column and overlap only its chrome.
+   ========================================================================== */
+.card-signal{ top:auto; bottom:96px; left:-30px; }
+.card-speed{ bottom:-14px; right:-6px; }
+.card-clients{ top:-12px; right:-10px; }
+.browser-mock{ position:relative; z-index:1; }
+.float-card{ z-index:3; }
+
+/* Keep the cards inside the viewport as the column narrows. */
+@media(max-width:1240px){
+  .card-signal{ left:-8px; }
+  .card-speed{ right:6px; }
+  .card-clients{ right:0; }
+}
+
+/* ==========================================================================
+   QUOTE CARD FIXES (found by screenshotting each step)
+   ========================================================================== */
+
+/* 1. A <legend> is taken out of normal flow and painted over the fieldset's
+      top border, so the step title was landing on top of the progress rail.
+      Floating it puts it back in flow while keeping the correct semantics. */
+.quote-step > .quote-legend{
+  float:left; width:100%; padding:0; margin:0 0 5px;
+}
+.quote-step > .quote-sub{ clear:both; }
+
+/* 2. `hidden` is a UA-level rule; .btn's display:inline-flex outranks it, so
+      "Send my brief" stayed on screen through steps 1 and 2 next to
+      "Continue". Anything hidden must actually be hidden. */
+.quote-foot [hidden],
+.quote-foot .btn[hidden]{ display:none !important; }
+
+/* 3. The trust line was wrapping into the buttons; let it shrink out of the
+      way before it collides. */
+.quote-foot{ flex-wrap:wrap; }
+.quote-trust{ flex:1 1 auto; min-width:0; max-width:210px; line-height:1.4; }
+@media(max-width:1100px){ .quote-trust{ display:none; } }
+
+/* ==========================================================================
+   MOBILE OVERLAY HYGIENE
+
+   Three floating things competed for the bottom of a 390px screen — the
+   contact dock, the back-to-top button and whatever CTA the page had there —
+   and they overlapped each other. The dock earns the space on a lead-gen
+   site; back-to-top is a convenience and stands down on small screens.
+   ========================================================================== */
+@media(max-width:700px){
+  .to-top{ display:none !important; }
+}
+
+/* On contact.html the brief is the entire point of the page, but the stacked
+   order put a full column of supporting copy in front of it. The card comes
+   first on small screens; the reassurance reads underneath it. */
+@media(max-width:980px){
+  .contact-grid{ display:flex; flex-direction:column; }
+  .contact-grid > *:last-child{ order:-1; }      /* the quote card */
+  .contact-grid .contact-info{ order:1; }
+}
+
+/* On the contact page the dock is redundant — the brief and a WhatsApp CTA
+   are both already on screen — and at 390px it sat directly on top of the
+   card's "Continue" button. */
+@media(max-width:700px){
+  .page-contact .sticky-socials{ display:none; }
+  .page-contact body{ padding-bottom:0; }
+}
+
+/* Interior heroes reserved 170px of top padding and 62vh of height for a
+   breadcrumb, a line of eyebrow and a headline — on a phone that is a screen
+   and a half of empty navy before any content. */
+@media(max-width:980px){
+  .page-hero{ min-height:auto; padding:120px 6vw 64px; }
+  .page-hero p.lede{ margin-bottom:8px; }
+  .breadcrumb{ margin-bottom:16px; }
+  .eyebrow{ margin-bottom:16px; }
+}
+@media(max-width:560px){
+  .page-hero{ padding:104px 6vw 52px; }
+}
+
+/* The framed scenes are tall squares; on a two-column row that leaves the
+   text column floating in the middle of a lot of nothing. A 5:4 frame and
+   top-aligned columns tighten the whole block. */
+.r3d-frame{ aspect-ratio:5/4; }
+.two-col:has(.r3d-frame){ align-items:center; gap:56px; }
+@media(max-width:900px){ .r3d-frame{ aspect-ratio:4/3; } }
+
+/* The contact columns are very different heights: supporting copy plus the
+   live scene on the left, a compact card on the right. Pinning the card keeps
+   it in view for the whole scroll instead of leaving half the row empty. */
+@media(min-width:981px){
+  .contact-grid{ align-items:start; }
+  .contact-grid > *:last-child{ position:sticky; top:104px; }
+}
+.contact-grid .r3d-frame{ max-width:440px; }

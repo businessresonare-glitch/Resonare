@@ -275,14 +275,16 @@
           ctx.stroke();
         }
 
-        // glowing crests
+        /* Only the top of each crest lights, and gently. This is ambience
+           behind a headline, not the subject: at full strength the field
+           read brighter than the type sitting on it. */
         ctx.globalCompositeOperation = 'lighter';
         for (var m = 0; m < proj.length; m++) {
           var g = proj[m];
           var lift = clamp((g.h + 70) / 150, 0, 1);
-          if (lift < 0.22) continue;
-          var col = mix(PALETTE.indigo, lift > 0.72 ? PALETTE.gold : PALETTE.rust, clamp((lift - 0.22) / 0.6, 0, 1));
-          s.glow(g.x, g.y, 2 + lift * 15 * g.s * 1.7, col, 0.10 + lift * 0.42);
+          if (lift < 0.42) continue;
+          var col = mix(PALETTE.indigo, lift > 0.8 ? PALETTE.gold : PALETTE.rust, clamp((lift - 0.42) / 0.5, 0, 1));
+          s.glow(g.x, g.y, 1.4 + lift * 8 * g.s * 1.5, col, 0.04 + lift * 0.20);
         }
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = 'source-over';

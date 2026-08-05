@@ -512,9 +512,26 @@ attachTilt('.service-card', 2.6, -8);
     Array.from(el.childNodes).forEach(node => {
       if (node.nodeType === 3 && node.textContent.trim()){ splitTextNode(node); return; }
       if (node.nodeType !== 1 || node.classList.contains('sr-word')) return;
-      /* <em> carries a clipped gradient fill — split it and the fill breaks,
-         so it animates as one unit instead of per character */
-      if (node.tagName === 'EM'){ node.classList.add('sr-char'); return; }
+      /* <em> carries a gradient clipped to its text, so its characters are not
+         split individually — a transformed child breaks the clip. It used to
+         animate as ONE inline-block, which made a multi-word emphasis an
+         unwrappable run: "real trade businesses" measured 1087px on a 768px
+         tablet and was clipped off at the hero edge. Splitting per word keeps
+         the fill intact (each word owns its own gradient, see .dark em .sr-word)
+         while restoring normal line breaking. */
+      if (node.tagName === 'EM'){
+        const parts = node.textContent.split(/(\s+)/);
+        node.textContent = '';
+        parts.forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)){ node.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement('span');
+          w.className = 'sr-word sr-char';   // wrap unit and animation unit in one
+          w.textContent = part;
+          node.appendChild(w);
+        });
+        return;
+      }
       walk(node);
     });
   }
