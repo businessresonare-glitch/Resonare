@@ -4,6 +4,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tokens.
+ *
+ * Tailwind's own scale (spacing, sizing, opacity) is the token system for
+ * anything expressible as a utility class, per the "default config, no
+ * extensions" constraint. These custom properties cover the values Tailwind
+ * cannot express: the glass recipe, brand colors, and motion curves.
+ */
+:root {
+  /* Brand — sourced from favicon.svg and site.webmanifest on the static site. */
+  --brand-navy: #0a0952;
+  --brand-accent: #de5a3c;
+
+  /* Liquid glass */
+  --glass-tint: rgba(255, 255, 255, 0.01);
+  --glass-blur: 4px;
+  --glass-inner-highlight: rgba(255, 255, 255, 0.1);
+  --glass-edge-width: 1.4px;
+  --glass-edge-strong: rgba(255, 255, 255, 0.45);
+  --glass-edge-soft: rgba(255, 255, 255, 0.15);
+  --glass-edge-none: rgba(255, 255, 255, 0);
+
+  /* Type */
+  --font-display: 'Instrument Serif', serif;
+
+  /* Motion */
+  --ease-entrance: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration-entrance: 0.7s;
+  --stagger-step: 0.09s;
+  --enter-blur: 12px;
+  --enter-distance: 28px;
+
+  /* Stacking order, low to high. */
+  --z-video: 0;
+  --z-content: 10;
+  --z-nav: 20;
+}
+
 html,
 body,
 #root {
@@ -15,30 +53,32 @@ body {
 }
 
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--glass-tint);
   background-blend-mode: luminosity;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
   border: none;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 1px var(--glass-inner-highlight);
   position: relative;
   overflow: hidden;
 }
 
+/* Gradient border with no actual border: paint the padding box, mask out the
+   content box, and the difference is a 1.4px edge. */
 .liquid-glass::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1.4px;
+  padding: var(--glass-edge-width);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(255, 255, 255, 0) 60%,
-    rgba(255, 255, 255, 0.15) 80%,
-    rgba(255, 255, 255, 0.45) 100%
+    var(--glass-edge-strong) 0%,
+    var(--glass-edge-soft) 20%,
+    var(--glass-edge-none) 40%,
+    var(--glass-edge-none) 60%,
+    var(--glass-edge-soft) 80%,
+    var(--glass-edge-strong) 100%
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -49,6 +89,133 @@ body {
     linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* ---- Entrance animations ---------------------------------------------- */
+
+@keyframes enter-blur-up {
+  from {
+    opacity: 0;
+    filter: blur(var(--enter-blur));
+    transform: translateY(var(--enter-distance));
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes enter-word {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(40px);
+  }
+  50% {
+    opacity: 0.5;
+    filter: blur(4px);
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* Reduced-motion fallback: same timing, no displacement and no blur. */
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-enter {
+  animation: enter-blur-up var(--duration-entrance) var(--ease-entrance) both;
+  animation-delay: var(--enter-delay, 0s);
+}
+
+.animate-word {
+  display: inline-block;
+  margin-right: 0.28em;
+  animation: enter-word var(--duration-entrance) var(--ease-entrance) both;
+  animation-delay: var(--enter-delay, 0s);
+}
+
+/* Trailing margin on the last word would pull a centered line off-center. */
+.animate-word:last-child {
+  margin-right: 0;
+}
+
+/* ---- Micro-interactions ------------------------------------------------ */
+
+.hover-lift {
+  transition:
+    transform 0.2s var(--ease-entrance),
+    background-color 0.2s var(--ease-entrance),
+    color 0.2s var(--ease-entrance);
+}
+
+.hover-lift:hover {
+  transform: scale(1.05);
+}
+
+.hover-lift:active {
+  transform: scale(0.97);
+}
+
+/* Directional links slide toward their destination rather than scaling. */
+.hover-nudge {
+  transition:
+    transform 0.2s var(--ease-entrance),
+    color 0.2s var(--ease-entrance);
+}
+
+.hover-nudge:hover {
+  transform: translateX(3px);
+}
+
+/* Nav links get an underline that draws left to right. */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-entrance);
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter,
+  .animate-word {
+    animation-name: enter-fade;
+  }
+
+  .hover-lift:hover,
+  .hover-lift:active,
+  .hover-nudge:hover {
+    transform: none;
+  }
+
+  .link-underline::after {
+    transition: none;
+  }
 }
 
 /* Keyboard focus stays visible against the video. */
