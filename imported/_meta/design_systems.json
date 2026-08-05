@@ -1,0 +1,141 @@
+{
+  "designSystems": [
+    {
+      "designSystem": {
+        "displayName": "Resonare",
+        "styleGuidelines": "## Brand & Style\nThe design system for Resonare embodies a \"Professional but Rogue\" ethos, blending high-end corporate reliability with an avant-garde editorial edge. It targets premium tech clients and creative disruptors who value precision and personality. \n\nThe visual language is rooted in **Modern Minimalism** with **Glassmorphic** and **Experimental Editorial** infusions. The core motif is the \"Echo\"\u2014represented through repeating visual elements, rhythmic motion blurs, and layered depth. The aesthetic is intentionally high-impact, utilizing dramatic contrast and expansive negative space to create a sense of focused power and sophisticated rebellion.\n\n## Layout & Spacing\nThe layout follows an **Asymmetric Grid** philosophy. Avoid standard 50/50 splits. Instead, use a 12-column grid where content often shifts off-center (e.g., spanning columns 2 through 7, or 8 through 11) to create visual tension and \"Rogue\" energy.\n\n- **Whitespace:** Use extreme vertical padding (160px+) between major sections to emphasize the premium nature of the content.\n- **Echo Repetition:** Break the grid with repeating elements (like a series of vertical lines or offset image stacks) that \"trail\" off the edge of the screen.\n- **Mobile:** Transition to a simplified single-column flow, but maintain the generous vertical rhythm.\n\n## Elevation & Depth\nDepth is created through light and transparency rather than traditional shadows.\n\n- **Glassmorphism:** Use background blurs (30px-50px) on navigation bars and cards. Borders on these elements should be 1px solid Silver (#E0E0E0) at 10% opacity.\n- **Tonal Layering:** Objects closer to the user are slightly lighter charcoal (#1A1A1A), appearing to emerge from the obsidian base.\n- **Cobalt Glow:** Use \"Ambient Glows\"\u2014large, low-opacity (#2E5BFF at 5%) radial gradients behind key components to simulate a digital aura.\n- **Motion Blur:** Interactive elements (like buttons or cards) should utilize a subtle directional blur transition on hover, suggesting an \"echo\" of movement.\n\n## Components\n- **Buttons:** Sharp-edged, solid Cobalt for primary actions. Use a \"Ghost Echo\" hover state where a secondary sharp frame expands outward from the button. Text is always Hanken Grotesk SemiBold.\n- **Input Fields:** Bottom-border only (Silver, 1px). Labels use the `label-caps` style positioned above the line. On focus, the bottom border glows Cobalt.\n- **Cards:** Glassmorphic backgrounds with sharp edges. No heavy shadows; use a subtle 1px Silver border.\n- **Editorial Chips:** Use Bodoni Moda Italic for chips, encased in a simple sharp 1px Silver box.\n- **Progress Indicators:** Linear, ultra-thin cobalt lines that expand across the top of sections or headers.\n- **Echo Lists:** List items that, when hovered, reveal a faded, offset duplicate of the text behind the original, creating a literal visual echo.",
+        "theme": {
+          "bodyFont": "HANKEN_GROTESK",
+          "bodyFontFamily": "Hanken Grotesk",
+          "colorMode": "DARK",
+          "colorVariant": "FIDELITY",
+          "customColor": "#2e5bff",
+          "designMd": "---\nname: Resonare\ncolors:\n  surface: '#131313'\n  surface-dim: '#131313'\n  surface-bright: '#393939'\n  surface-container-lowest: '#0e0e0e'\n  surface-container-low: '#1c1b1b'\n  surface-container: '#20201f'\n  surface-container-high: '#2a2a2a'\n  surface-container-highest: '#353535'\n  on-surface: '#e5e2e1'\n  on-surface-variant: '#c4c5d9'\n  inverse-surface: '#e5e2e1'\n  inverse-on-surface: '#313030'\n  outline: '#8e90a2'\n  outline-variant: '#434656'\n  surface-tint: '#b8c3ff'\n  primary: '#b8c3ff'\n  on-primary: '#002388'\n  primary-container: '#2e5bff'\n  on-primary-container: '#efefff'\n  inverse-primary: '#124af0'\n  secondary: '#c6c6c6'\n  on-secondary: '#2f3131'\n  secondary-container: '#454747'\n  on-secondary-container: '#b5b5b5'\n  tertiary: '#c9c6c5'\n  on-tertiary: '#313030'\n  tertiary-container: '#6e6d6d'\n  on-tertiary-container: '#f3f0ef'\n  error: '#ffb4ab'\n  on-error: '#690005'\n  error-container: '#93000a'\n  on-error-container: '#ffdad6'\n  primary-fixed: '#dde1ff'\n  primary-fixed-dim: '#b8c3ff'\n  on-primary-fixed: '#001356'\n  on-primary-fixed-variant: '#0035be'\n  secondary-fixed: '#e2e2e2'\n  secondary-fixed-dim: '#c6c6c6'\n  on-secondary-fixed: '#1a1c1c'\n  on-secondary-fixed-variant: '#454747'\n  tertiary-fixed: '#e5e2e1'\n  tertiary-fixed-dim: '#c9c6c5'\n  on-tertiary-fixed: '#1c1b1b'\n  on-tertiary-fixed-variant: '#474646'\n  background: '#131313'\n  on-background: '#e5e2e1'\n  surface-variant: '#353535'\ntypography:\n  display-lg:\n    fontFamily: Syne\n    fontSize: 80px\n    fontWeight: '800'\n    lineHeight: 90px\n    letterSpacing: -0.04em\n  display-lg-mobile:\n    fontFamily: Syne\n    fontSize: 48px\n    fontWeight: '800'\n    lineHeight: 52px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Syne\n    fontSize: 48px\n    fontWeight: '700'\n    lineHeight: 56px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Syne\n    fontSize: 32px\n    fontWeight: '700'\n    lineHeight: 40px\n    letterSpacing: -0.01em\n  body-lg:\n    fontFamily: Hanken Grotesk\n    fontSize: 18px\n    fontWeight: '400'\n    lineHeight: 28px\n  body-md:\n    fontFamily: Hanken Grotesk\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 24px\n  accent-serif:\n    fontFamily: Bodoni Moda\n    fontSize: 20px\n    fontWeight: '400'\n    lineHeight: 28px\n  label-caps:\n    fontFamily: Hanken Grotesk\n    fontSize: 12px\n    fontWeight: '600'\n    lineHeight: 16px\n    letterSpacing: 0.1em\nspacing:\n  unit: 8px\n  container-max: 1440px\n  gutter: 32px\n  margin-mobile: 24px\n  margin-desktop: 80px\n---\n\n## Brand & Style\nThe design system for Resonare embodies a \"Professional but Rogue\" ethos, blending high-end corporate reliability with an avant-garde editorial edge. It targets premium tech clients and creative disruptors who value precision and personality. \n\nThe visual language is rooted in **Modern Minimalism** with **Glassmorphic** and **Experimental Editorial** infusions. The core motif is the \"Echo\"\u2014represented through repeating visual elements, rhythmic motion blurs, and layered depth. The aesthetic is intentionally high-impact, utilizing dramatic contrast and expansive negative space to create a sense of focused power and sophisticated rebellion.\n\n## Colors\nThe palette is dominated by a deep obsidian base to establish a premium, \"dark mode\" first environment. \n\n- **Primary (Electric Cobalt):** Used sparingly for high-action touchpoints and \"echo\" highlights.\n- **Secondary (Sharp Silver):** Reserved for high-contrast typography and delicate structural lines.\n- **Background Tiers:** The base is `#0A0A0A`. Surface levels use subtle charcoal variations to create depth without losing the obsidian atmosphere.\n- **Accents:** Cobalt should be used with motion blurs or glassmorphism to simulate a glowing digital pulse.\n\n## Typography\nTypography is the primary driver of the \"Rogue\" personality. \n\n- **Headlines (Syne):** Bold, wide, and commanding. Use `display-lg` for hero sections with tight tracking to create a massive, monolithic feel.\n- **Body (Hanken Grotesk):** Provides a contemporary, clean, and highly legible counterpoint to the expressive headlines.\n- **Accents (Bodoni Moda):** Used for pull quotes, captions, or \"editorial interjections\" within sections to introduce a high-fashion, sophisticated air.\n- **The Echo Effect:** Occasionally layer a low-opacity \"outline-only\" version of the Syne headline behind the solid text to reinforce the brand motif.\n\n## Layout & Spacing\nThe layout follows an **Asymmetric Grid** philosophy. Avoid standard 50/50 splits. Instead, use a 12-column grid where content often shifts off-center (e.g., spanning columns 2 through 7, or 8 through 11) to create visual tension and \"Rogue\" energy.\n\n- **Whitespace:** Use extreme vertical padding (160px+) between major sections to emphasize the premium nature of the content.\n- **Echo Repetition:** Break the grid with repeating elements (like a series of vertical lines or offset image stacks) that \"trail\" off the edge of the screen.\n- **Mobile:** Transition to a simplified single-column flow, but maintain the generous vertical rhythm.\n\n## Elevation & Depth\nDepth is created through light and transparency rather than traditional shadows.\n\n- **Glassmorphism:** Use background blurs (30px-50px) on navigation bars and cards. Borders on these elements should be 1px solid Silver (#E0E0E0) at 10% opacity.\n- **Tonal Layering:** Objects closer to the user are slightly lighter charcoal (#1A1A1A), appearing to emerge from the obsidian base.\n- **Cobalt Glow:** Use \"Ambient Glows\"\u2014large, low-opacity (#2E5BFF at 5%) radial gradients behind key components to simulate a digital aura.\n- **Motion Blur:** Interactive elements (like buttons or cards) should utilize a subtle directional blur transition on hover, suggesting an \"echo\" of movement.\n\n## Shapes\nThis design system utilizes **Sharp (0px)** roundedness. Every element\u2014from buttons to images to input fields\u2014must have crisp, 90-degree corners. This reinforces the \"Professional\" and \"Technical\" aspect of the brand, leaning into a brutalist-adjacent precision.\n\n- **Exceptions:** None. Even \"pills\" are replaced by sharp rectangular tags.\n- **Decorative:** Use ultra-thin 1px lines (Silver) to frame content or create \"echo\" repeats.\n\n## Components\n- **Buttons:** Sharp-edged, solid Cobalt for primary actions. Use a \"Ghost Echo\" hover state where a secondary sharp frame expands outward from the button. Text is always Hanken Grotesk SemiBold.\n- **Input Fields:** Bottom-border only (Silver, 1px). Labels use the `label-caps` style positioned above the line. On focus, the bottom border glows Cobalt.\n- **Cards:** Glassmorphic backgrounds with sharp edges. No heavy shadows; use a subtle 1px Silver border.\n- **Editorial Chips:** Use Bodoni Moda Italic for chips, encased in a simple sharp 1px Silver box.\n- **Progress Indicators:** Linear, ultra-thin cobalt lines that expand across the top of sections or headers.\n- **Echo Lists:** List items that, when hovered, reveal a faded, offset duplicate of the text behind the original, creating a literal visual echo.",
+          "font": "SYNE",
+          "headlineFont": "SYNE",
+          "headlineFontFamily": "Syne",
+          "labelFont": "BODONI_MODA",
+          "labelFontFamily": "Bodoni Moda",
+          "namedColors": {
+            "background": "#131313",
+            "error": "#ffb4ab",
+            "error_container": "#93000a",
+            "inverse_on_surface": "#313030",
+            "inverse_primary": "#124af0",
+            "inverse_surface": "#e5e2e1",
+            "on_background": "#e5e2e1",
+            "on_error": "#690005",
+            "on_error_container": "#ffdad6",
+            "on_primary": "#002388",
+            "on_primary_container": "#efefff",
+            "on_primary_fixed": "#001356",
+            "on_primary_fixed_variant": "#0035be",
+            "on_secondary": "#2f3131",
+            "on_secondary_container": "#b5b5b5",
+            "on_secondary_fixed": "#1a1c1c",
+            "on_secondary_fixed_variant": "#454747",
+            "on_surface": "#e5e2e1",
+            "on_surface_variant": "#c4c5d9",
+            "on_tertiary": "#313030",
+            "on_tertiary_container": "#f3f0ef",
+            "on_tertiary_fixed": "#1c1b1b",
+            "on_tertiary_fixed_variant": "#474646",
+            "outline": "#8e90a2",
+            "outline_variant": "#434656",
+            "primary": "#b8c3ff",
+            "primary_container": "#2e5bff",
+            "primary_fixed": "#dde1ff",
+            "primary_fixed_dim": "#b8c3ff",
+            "secondary": "#c6c6c6",
+            "secondary_container": "#454747",
+            "secondary_fixed": "#e2e2e2",
+            "secondary_fixed_dim": "#c6c6c6",
+            "surface": "#131313",
+            "surface_bright": "#393939",
+            "surface_container": "#20201f",
+            "surface_container_high": "#2a2a2a",
+            "surface_container_highest": "#353535",
+            "surface_container_low": "#1c1b1b",
+            "surface_container_lowest": "#0e0e0e",
+            "surface_dim": "#131313",
+            "surface_tint": "#b8c3ff",
+            "surface_variant": "#353535",
+            "tertiary": "#c9c6c5",
+            "tertiary_container": "#6e6d6d",
+            "tertiary_fixed": "#e5e2e1",
+            "tertiary_fixed_dim": "#c9c6c5"
+          },
+          "overrideNeutralColor": "#1a1a1a",
+          "overridePrimaryColor": "#2e5bff",
+          "overrideSecondaryColor": "#e0e0e0",
+          "overrideTertiaryColor": "#0a0a0a",
+          "spacing": {
+            "container-max": "1440px",
+            "gutter": "32px",
+            "margin-desktop": "80px",
+            "margin-mobile": "24px",
+            "unit": "8px"
+          },
+          "spacingScale": 2,
+          "typography": {
+            "accent-serif": {
+              "fontFamily": "Bodoni Moda",
+              "fontSize": "20px",
+              "fontWeight": "400",
+              "lineHeight": "28px"
+            },
+            "body-lg": {
+              "fontFamily": "Hanken Grotesk",
+              "fontSize": "18px",
+              "fontWeight": "400",
+              "lineHeight": "28px"
+            },
+            "body-md": {
+              "fontFamily": "Hanken Grotesk",
+              "fontSize": "16px",
+              "fontWeight": "400",
+              "lineHeight": "24px"
+            },
+            "display-lg": {
+              "fontFamily": "Syne",
+              "fontSize": "80px",
+              "fontWeight": "800",
+              "letterSpacing": "-0.04em",
+              "lineHeight": "90px"
+            },
+            "display-lg-mobile": {
+              "fontFamily": "Syne",
+              "fontSize": "48px",
+              "fontWeight": "800",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "52px"
+            },
+            "headline-lg": {
+              "fontFamily": "Syne",
+              "fontSize": "48px",
+              "fontWeight": "700",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "56px"
+            },
+            "headline-md": {
+              "fontFamily": "Syne",
+              "fontSize": "32px",
+              "fontWeight": "700",
+              "letterSpacing": "-0.01em",
+              "lineHeight": "40px"
+            },
+            "label-caps": {
+              "fontFamily": "Hanken Grotesk",
+              "fontSize": "12px",
+              "fontWeight": "600",
+              "letterSpacing": "0.1em",
+              "lineHeight": "16px"
+            }
+          }
+        }
+      },
+      "name": "assets/ec89e8355b9a456883553cb0a2836726",
+      "version": "1"
+    }
+  ]
+}

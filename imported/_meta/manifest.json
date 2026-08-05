@@ -1,0 +1,290 @@
+{
+  "projectId": "5809514541791305568",
+  "title": "Resonare Digital Echo",
+  "importedAt": "2026-08-05T04:58:35Z",
+  "source": "https://stitch.googleapis.com/mcp",
+  "screens": [
+    {
+      "screenId": "0f25f73e242d4e1cb62eb21597e8bc67",
+      "name": "projects/5809514541791305568/screens/0f25f73e242d4e1cb62eb21597e8bc67",
+      "title": "Resonare Logo",
+      "deviceType": null,
+      "width": "1024",
+      "height": "1024",
+      "files": {
+        "screenshot": {
+          "path": "assets/Resonare_Logo__0f25f73e.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "17119894555841504912",
+      "name": "projects/5809514541791305568/screens/17119894555841504912",
+      "title": "WhatsApp Image 2026-07-31 at 17.41.41.jpeg",
+      "deviceType": null,
+      "width": "1280",
+      "height": "853",
+      "files": {
+        "screenshot": {
+          "path": "assets/WhatsApp_Image_2026-07-31_at_17.41.41.jpeg__17119894.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "13157498365827836850",
+      "name": "projects/5809514541791305568/screens/13157498365827836850",
+      "title": "WhatsApp Image 2026-07-31 at 17.41.41 (1).jpeg",
+      "deviceType": null,
+      "width": "2910",
+      "height": "1834",
+      "files": {
+        "screenshot": {
+          "path": "assets/WhatsApp_Image_2026-07-31_at_17.41.41_1.jpeg__13157498.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "1eb0b916e41d479683689041b24f424f",
+      "name": "projects/5809514541791305568/screens/1eb0b916e41d479683689041b24f424f",
+      "title": "Resonare \u2014 Services (Final Logo)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "7388",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Services_Final_Logo__1eb0b916.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Services_Final_Logo__1eb0b916.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "28b5c892fad44a64b7b74c26517ddf79",
+      "name": "projects/5809514541791305568/screens/28b5c892fad44a64b7b74c26517ddf79",
+      "title": "Resonare \u2014 Services",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "7388",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Services__28b5c892.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Services__28b5c892.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "64950916ff664448ab0748a9be3ec50c",
+      "name": "projects/5809514541791305568/screens/64950916ff664448ab0748a9be3ec50c",
+      "title": "Shader",
+      "deviceType": null,
+      "width": "512",
+      "height": "512",
+      "files": {
+        "html": {
+          "path": "screens/Shader__64950916.html",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "67ee4ab17cfc4d3f9f412c98cf29126f",
+      "name": "projects/5809514541791305568/screens/67ee4ab17cfc4d3f9f412c98cf29126f",
+      "title": "Resonare \u2014 Contact (Final Logo)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2848",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Contact_Final_Logo__67ee4ab1.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Contact_Final_Logo__67ee4ab1.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "922045f1c3c34749986d170fe2600c45",
+      "name": "projects/5809514541791305568/screens/922045f1c3c34749986d170fe2600c45",
+      "title": "Resonare \u2014 Contact",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2848",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Contact__922045f1.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Contact__922045f1.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "9a28268de3ff4b34bf17fd31f34b0ec2",
+      "name": "projects/5809514541791305568/screens/9a28268de3ff4b34bf17fd31f34b0ec2",
+      "title": "Resonare \u2014 Services (Updated Logo)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "7388",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Services_Updated_Logo__9a28268d.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Services_Updated_Logo__9a28268d.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "a63131c8f38b4aebb5c1a63bfdc240a7",
+      "name": "projects/5809514541791305568/screens/a63131c8f38b4aebb5c1a63bfdc240a7",
+      "title": "Resonare \u2014 Portfolio (Updated Logo)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "6162",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Portfolio_Updated_Logo__a63131c8.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Portfolio_Updated_Logo__a63131c8.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "a951088c40804403aa46084c052108ad",
+      "name": "projects/5809514541791305568/screens/a951088c40804403aa46084c052108ad",
+      "title": "Resonare \u2014 Home (Final Branding & 3D)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "5510",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Home_Final_Branding_3D__a951088c.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Home_Final_Branding_3D__a951088c.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "b84023be52e34a99b3ed0e91b8ef56cf",
+      "name": "projects/5809514541791305568/screens/b84023be52e34a99b3ed0e91b8ef56cf",
+      "title": "Resonare \u2014 Contact (Updated Logo)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "2848",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Contact_Updated_Logo__b84023be.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Contact_Updated_Logo__b84023be.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "bc9cd05ce10c403f83647ee4854ca263",
+      "name": "projects/5809514541791305568/screens/bc9cd05ce10c403f83647ee4854ca263",
+      "title": "Resonare \u2014 Portfolio",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "6162",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Portfolio__bc9cd05c.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Portfolio__bc9cd05c.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "c56d995c11d648f4a7cd1f22b0a92b4d",
+      "name": "projects/5809514541791305568/screens/c56d995c11d648f4a7cd1f22b0a92b4d",
+      "title": "Resonare \u2014 Home",
+      "deviceType": "DESKTOP",
+      "width": "100%",
+      "height": "100%",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Home__c56d995c.html",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "cbd1d9d0b69d480783c6287bc0034d94",
+      "name": "projects/5809514541791305568/screens/cbd1d9d0b69d480783c6287bc0034d94",
+      "title": "Resonare \u2014 Portfolio (Final Logo)",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "6162",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Portfolio_Final_Logo__cbd1d9d0.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Portfolio_Final_Logo__cbd1d9d0.png",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "eadff7452a5b415f920c7dde3539abd2",
+      "name": "projects/5809514541791305568/screens/eadff7452a5b415f920c7dde3539abd2",
+      "title": "Three.js",
+      "deviceType": null,
+      "width": "512",
+      "height": "512",
+      "files": {
+        "html": {
+          "path": "screens/Three.js__eadff745.html",
+          "bytes": 0
+        }
+      }
+    },
+    {
+      "screenId": "f7ce86c45b0e41b9b61e66af8e3d72c9",
+      "name": "projects/5809514541791305568/screens/f7ce86c45b0e41b9b61e66af8e3d72c9",
+      "title": "Resonare \u2014 Unified Experience",
+      "deviceType": "DESKTOP",
+      "width": "2560",
+      "height": "8242",
+      "files": {
+        "html": {
+          "path": "screens/Resonare_Unified_Experience__f7ce86c4.html",
+          "bytes": 0
+        },
+        "screenshot": {
+          "path": "screens/Resonare_Unified_Experience__f7ce86c4.png",
+          "bytes": 0
+        }
+      }
+    }
+  ]
+}
