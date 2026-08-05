@@ -1737,3 +1737,65 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   .contact-grid > *:last-child{ position:sticky; top:104px; }
 }
 .contact-grid .r3d-frame{ max-width:440px; }
+
+/* The breathing blob is a very large blurred gradient; animating its scale
+   repaints most of the hero every frame and measured 5fps of the mobile
+   budget. It keeps its shape and colour, and simply stops moving on phones. */
+@media(max-width:760px){
+  .hero-breath{ animation:none !important; }
+}
+
+/* ==========================================================================
+   MICRO-TYPE FLOOR ON SMALL SCREENS
+
+   The label scale bottoms out at 10–11px, which is fine on a desktop monitor
+   at arm's length and genuinely hard to read on a phone held in one hand,
+   especially uppercase and letter-spaced. Nothing that carries meaning drops
+   below 12px on a touch device. Purely decorative labels inside the hero
+   mock-up are exempt — they are illustration, not copy.
+   ========================================================================== */
+@media(max-width:900px){
+  :root{ --fs-2xs:12px; --fs-xs:13px; }
+  .work-tag,
+  .impact-badge,
+  .mini-impact-label,
+  .quote-step-label,
+  .quote-step-hint,
+  .footer-bottom,
+  .r3d-caption,
+  .quote-ref,
+  .breadcrumb,
+  .section-index,
+  .plan-badge,
+  .plan-name,
+  .chip{ font-size:12px; }
+  .mini-delta{ font-size:12px; }
+  small{ font-size:12px; }
+  /* slightly tighter tracking so the larger size still fits its container */
+  .work-tag, .impact-badge, .plan-badge{ letter-spacing:.08em; }
+}
+
+/* The remaining sub-12px content labels. Everything still under the floor
+   after this is illustration — the fake browser chrome in the hero mock-up,
+   the rotating badge lettering, the desktop-only scroll cue — where the text
+   is a texture rather than something anyone needs to read. */
+@media(max-width:900px){
+  .tech-cell span,
+  .work-meta span,
+  .mini-impact-figure small,
+  .trust-chip span,
+  .impact-stats span,
+  .review-person span,
+  .contact-channel span{ font-size:12px; letter-spacing:.07em; }
+}
+
+/* The eyebrow is a dot plus a bare text node. Allowing the flex row to wrap
+   pushed the whole label to a second line and left the dot stranded alone on
+   the first. Keep them on one row and let the *text* wrap beside the dot. */
+@media(max-width:980px){
+  .eyebrow{ flex-wrap:nowrap; align-items:flex-start; gap:8px; letter-spacing:.1em; }
+  .eyebrow span{ flex:0 0 7px; margin-top:.5em; }
+}
+@media(max-width:420px){
+  .eyebrow{ font-size:11.5px; letter-spacing:.08em; }
+}

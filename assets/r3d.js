@@ -81,6 +81,10 @@
     this.fitMode = this.opts.fitMode || 'contain';
     this.fit = 1;
 
+    /* A framed scene is the subject and stays sharp; a backdrop is texture and
+       gets a much smaller pixel budget on phones. */
+    this.isAmbient = !canvas.closest('.r3d-frame');
+
     this._bind();
     this.resize();
   }
@@ -119,7 +123,7 @@
         self.visible = en.isIntersecting;
         self.visible ? self.start() : self.stop();
       });
-    }, { threshold: 0.01 });
+    }, { threshold: this.isAmbient ? 0.25 : 0.01, rootMargin: '-5% 0px -5% 0px' });
     this._io.observe(this.canvas);
 
     this._onVis = function () {
@@ -133,7 +137,19 @@
     var r = this.canvas.getBoundingClientRect();
     var w = Math.max(1, Math.round(r.width));
     var h = Math.max(1, Math.round(r.height));
-    var dpr = Math.min(global.devicePixelRatio || 1, 2);
+    /* These scenes are entirely soft gradients — there is no hard edge for
+       extra device pixels to sharpen, so rendering a 390px canvas at DPR 3
+       costs 4x the fill for nothing visible.
+
+       Two tiers, because the two uses are not equal. A *framed* scene is the
+       thing the visitor is looking at and can drag, so it keeps resolution.
+       An *ambient* backdrop sits at ~50% opacity behind a mask and behind
+       type; on a phone it was measured costing 13fps of a 16fps page, which
+       is not a trade worth making for texture nobody can seem. */
+    var cap;
+    if (w >= 760) cap = 2;
+    else cap = this.isAmbient ? 1 : 1.5;
+    var dpr = Math.min(global.devicePixelRatio || 1, cap);
     if (w === this.w && h === this.h && dpr === this.dpr) return;
     this.w = w; this.h = h; this.dpr = dpr;
     this.canvas.width = Math.round(w * dpr);
@@ -175,8 +191,18 @@
     this.running = true;
     var self = this;
     var last = performance.now();
+
+    /* Ambient motion does not need 60fps. Capping the phone budget at 30
+       halves the per-second fill cost, and at this drift speed the difference
+       is invisible — whereas the dropped frames at 60 were not. */
+    var minFrame = this.w >= 760 ? 0 : (this.isAmbient ? 40 : 32);
+
     (function loop(now) {
       if (!self.running) return;
+      if (minFrame && now - last < minFrame) {
+        self._raf = requestAnimationFrame(loop);
+        return;
+      }
       var dt = Math.min((now - last) / 16.667, 3);
       last = now;
       self.t += dt;
@@ -214,7 +240,7 @@
      ripple in. Mesh lines are drawn along one axis only: a full grid doubles
      the stroke count for almost no visual gain at this density. */
   SCENES.resonance = function (stage) {
-    var N = stage.w < 560 ? 22 : stage.w < 900 ? 28 : 34;
+    var N = stage.w < 560 ? 12 : stage.w < 900 ? 20 : 25;
     var SPAN = 1150;
     var step = SPAN / (N - 1);
     var pts = [];
@@ -228,7 +254,7 @@
     return {
       fitMode: 'cover',                 // the wave field should bleed off both edges
       resize: function (s) {
-        var n = s.w < 560 ? 22 : s.w < 900 ? 28 : 34;
+        var n = s.w < 560 ? 12 : s.w < 900 ? 20 : 25;
         if (n !== N) { N = n; this._rebuild(s); }
       },
       _rebuild: function (s) {
@@ -265,7 +291,8 @@
         // mesh lines along j (one direction only)
         ctx.globalCompositeOperation = 'source-over';
         ctx.lineWidth = 1;
-        for (var i2 = 0; i2 < N; i2++) {
+        var drawMesh = !(s.isAmbient && s.w < 560);
+        for (var i2 = 0; drawMesh && i2 < N; i2++) {
           ctx.beginPath();
           for (var j2 = 0; j2 < N; j2++) {
             var q2 = proj[i2 * N + j2];
@@ -324,7 +351,7 @@
       { r: 355, tilt: 0.0, speed: 0.011, col: PALETTE.rust },
       { r: 415, tilt: 1.15, speed: -0.008, col: PALETTE.gold }
     ];
-    var RING_SEG = 84;
+    var RING_SEG = 84;   // halved on small canvases in draw()
 
     return {
       fitMode: 'contain',
@@ -339,8 +366,9 @@
 
         // rings, drawn as depth-shaded segments
         rings.forEach(function (ring) {
-          for (var i = 0; i < RING_SEG; i++) {
-            var t0 = (i / RING_SEG) * Math.PI * 2 + s.t * ring.speed;
+          var segs = s.w < 700 ? RING_SEG >> 1 : RING_SEG;
+          for (var i = 0; i < segs; i++) {
+            var t0 = (i / segs) * Math.PI * 2 + s.t * ring.speed;
             var x = Math.cos(t0) * ring.r;
             var z = Math.sin(t0) * ring.r;
             var y = Math.sin(t0) * ring.r * Math.sin(ring.tilt) * 0.55;
@@ -495,7 +523,7 @@
   /* 5. ORBIT — a Fibonacci sphere for the Contact page. `energy` is driven by
      how complete the quote brief is, so the artwork responds to the form. */
   SCENES.orbit = function (stage) {
-    var COUNT = (stage && stage.w < 600) ? 190 : 320;
+    var COUNT = (stage && stage.w < 600) ? 120 : 300;
     var R = 260;
     var pts = [];
     function build(count) {
@@ -512,7 +540,7 @@
     return {
       fitMode: 'contain',
       resize: function (s) {
-        var c = s.w < 600 ? 190 : 320;
+        var c = s.w < 600 ? 120 : 300;
         if (c !== COUNT) { COUNT = c; build(COUNT); }
       },
       draw: function (s) {
@@ -537,8 +565,9 @@
         }
 
         // equator ring tightens as the brief fills in
-        for (var k = 0; k < 96; k++) {
-          var a = (k / 96) * Math.PI * 2 + s.t * 0.010;
+        var RING = s.w < 600 ? 48 : 96;
+        for (var k = 0; k < RING; k++) {
+          var a = (k / RING) * Math.PI * 2 + s.t * 0.010;
           var q2 = s.project(Math.cos(a) * R * 1.32, 0, Math.sin(a) * R * 1.32, yaw, pitch);
           var d2 = clamp(1 - (q2.z - s.dist + R) / (R * 2), 0.02, 1);
           s.glow(q2.x, q2.y, 1 + d2 * 3, PALETTE.gold, (0.05 + d2 * 0.28) * (0.35 + energy * 0.65));
