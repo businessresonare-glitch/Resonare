@@ -1,0 +1,129 @@
+/*
+ * Resonare design system tokens.
+ *
+ * GENERATED — do not edit by hand. Source of truth is the Stitch import at
+ * imported/_meta/design_theme.json; regenerate with scripts/gen-tokens.mjs.
+ *
+ * Color mode: DARK. Base spacing unit: 8px.
+ */
+
+:root {
+  /* Font families */
+  --ds-font-display: 'Syne', sans-serif;
+  --ds-font-body: 'Hanken Grotesk', sans-serif;
+  --ds-font-accent: 'Bodoni Moda', serif;
+
+  /* Palette — 47 named colors */
+  --ds-color-background: #131313;
+  --ds-color-error: #ffb4ab;
+  --ds-color-error-container: #93000a;
+  --ds-color-inverse-on-surface: #313030;
+  --ds-color-inverse-primary: #124af0;
+  --ds-color-inverse-surface: #e5e2e1;
+  --ds-color-on-background: #e5e2e1;
+  --ds-color-on-error: #690005;
+  --ds-color-on-error-container: #ffdad6;
+  --ds-color-on-primary: #002388;
+  --ds-color-on-primary-container: #efefff;
+  --ds-color-on-primary-fixed: #001356;
+  --ds-color-on-primary-fixed-variant: #0035be;
+  --ds-color-on-secondary: #2f3131;
+  --ds-color-on-secondary-container: #b5b5b5;
+  --ds-color-on-secondary-fixed: #1a1c1c;
+  --ds-color-on-secondary-fixed-variant: #454747;
+  --ds-color-on-surface: #e5e2e1;
+  --ds-color-on-surface-variant: #c4c5d9;
+  --ds-color-on-tertiary: #313030;
+  --ds-color-on-tertiary-container: #f3f0ef;
+  --ds-color-on-tertiary-fixed: #1c1b1b;
+  --ds-color-on-tertiary-fixed-variant: #474646;
+  --ds-color-outline: #8e90a2;
+  --ds-color-outline-variant: #434656;
+  --ds-color-primary: #b8c3ff;
+  --ds-color-primary-container: #2e5bff;
+  --ds-color-primary-fixed: #dde1ff;
+  --ds-color-primary-fixed-dim: #b8c3ff;
+  --ds-color-secondary: #c6c6c6;
+  --ds-color-secondary-container: #454747;
+  --ds-color-secondary-fixed: #e2e2e2;
+  --ds-color-secondary-fixed-dim: #c6c6c6;
+  --ds-color-surface: #131313;
+  --ds-color-surface-bright: #393939;
+  --ds-color-surface-container: #20201f;
+  --ds-color-surface-container-high: #2a2a2a;
+  --ds-color-surface-container-highest: #353535;
+  --ds-color-surface-container-low: #1c1b1b;
+  --ds-color-surface-container-lowest: #0e0e0e;
+  --ds-color-surface-dim: #131313;
+  --ds-color-surface-tint: #b8c3ff;
+  --ds-color-surface-variant: #353535;
+  --ds-color-tertiary: #c9c6c5;
+  --ds-color-tertiary-container: #6e6d6d;
+  --ds-color-tertiary-fixed: #e5e2e1;
+  --ds-color-tertiary-fixed-dim: #c9c6c5;
+
+  /* Brand overrides */
+  --ds-neutral-color: #1a1a1a;
+  --ds-primary-color: #2e5bff;
+  --ds-secondary-color: #e0e0e0;
+  --ds-tertiary-color: #0a0a0a;
+
+  /* Type scale */
+  --ds-text-accent-serif-family: 'Bodoni Moda', sans-serif;
+  --ds-text-accent-serif-size: 20px;
+  --ds-text-accent-serif-weight: 400;
+  --ds-text-accent-serif-leading: 28px;
+  --ds-text-body-lg-family: 'Hanken Grotesk', sans-serif;
+  --ds-text-body-lg-size: 18px;
+  --ds-text-body-lg-weight: 400;
+  --ds-text-body-lg-leading: 28px;
+  --ds-text-body-md-family: 'Hanken Grotesk', sans-serif;
+  --ds-text-body-md-size: 16px;
+  --ds-text-body-md-weight: 400;
+  --ds-text-body-md-leading: 24px;
+  --ds-text-display-lg-family: 'Syne', sans-serif;
+  --ds-text-display-lg-size: 80px;
+  --ds-text-display-lg-weight: 800;
+  --ds-text-display-lg-leading: 90px;
+  --ds-text-display-lg-tracking: -0.04em;
+  --ds-text-display-lg-mobile-family: 'Syne', sans-serif;
+  --ds-text-display-lg-mobile-size: 48px;
+  --ds-text-display-lg-mobile-weight: 800;
+  --ds-text-display-lg-mobile-leading: 52px;
+  --ds-text-display-lg-mobile-tracking: -0.02em;
+  --ds-text-headline-lg-family: 'Syne', sans-serif;
+  --ds-text-headline-lg-size: 48px;
+  --ds-text-headline-lg-weight: 700;
+  --ds-text-headline-lg-leading: 56px;
+  --ds-text-headline-lg-tracking: -0.02em;
+  --ds-text-headline-md-family: 'Syne', sans-serif;
+  --ds-text-headline-md-size: 32px;
+  --ds-text-headline-md-weight: 700;
+  --ds-text-headline-md-leading: 40px;
+  --ds-text-headline-md-tracking: -0.01em;
+  --ds-text-label-caps-family: 'Hanken Grotesk', sans-serif;
+  --ds-text-label-caps-size: 12px;
+  --ds-text-label-caps-weight: 600;
+  --ds-text-label-caps-leading: 16px;
+  --ds-text-label-caps-tracking: 0.1em;
+
+  /* Spacing */
+  --ds-space-container-max: 1440px;
+  --ds-space-gutter: 32px;
+  --ds-space-margin-desktop: 80px;
+  --ds-space-margin-mobile: 24px;
+  --ds-space-unit: 8px;
+  --ds-space-1: 8px;
+  --ds-space-2: 16px;
+  --ds-space-3: 24px;
+  --ds-space-4: 32px;
+  --ds-space-6: 48px;
+  --ds-space-8: 64px;
+  --ds-space-10: 80px;
+  --ds-space-12: 96px;
+  --ds-space-16: 128px;
+  --ds-space-20: 160px;
+
+  /* Shape — the design system specifies sharp corners with no exceptions. */
+  --ds-radius: 0px;
+}

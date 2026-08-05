@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react';
 import ResonareMark from './ResonareMark';
+import { SITE_PATHS, siteUrl } from '../siteLinks';
 
 const NAV_LINKS = [
-  { label: 'Services', href: '/services.html' },
-  { label: 'Our Work', href: '/work.html' },
-  { label: 'About', href: '/about.html' },
+  { label: 'Services', href: SITE_PATHS.services },
+  { label: 'Our Work', href: SITE_PATHS.work },
+  { label: 'About', href: SITE_PATHS.about },
 ] as const;
 
 /** The nav is the first thing to settle, ahead of the headline. */
@@ -20,7 +21,7 @@ export default function SiteNav() {
       >
         <div className="flex items-center gap-8">
           <a
-            href="/"
+            href={siteUrl(SITE_PATHS.home)}
             className="flex min-h-[44px] items-center gap-2 text-white md:min-h-0"
             aria-label="RESONARE home"
           >
@@ -32,7 +33,7 @@ export default function SiteNav() {
             {NAV_LINKS.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={siteUrl(link.href)}
                 className="link-underline text-sm font-medium text-white/80 transition-colors hover:text-white"
               >
                 {link.label}
@@ -44,13 +45,13 @@ export default function SiteNav() {
         <div className="flex items-center gap-4">
           {/* Secondary CTA is dropped below md so it cannot crowd the mark. */}
           <a
-            href="/contact.html"
+            href={siteUrl(SITE_PATHS.contact)}
             className="hover-nudge hidden min-h-[44px] items-center whitespace-nowrap text-sm font-medium text-white hover:text-white/80 md:inline-flex md:min-h-0"
           >
             Get a quote
           </a>
           <a
-            href="/contact.html"
+            href={siteUrl(SITE_PATHS.contact)}
             className="liquid-glass hover-lift inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full px-6 py-2 text-sm font-medium text-white hover:bg-white/5 md:min-h-0"
           >
             Start a project
