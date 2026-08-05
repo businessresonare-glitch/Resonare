@@ -1902,3 +1902,38 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 @supports not (height:100svh){
   .hero > .r3d-stage, .page-hero > .r3d-stage{ height:min(100%, 100vh); }
 }
+
+/* ==========================================================================
+   BRAND LOCKUP
+
+   The real RESONARE mark, rebuilt to the artwork: two parallel arms joined
+   only by the bowl's right-hand curve, both cut on the same forward-leaning
+   diagonal, so the counter is open on the left. The trailing red dot keeps
+   the resonance ping — it is the same gesture the logo's dot implies.
+   ========================================================================== */
+:root{ --brand-red:#D8261F; }
+
+.brand, .footer-brand, .preloader-mark{
+  display:inline-flex; align-items:center; gap:.42em;
+}
+.brand-mark{
+  /* The mark carries an open counter and a fine diagonal, so it needs real
+     height to stay legible — below about 24px it collapses into a blob. */
+  height:1.35em; width:auto; display:block; flex-shrink:0;
+  color:#fff;                      /* the R itself; the dot is set on the path */
+}
+.brand-word{ display:inline-block; }
+
+/* The header lockup wants a touch more air between mark and wordmark than the
+   footer, where the type is larger. */
+.brand{ font-size:20px; gap:.46em; }
+.footer-brand .brand-mark{ height:1.25em; }
+.preloader-mark .brand-mark{ height:1.2em; }
+
+/* The trailing dot matches the logo's red rather than the UI rust. */
+.resonance-mark .rm-dot{ fill:var(--brand-red); }
+.resonance-mark .rm-ring{ stroke:var(--brand-red); }
+
+@media(max-width:520px){
+  .brand{ font-size:17px; }
+}

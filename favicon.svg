@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="RESONARE">
   <rect width="64" height="64" rx="13.44" fill="#0A0952"/>
-  <g transform="translate(7.194 52.867) scale(0.059451 -0.059451)" fill="#DE5A3C">
-    <path d="M420 0 274 265H233V0H62V702H349Q432 702 490.5 673.0Q549 644 578.0 593.5Q607 543 607 481Q607 411 567.5 356.0Q528 301 451 278L613 0ZM233 386H339Q386 386 409.5 409.0Q433 432 433 474Q433 514 409.5 537.0Q386 560 339 560H233Z"/>
+  <g transform="translate(8.320 11.912) scale(0.488751)">
+    <path d="M 0 0 L 75 0 A 25 25 0 0 1 75 50 L 18.75 50 L 5.6 32.8 L 75 32.8 A 7.8 7.8 0 0 0 75 17.2 L 14 17.2 Z" fill="#FFFFFF"/>
+    <path d="M 43.75 50 L 71.9 50 L 96.9 82.2 L 68.75 82.2 Z" fill="#FFFFFF"/>
+    <circle cx="21.9" cy="70.3" r="10.3" fill="#D8261F"/>
   </g>
-  <circle cx="47.532" cy="44.717" r="5.588" fill="#DE5A3C"/>
 </svg>
