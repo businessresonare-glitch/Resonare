@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="RESONARE">
+  <rect width="64" height="64" rx="14" fill="#0A0952"/>
+  <g transform="translate(13.779 49.280) scale(0.04902 -0.04902)" fill="#DE5A3C">
+    <path d="M420 0 274 265H233V0H62V702H349Q432 702 490.5 673.0Q549 644 578.0 593.5Q607 543 607 481Q607 411 567.5 356.0Q528 301 451 278L613 0ZM233 386H339Q386 386 409.5 409.0Q433 432 433 474Q433 514 409.5 537.0Q386 560 339 560H233Z"/>
+  </g>
+  <circle cx="47.04" cy="42.56" r="4.61" fill="#DE5A3C"/>
+</svg>
