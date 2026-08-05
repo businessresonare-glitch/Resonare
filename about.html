@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>About RESONARE — Web Design for Every Local Business</title>
 <meta name="description" content="RESONARE exists to give every local and trade business a professional website that helps them grow, get found, and get called. Here's how we work.">
 <link rel="canonical" href="https://resonare.digital/about.html">
@@ -18,17 +18,25 @@
 <meta name="twitter:title" content="About RESONARE — Web Design for Every Local Business">
 <meta name="twitter:description" content="RESONARE exists to give every local and trade business a professional website that helps them grow, get found, and get called. Here's how we work.">
 <meta name="twitter:image" content="https://resonare.digital/assets/og-image.jpg">
-<meta name="theme-color" content="#0A0952">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="manifest" href="/site.webmanifest">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Rubik:wght@300;400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0A0952" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0A0952" media="(prefers-color-scheme: light)">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="mask-icon" href="safari-pinned-tab.svg" color="#DE5A3C">
+<meta name="apple-mobile-web-app-title" content="RESONARE">
+<meta name="application-name" content="RESONARE">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","@id":"https://resonare.digital/#business","name":"RESONARE","url":"https://resonare.digital/","logo":"https://resonare.digital/assets/og-image.jpg","image":"https://resonare.digital/assets/og-image.jpg","description":"RESONARE builds high-impact websites, booking systems, and SEO-driven digital identities for ambitious local & trade businesses.","email":"business.resonare@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Kathmandu","addressCountry":"NP"},"areaServed":"Worldwide","priceRange":"$$","sameAs":["https://wa.me/9779767278212"]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://resonare.digital/"},{"@type":"ListItem","position":2,"name":"About","item":"https://resonare.digital/about.html"}]}</script>
@@ -95,7 +103,8 @@
 <main>
 
   <!-- ============ PAGE HERO ============ -->
-  <section class="page-hero">
+  <section class="page-hero" data-r3d-host>
+    <canvas class="r3d-stage" data-r3d="orbit" style="opacity:.42"></canvas>
     <div class="page-hero-grid" aria-hidden="true"></div>
     <div class="hero-breath" aria-hidden="true"></div>
     <div class="page-hero-inner">
@@ -148,6 +157,21 @@
   </section>
 
   <!-- ============ MISSION / VALUES ============ -->
+  <!-- ============ 3D CORE ============ -->
+  <section class="section-pad" style="padding-top:0;">
+    <div class="two-col" style="align-items:center;">
+      <div class="reveal">
+        <span class="section-index">03 / How we build</span>
+        <h2 style="margin:14px 0 18px;">One core, every surface tuned to it.</h2>
+        <p style="color:var(--ink-soft); max-width:46ch;">Structure, speed, search and the path to a phone call are designed as one system &mdash; not bolted together afterwards. Drag the core to look around it.</p>
+      </div>
+      <div class="r3d-frame reveal" data-r3d-host>
+        <canvas class="r3d-stage" data-r3d="core"></canvas>
+        <div class="r3d-caption">Interactive<b>The Resonare core</b></div>
+      </div>
+    </div>
+  </section>
+
   <section class="services section-pad">
     <div class="section-heading">
       <div><span class="section-index">Our approach</span><h2>Three things we don't compromise on.</h2></div>
@@ -173,7 +197,7 @@
   </section>
 
   <!-- ============ STATS ============ -->
-  <section class="signal-section stats-band" style="grid-template-columns:1fr; text-align:center;" data-dot-dark data-line-rain="16">
+  <section class="signal-section stats-band" data-r3d-host style="grid-template-columns:1fr; text-align:center;" data-dot-dark data-line-rain="16">
     <div class="reveal" style="grid-column:1/-1;">
       <span class="section-index light">By the numbers</span>
       <h2 style="color:#fff;">Small studio. Numbers that hold up.</h2>
@@ -253,7 +277,7 @@
 <div class="sticky-socials" aria-label="Contact RESONARE">
   <a class="whatsapp-glow" href="https://wa.me/9779767278212?text=Hi%20Resonare!%20I%27m%20interested%20in%20getting%20a%20website%20for%20my%20business" target="_blank" rel="noreferrer" aria-label="WhatsApp">
     <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"></path></svg>
-  </a>
+  </a><span class="dock-label">Chat with us</span>
   <a href="mailto:business.resonare@gmail.com" aria-label="Email">
     <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>
   </a>
@@ -286,8 +310,7 @@
     <span>Strategy · Design · Code · Motion</span>
   </div>
 </footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.13/lenis.min.js"></script>
-<script src="assets/main.js"></script>
+<script src="assets/r3d.js" defer></script>
+<script src="assets/main.js" defer></script>
 </body>
 </html>

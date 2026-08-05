@@ -25,11 +25,11 @@
   --ease-out: cubic-bezier(.22,.61,.36,1);
   --spring: cubic-bezier(.22,1.15,.36,1);
 
-  /* type roles */
-  --font-display:'Rajdhani', 'Barlow', system-ui, sans-serif;
-  --font-ui:'Rubik', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-label:'Barlow', 'Rubik', system-ui, sans-serif;
-  --font-mono:var(--font-label);
+  /* type roles — see assets/fonts.css, all self-hosted */
+  --font-display:'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-ui:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-label:'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* small-text scale — overridden per-face in the Digilab pass at the
      bottom of this file, which is what actually ships */
@@ -849,85 +849,117 @@ html{ scrollbar-color:rgba(11,10,30,.28) transparent; scrollbar-width:thin; }
 ::-webkit-scrollbar-thumb:hover{ background:rgba(11,10,30,.36); }
 
 /* ==========================================================================
-   DIGILAB PASS — typography metrics for Rajdhani / Rubik / Barlow, plus the
-   split-text heading reveal and odometer counters ported from the reference.
-   ========================================================================== */
+   BRAND TYPE SYSTEM — Space Grotesk / Inter / JetBrains Mono
 
-/* ---- Type metrics --------------------------------------------------------
-   Rajdhani is condensed with tall caps: it needs MORE size and ZERO negative
-   tracking (the old scale was cut for Bricolage, which is the opposite face).
-   Rubik has a taller x-height than Work Sans, so body steps back down. */
+   Three faces, three jobs, no overlap:
+     Space Grotesk  display only. A grotesque with real character in the
+                    caps and figures, so headlines carry the brand instead
+                    of just being large.
+     Inter          every running size: body, UI, forms, nav, buttons.
+     JetBrains Mono the data voice — section indices, eyebrows, the
+                    preloader readout. Used sparingly and only uppercase.
+
+   All three are self-hosted variable woff2 (assets/fonts.css). Space Grotesk
+   has a large x-height and tight default spacing, so display sizes take
+   negative tracking and body sizes step down slightly from the old Rubik
+   scale to compensate for Inter's taller x-height.
+   ========================================================================== */
 :root{
-  --fs-2xs: 11.5px;
+  --fs-2xs: 11px;
   --fs-xs:  12.5px;
   --fs-sm:  14px;
-  --fs-base:15px;
-  --fs-md:  16px;
-  --fs-lg:  17.5px;
+  --fs-base:15.5px;
+  --fs-md:  16.5px;
+  --fs-lg:  18.5px;
   --track-micro: 0em;
-  --track-label: .16em;
+  --track-label: .14em;
 }
-body{ font-family:var(--font-ui); font-size:var(--fs-base); line-height:1.65; letter-spacing:0; }
+body{
+  font-family:var(--font-ui);
+  font-size:var(--fs-base);
+  line-height:1.65;
+  letter-spacing:-.002em;
+  font-feature-settings:"cv05" 1, "ss01" 1;   /* Inter: single-storey l, cleaner a */
+}
 
-h1,h2,h3,h4{ font-family:var(--font-display); font-weight:700; letter-spacing:0; line-height:1.04; }
+h1,h2,h3,h4{
+  font-family:var(--font-display);
+  font-weight:700;
+  letter-spacing:-.028em;                      /* Space Grotesk sets loose at display size */
+  line-height:1.04;
+}
 .brand,
 .footer-brand,
-.preloader-mark,
-.plan-price{ font-weight:700; }
+.preloader-mark{ font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; }
+.plan-price{ font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; }
 
-.hero h1{ font-size:clamp(46px,6.4vw,80px); line-height:.98; }
-.page-hero h1{ font-size:clamp(42px,5.8vw,70px); line-height:1; }
-.section-heading h2{ font-size:clamp(32px,4.2vw,52px); line-height:1.02; }
+.hero h1{ font-size:clamp(40px,6.2vw,78px); line-height:1.0; letter-spacing:-.034em; }
+.page-hero h1{ font-size:clamp(36px,5.6vw,68px); line-height:1.02; letter-spacing:-.032em; }
+.section-heading h2{ font-size:clamp(29px,4.1vw,50px); line-height:1.06; }
 .signal-copy h2,
-.contact-info h2{ font-size:clamp(30px,3.8vw,46px); line-height:1.04; }
-.final-cta h2{ font-size:clamp(34px,5.2vw,60px); line-height:1.02; }
-.mobile-drawer nav a{ font-family:var(--font-display); font-size:44px; font-weight:600; }
+.contact-info h2{ font-size:clamp(27px,3.7vw,44px); line-height:1.08; }
+.final-cta h2{ font-size:clamp(30px,5vw,58px); line-height:1.04; }
+.mobile-drawer nav a{ font-family:var(--font-display); font-size:clamp(30px,8.4vw,42px); font-weight:600; letter-spacing:-.03em; }
 .service-card h3,
-.work-body h3{ font-size:25px; }
-.process-row h3{ font-size:26px; }
-.value-card h3{ font-size:21px; }
-.plan-price{ font-size:42px; }
+.work-body h3{ font-size:23px; letter-spacing:-.024em; }
+.process-row h3{ font-size:25px; letter-spacing:-.024em; }
+.value-card h3{ font-size:20px; letter-spacing:-.022em; }
+.plan-price{ font-size:40px; }
 .trust-chip b,
-.impact-stats b{ font-size:28px; }
+.impact-stats b{ font-family:var(--font-display); font-size:27px; letter-spacing:-.03em; }
 
-/* Barlow carries every uppercase label: it wants weight and air, not a mono
-   look, so tracking goes up and the size comes down a step. */
+/* ---- The data voice ------------------------------------------------------
+   Mono, uppercase, generously tracked. Restricted to true micro-labels: it
+   signals precision in small doses and turns cold if it creeps into prose. */
 .eyebrow,
 .section-index,
+.mini-impact-label,
+.canvas-label,
+.scroll-cue-label,
+.preloader-status,
+.preloader-pct,
+.breadcrumb,
+.footer-bottom,
+.mono,
+.section-dots button::after{
+  font-family:var(--font-mono);
+  font-weight:500;
+  letter-spacing:var(--track-label);
+}
+/* Labels that sit inside content keep the humanist face — mono here would
+   fight the copy it is labelling. */
 .plan-name,
 .work-tag,
 .footer-col h4,
-.mini-impact-label,
 .impact-badge,
 .chip,
-.canvas-label,
-.scroll-cue-label,
 .plan-badge,
 .trust-chip span,
 .impact-stats span,
 .work-meta span,
-.tech-cell span,
-.preloader-status,
-.breadcrumb,
-.footer-bottom,
-.section-dots button::after{ font-family:var(--font-label); font-weight:600; letter-spacing:var(--track-label); }
+.tech-cell span{
+  font-family:var(--font-label);
+  font-weight:600;
+  letter-spacing:.11em;
+}
 .section-index{ font-size:var(--fs-xs); text-transform:uppercase; }
-.footer-bottom{ font-weight:500; letter-spacing:.08em; }
+.footer-bottom{ font-weight:500; letter-spacing:.1em; font-size:var(--fs-2xs); }
 
-/* Rubik body copy */
+/* ---- Running copy -------------------------------------------------------- */
 .hero p.lede,
-.page-hero p.lede{ font-size:var(--fs-lg); line-height:1.6; font-weight:300; }
+.page-hero p.lede{ font-size:var(--fs-lg); line-height:1.58; font-weight:400; letter-spacing:-.011em; }
 .service-card p,
 .value-card p,
 .review-card p,
 .work-body p,
 .plan-features li,
 .footer-col a,
-footer p{ font-size:var(--fs-sm); line-height:1.7; letter-spacing:0; }
+footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
 .main-nav a,
 .btn,
-.text-link{ letter-spacing:.01em; }
-.btn{ font-weight:500; }
+.text-link{ letter-spacing:-.005em; }
+.btn{ font-weight:600; }
+.main-nav a{ font-weight:500; }
 
 /* ---- Split-text heading reveal ------------------------------------------
    The reference splits each heading into characters and swings them in from
@@ -1137,3 +1169,381 @@ footer p{ font-size:var(--fs-sm); line-height:1.7; letter-spacing:0; }
 @keyframes qs-pop{ from{ transform:scale(.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
 .quote-success h3{ font-size:26px; margin-bottom:10px; }
 .quote-success p{ color:var(--ink-soft); font-size:var(--fs-sm); max-width:320px; margin:0 auto; }
+
+/* ==========================================================================
+   V6 LAYER — mobile correctness, 3D surfaces, and the stepped quote card.
+
+   Everything below was written against measured problems, not guesses:
+   a Playwright pass at 360/375/390/768 flagged sub-44px tap targets on every
+   page, a 13px horizontal overflow on contact.html at 360px, and a contact
+   dock that vanished entirely below 700px — on a site whose whole job is
+   generating calls.
+   ========================================================================== */
+
+/* ---- 1. Touch foundation -------------------------------------------------- */
+html{
+  -webkit-text-size-adjust:100%;                 /* iOS must not re-flow our type */
+  scroll-padding-top:92px;                       /* anchors clear the fixed header */
+}
+body{
+  overscroll-behavior-y:none;                    /* kills the rubber-band white flash */
+  -webkit-tap-highlight-color:transparent;
+}
+/* Respect notches and home indicators on every fixed-position surface. */
+.site-header{ padding-left:max(5vw, env(safe-area-inset-left)); padding-right:max(5vw, env(safe-area-inset-right)); }
+.mobile-drawer{ padding-top:max(26px, env(safe-area-inset-top)); padding-bottom:max(26px, env(safe-area-inset-bottom)); }
+
+/* The drawer is a real overlay: it traps scroll and sits above everything.
+   position:fixed is the only lock iOS Safari actually honours — overflow:hidden
+   on body is ignored there. main.js pins `top` to the saved scroll offset and
+   restores it on close, so the page does not jump to the top. */
+body.nav-open{ position:fixed; width:100%; overflow:hidden; }
+.mobile-drawer{ overflow-y:auto; -webkit-overflow-scrolling:touch; visibility:hidden; }
+.mobile-drawer.open{ visibility:visible; }
+.mobile-drawer nav a{ min-height:56px; display:flex; align-items:center; }
+
+/* ---- 2. Tap targets ------------------------------------------------------
+   WCAG 2.5.8 asks for 24px; Apple and Google both say 44px. Icon-only controls
+   get a 44px box via padding so the visual size is unchanged. */
+.menu-button{
+  width:46px; height:46px; display:none; align-items:center; justify-content:center;
+  margin-right:-9px; border-radius:12px;
+}
+@media(max-width:880px){ .menu-button{ display:flex; } }
+.drawer-top button{
+  width:46px; height:46px; display:flex; align-items:center; justify-content:center;
+  margin-right:-9px; border-radius:12px;
+}
+.to-top{ min-width:46px; min-height:46px; }
+
+@media(max-width:900px){
+  .footer-col a{ padding:9px 0; display:inline-flex; align-items:center; min-height:44px; }
+  .footer-col h4{ margin-bottom:2px; }
+  .text-link{ padding:11px 0; min-height:44px; }
+  .breadcrumb a{ padding:6px 0; display:inline-block; }
+  .sticky-socials a{ min-width:48px; min-height:48px; }
+  .pill span{ padding:12px 18px; }        /* 44px tall including border */
+}
+
+/* ---- 3. Contact page overflow -------------------------------------------
+   "Fastest response — +977 976-727-8212" is one unbreakable run; at 360px it
+   pushed the document 13px wider than the viewport and the whole page slid
+   sideways. Long-word breaking is applied at the source rather than hiding it
+   with overflow-x on body. */
+.contact-channel{ min-width:0; }
+.contact-channel > div{ min-width:0; }
+.contact-channel b,
+.contact-channel span{ overflow-wrap:anywhere; word-break:break-word; }
+.footer-col a{ overflow-wrap:anywhere; }
+
+/* ---- 4. Viewport units ---------------------------------------------------
+   100vh on mobile is measured against the *expanded* browser chrome, so a
+   100vh hero is always taller than the visible area and the CTA sits under
+   the fold. svh/dvh fix that where supported. */
+.hero{ min-height:100vh; }
+@supports (height:100svh){
+  .hero{ min-height:100svh; }
+  .page-hero{ min-height:auto; }
+}
+
+/* ---- 5. Forms on iOS -----------------------------------------------------
+   Safari zooms the viewport whenever a focused control is under 16px. */
+@media(max-width:900px){
+  .form-group input,
+  .form-group select,
+  .form-group textarea{ font-size:16px; }
+}
+
+/* ---- 6. Mobile contact dock ----------------------------------------------
+   The desktop rail was display:none below 700px, which removed the only
+   persistent contact affordance on the devices where most trade customers
+   actually land. Replaced with a bottom dock that clears the home indicator. */
+@media(max-width:700px){
+  .sticky-socials{
+    display:flex; flex-direction:row; gap:10px;
+    top:auto; right:auto; transform:none;
+    left:50%; translate:-50% 0;
+    bottom:calc(14px + env(safe-area-inset-bottom));
+    padding:8px; border-radius:100px;
+    background:rgba(10,9,82,.86);
+    backdrop-filter:blur(16px) saturate(150%);
+    -webkit-backdrop-filter:blur(16px) saturate(150%);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 18px 40px -16px rgba(0,0,0,.6);
+    z-index:120;
+  }
+  .sticky-socials a{
+    width:48px; height:48px; display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+  }
+  .sticky-socials .dock-label{
+    display:flex; align-items:center; padding:0 16px 0 6px; color:#fff;
+    font-size:13.5px; font-weight:600; white-space:nowrap;
+  }
+  .to-top{ bottom:calc(78px + env(safe-area-inset-bottom)); }
+}
+@media(min-width:701px){ .sticky-socials .dock-label{ display:none; } }
+
+/* ---- 7. Ticker ----------------------------------------------------------- */
+.ticker{ overflow:hidden; max-width:100%; }
+
+/* ==========================================================================
+   3D SURFACES
+   ========================================================================== */
+
+/* A canvas scene sits behind its section's content and never eats a tap. */
+.r3d-stage{
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none; z-index:0; display:block;
+}
+[data-r3d-host]{ position:relative; }
+[data-r3d-host] > *:not(.r3d-stage){ position:relative; z-index:1; }
+
+/* A framed, interactive scene — used where the artwork is the subject rather
+   than a backdrop. */
+.r3d-frame{
+  position:relative; border-radius:var(--radius-lg); overflow:hidden;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(108,107,232,.20), transparent 60%),
+    linear-gradient(160deg, #0D0B5E, #080748 60%, #06052F);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 40px 90px -50px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.07);
+  aspect-ratio:1/1;
+}
+.r3d-frame .r3d-stage{ pointer-events:auto; }
+.r3d-frame::after{                              /* a soft vignette so glow falls off */
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+  background:radial-gradient(120% 120% at 50% 50%, transparent 52%, rgba(6,5,47,.75));
+}
+.r3d-caption{
+  position:absolute; left:20px; bottom:18px; z-index:3; pointer-events:none;
+  font-family:var(--font-mono); font-size:var(--fs-2xs); font-weight:500;
+  letter-spacing:var(--track-label); text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+}
+.r3d-caption b{ display:block; color:#fff; font-family:var(--font-display);
+  font-size:17px; letter-spacing:-.02em; text-transform:none; margin-top:5px; }
+
+@media(max-width:700px){
+  .r3d-frame{ aspect-ratio:4/3; }
+  .r3d-caption{ left:16px; bottom:14px; }
+}
+
+/* Real depth on cards: children lift on their own Z plane rather than the
+   whole card being flat-transformed. */
+.depth-card{ transform-style:preserve-3d; }
+.depth-card > *{ transform:translateZ(0.01px); }
+.depth-card .depth-pop{ transform:translateZ(38px); }
+.depth-card .depth-mid{ transform:translateZ(20px); }
+@media(hover:none){ .depth-card, .depth-card > *{ transform:none !important; } }
+
+/* ==========================================================================
+   QUOTE CARD — a three-step brief.
+
+   The old form was a single 11-field wall that also lied: it POSTed to "/" and
+   showed "Message sent" for any resolved fetch, so on a non-Netlify host every
+   lead was silently dropped onto the homepage and the visitor was told it
+   worked. This one advances a step at a time, and only ever reports what
+   actually happened.
+   ========================================================================== */
+.quote-card-shell{
+  position:relative; border-radius:var(--radius-lg); background:#fff;
+  box-shadow:var(--shadow-3); overflow:hidden; isolation:isolate;
+}
+.quote-card-shell::before{                       /* brand edge-light */
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:3;
+  padding:1px; background:linear-gradient(150deg, rgba(222,90,60,.55), rgba(108,107,232,.25) 45%, transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+}
+
+.quote-head{ padding:26px 30px 0; }
+.quote-head-top{
+  display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+  margin-bottom:14px;
+}
+.quote-step-label{
+  font-family:var(--font-mono); font-size:var(--fs-2xs); font-weight:500;
+  letter-spacing:var(--track-label); text-transform:uppercase; color:var(--rust);
+}
+.quote-step-hint{ font-size:var(--fs-xs); color:var(--ink-soft); }
+.quote-rail{ display:flex; gap:6px; }
+.quote-rail i{
+  flex:1; height:4px; border-radius:4px; background:rgba(11,10,30,.10);
+  overflow:hidden; position:relative;
+}
+.quote-rail i::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; transform:scaleX(0);
+  transform-origin:left; background:linear-gradient(90deg, var(--rust), var(--rust-light) 70%, #F4C77E);
+  transition:transform .55s var(--ease-out);
+}
+.quote-rail i.is-done::after{ transform:scaleX(1); }
+.quote-rail i.is-active::after{ transform:scaleX(.5); }
+
+/* The viewport animates its own height so the card grows and shrinks with the
+   step instead of reserving the tallest step's height on every screen. */
+.quote-viewport{
+  position:relative; overflow:hidden;
+  transition:height .52s var(--ease-out);
+}
+/* The track is 100% wide with each step at flex-basis 100%, and slides by
+   whole multiples of its own width. A 300%-wide track instead leaks into the
+   grid column's intrinsic size (grid items default to min-width:auto), which
+   is what pushed contact.html 319px past the viewport. */
+.quote-track{ display:flex; align-items:flex-start; width:100%;
+  transition:transform .52s var(--ease-out); }
+.quote-step{
+  width:100%; flex:0 0 100%; border:0; padding:24px 30px 4px; margin:0;
+  opacity:0; transform:translateY(14px) scale(.985);
+  transition:opacity .42s var(--ease-out), transform .42s var(--ease-out);
+  transition-delay:0s;
+  /* visibility (not display) keeps the step as a flex item, so the track can
+     still slide; it also drops the step out of the focus order. `inert` in
+     main JS covers the a11y tree for browsers that support it. */
+  visibility:hidden;
+}
+.quote-step.is-current{ opacity:1; transform:none; transition-delay:.1s; visibility:visible; }
+
+.quote-legend{
+  display:block; font-family:var(--font-display); font-weight:700;
+  font-size:21px; letter-spacing:-.024em; line-height:1.25; margin-bottom:5px;
+}
+.quote-sub{ font-size:var(--fs-sm); color:var(--ink-soft); margin-bottom:20px; }
+
+.quote-foot{
+  display:flex; align-items:center; gap:12px; justify-content:space-between;
+  padding:18px 30px 26px; border-top:1px solid rgba(11,10,30,.07); margin-top:10px;
+}
+.quote-back{
+  display:inline-flex; align-items:center; gap:7px; background:none; border:0;
+  cursor:pointer; color:var(--ink-soft); font-family:var(--font-ui);
+  font-size:var(--fs-sm); font-weight:600; padding:12px 4px; min-height:44px;
+  transition:color .25s var(--ease), opacity .25s var(--ease);
+}
+.quote-back:hover{ color:var(--ink); }
+.quote-back[hidden]{ display:none; }
+.quote-foot .btn{ flex:0 0 auto; }
+.quote-trust{
+  font-family:var(--font-mono); font-size:var(--fs-2xs); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink-soft); opacity:.75;
+}
+
+@media(max-width:620px){
+  .quote-head{ padding:20px 20px 0; }
+  .quote-step{ padding:20px 20px 4px; }
+  .quote-foot{ padding:16px 20px 22px; flex-wrap:wrap; }
+  .quote-foot .btn{ flex:1 1 100%; justify-content:center; order:1; }
+  .quote-back{ order:2; }
+  .quote-trust{ display:none; }
+}
+
+/* ---- Choice cards: 3D press, not just a colour swap ---------------------- */
+.quote-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:0 0 6px; border:0; padding:0; }
+@media(max-width:760px){
+  .quote-cards{ grid-template-columns:1fr; }
+  .quote-card .qc-inner{ flex-direction:row; align-items:center; gap:14px; padding:16px 16px; min-height:64px; }
+  .quote-card .qc-icon{ margin:0; flex:0 0 38px; }
+  .quote-card .qc-sub{ display:none; }
+  .quote-card .qc-title{ font-size:16px; }
+}
+.quote-card .qc-inner{ transform-style:preserve-3d; }
+.quote-card input:focus-visible + .qc-inner{ outline:2px solid var(--rust); outline-offset:3px; }
+.quote-card.is-selected .qc-inner{ animation:qc-select .5s var(--spring); }
+@keyframes qc-select{ 0%{ transform:scale(1); } 45%{ transform:scale(1.035); } 100%{ transform:scale(1); } }
+
+/* ---- Field validity ------------------------------------------------------ */
+.field-error{
+  display:block; font-size:var(--fs-xs); color:#C0392B; margin-top:6px;
+  opacity:0; max-height:0; overflow:hidden;
+  transition:opacity .25s var(--ease), max-height .25s var(--ease);
+}
+.field-error.is-shown{ opacity:1; max-height:44px; }
+
+/* ---- Sending / success / failure ---------------------------------------- */
+.quote-sending{
+  position:absolute; inset:0; z-index:5; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:16px; background:rgba(255,255,255,.94);
+  backdrop-filter:blur(3px); opacity:0; visibility:hidden; transition:opacity .3s var(--ease);
+}
+.quote-sending.is-on{ opacity:1; visibility:visible; }
+.quote-spinner{
+  width:44px; height:44px; border-radius:50%;
+  border:3px solid rgba(181,47,36,.16); border-top-color:var(--rust);
+  animation:quote-spin .8s linear infinite;
+}
+@keyframes quote-spin{ to{ transform:rotate(360deg); } }
+.quote-sending span{ font-family:var(--font-mono); font-size:var(--fs-xs);
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); }
+
+.quote-result{ padding:44px 30px 46px; text-align:center; }
+.quote-result .qs-mark{
+  width:66px; height:66px; margin:0 auto 20px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  background:linear-gradient(135deg,#2FBE6E,#1E9C57);
+  animation:qs-pop .62s var(--spring) both;
+  box-shadow:0 16px 34px -14px rgba(30,156,87,.7);
+}
+.quote-result.is-warn .qs-mark{
+  background:linear-gradient(135deg,var(--rust-light),var(--rust));
+  box-shadow:0 16px 34px -14px var(--rust-glow);
+}
+.quote-result h3{ font-size:25px; margin-bottom:9px; letter-spacing:-.024em; }
+.quote-result > p{ color:var(--ink-soft); font-size:var(--fs-sm); max-width:380px; margin:0 auto; }
+.quote-result-actions{
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:24px;
+}
+.quote-ref{
+  margin-top:22px; font-family:var(--font-mono); font-size:var(--fs-2xs);
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); opacity:.7;
+}
+
+/* A ring of resonance on success — the logo gesture, at card scale. */
+.qs-mark{ position:relative; }
+.qs-mark::before,
+.qs-mark::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  border:2px solid currentColor; opacity:0;
+  animation:qs-ring 2.4s var(--ease-out) infinite;
+}
+.qs-mark::after{ animation-delay:.8s; }
+@keyframes qs-ring{
+  0%{ transform:scale(1); opacity:.5; }
+  100%{ transform:scale(2.1); opacity:0; }
+}
+
+.btn-whatsapp{
+  background:linear-gradient(135deg,#3AE07B,#1FA855); color:#04331A;
+  box-shadow:0 12px 30px -10px rgba(37,211,102,.6);
+}
+.btn-whatsapp:hover{ --btn-lift:-3px; }
+
+@media (prefers-reduced-motion: reduce){
+  .quote-track, .quote-viewport, .quote-step{ transition:none !important; }
+  .qs-mark::before, .qs-mark::after{ animation:none; }
+  .quote-spinner{ animation-duration:2s; }
+}
+
+/* A short lateral shake when a step fails validation — enough to read as
+   "look here", short enough not to feel punitive. */
+.is-shake{ animation:quote-shake .42s var(--ease-out); }
+@keyframes quote-shake{
+  0%,100%{ transform:translateX(0); }
+  22%{ transform:translateX(-7px); }
+  44%{ transform:translateX(6px); }
+  68%{ transform:translateX(-3px); }
+}
+@media (prefers-reduced-motion: reduce){ .is-shake{ animation:none; } }
+
+/* Grid and flex children default to min-width:auto, so a wide descendant can
+   force a track wider than its column instead of being clipped by it. */
+.contact-grid > *,
+.quote-card-shell,
+.quote-viewport,
+.two-col > *{ min-width:0; }
+.quote-card-shell{ width:100%; max-width:100%; }
+
+/* The contact column stacks: badge, then the live 3D piece. */
+.contact-aside{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+@media(max-width:980px){
+  .contact-grid .r3d-frame{ max-width:420px; }
+}

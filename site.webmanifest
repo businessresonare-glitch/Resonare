@@ -1,14 +1,26 @@
 {
-  "name": "RESONARE",
+  "id": "./",
+  "name": "RESONARE — Web Design That Resonates",
   "short_name": "RESONARE",
-  "description": "Web design that resonates \u2014 websites for local and trade businesses.",
-  "icons": [
-    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ],
+  "description": "Websites, SEO and lead systems for local & trade businesses.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
   "theme_color": "#0A0952",
   "background_color": "#0A0952",
-  "display": "standalone",
-  "start_url": "/"
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "favicon-96x96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Get a quote", "short_name": "Quote", "url": "./contact.html", "description": "Start a project brief" },
+    { "name": "Our work", "short_name": "Work", "url": "./work.html", "description": "See recent builds" }
+  ]
 }

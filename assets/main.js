@@ -16,19 +16,31 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
   }, 650);
 
   if (reduceMotion) {
-    window.addEventListener('load', () => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
       if (fill) fill.style.width = '100%';
       if (pct) pct.textContent = '100%';
       if (status) status.textContent = 'Ready';
       document.body.classList.add('loaded');
       setTimeout(() => { pre.classList.add('hidden'); pre.style.display = 'none'; }, 150);
-    });
+    };
+    window.addEventListener('load', finish);
+    setTimeout(finish, 3500);          // same failsafe as the animated path
     return;
   }
 
   let progress = 0;
   let loaded = false;
   window.addEventListener('load', () => { loaded = true; });
+
+  /* Failsafe. The bar's ceiling is 92% until `load` fires, and `load` waits on
+     every subresource — so one slow or blocked third-party request left the
+     preloader parked at 92% forever with the whole site sealed behind it. A
+     visitor must never be locked out by an asset that is not theirs. */
+  const FAILSAFE_MS = 3500;
+  setTimeout(() => { loaded = true; }, FAILSAFE_MS);
 
   function tick() {
     const ceiling = loaded ? 100 : 92;
@@ -105,13 +117,77 @@ if (lenis) { lenis.on('scroll', onScroll); } else { window.addEventListener('scr
 onScroll();
 if (toTopBtn) toTopBtn.addEventListener('click', () => smoothScrollTo(0, 0));
 
-/* ============ MOBILE DRAWER ============ */
+/* ============ MOBILE DRAWER ============
+   Previously the drawer only toggled a class: the page behind it stayed
+   scrollable, so flicking the "overlay" scrolled the document underneath and
+   closing it dumped you somewhere else entirely. It also could not be closed
+   with Escape and never returned focus. All three are handled here, and the
+   scroll position is restored on close rather than reset to the top. */
 const drawer = document.getElementById('mobileDrawer');
 const menuOpen = document.getElementById('menuOpen');
 const menuClose = document.getElementById('menuClose');
-if (menuOpen && drawer) menuOpen.addEventListener('click', () => drawer.classList.add('open'));
-if (menuClose && drawer) menuClose.addEventListener('click', () => drawer.classList.remove('open'));
-if (drawer) drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => drawer.classList.remove('open')));
+
+if (drawer) {
+  let scrollY = 0;
+
+  const focusables = () => Array.from(
+    drawer.querySelectorAll('a[href], button:not([disabled])')
+  ).filter(el => el.offsetParent !== null);
+
+  const openDrawer = () => {
+    scrollY = window.scrollY;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    if (menuOpen) menuOpen.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('nav-open');
+    document.body.style.top = `-${scrollY}px`;
+    if (lenis) lenis.stop();
+    const first = focusables()[0];
+    if (first) setTimeout(() => first.focus(), 80);
+  };
+
+  const closeDrawer = ({ restoreFocus = true } = {}) => {
+    if (!drawer.classList.contains('open')) return;
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    if (menuOpen) menuOpen.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
+    if (lenis) lenis.start();
+    if (restoreFocus && menuOpen) menuOpen.focus();
+  };
+
+  if (menuOpen) {
+    menuOpen.setAttribute('aria-expanded', 'false');
+    menuOpen.setAttribute('aria-controls', 'mobileDrawer');
+    menuOpen.addEventListener('click', openDrawer);
+  }
+  if (menuClose) menuClose.addEventListener('click', () => closeDrawer());
+
+  /* A nav link both closes the drawer and navigates, so focus must not be
+     yanked back to the burger mid-navigation. */
+  drawer.querySelectorAll('a').forEach(a =>
+    a.addEventListener('click', () => closeDrawer({ restoreFocus: false }))
+  );
+
+  document.addEventListener('keydown', (e) => {
+    if (!drawer.classList.contains('open')) return;
+    if (e.key === 'Escape') { closeDrawer(); return; }
+    if (e.key !== 'Tab') return;
+    const items = focusables();
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  /* Rotating to landscape past the breakpoint leaves an open drawer stranded
+     over a desktop layout with the burger gone. */
+  window.matchMedia('(min-width:881px)').addEventListener('change', (e) => {
+    if (e.matches) closeDrawer({ restoreFocus: false });
+  });
+}
 
 /* ============ REVEAL ON SCROLL ============ */
 const revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
@@ -485,26 +561,12 @@ attachTilt('.service-card', 2.6, -8);
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-/* ============ CONTACT FORM (Netlify AJAX) ============ */
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-  contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const btn = contactForm.querySelector('button[type="submit"]');
-    const original = btn.innerHTML;
-    btn.innerHTML = 'Sending…';
-    btn.disabled = true;
-    const formData = new FormData(contactForm);
-    fetch('/', { method: 'POST', body: new URLSearchParams(formData).toString(), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-      .then(() => {
-        contactForm.innerHTML = '<div style="text-align:center; padding:30px 0;"><h3 style="margin-bottom:10px;">Message sent</h3><p style="color:var(--ink-soft);">We reply within one business day — usually much sooner.</p></div>';
-      })
-      .catch(() => {
-        btn.innerHTML = original; btn.disabled = false;
-        alert('Something went wrong. Please WhatsApp us instead — it\'s faster anyway.');
-      });
-  });
-}
+/* ============ CONTACT FORM ============
+   The quote form is owned by assets/quote.js, which validates per step and
+   verifies the relay's response before claiming a send. The handler that used
+   to live here POSTed to "/" and declared success on any resolved fetch — on
+   a non-Netlify host that meant every brief was dropped while the visitor was
+   told it had been sent. */
 
 /* ============ LINE RAIN (ported from the reference's ambient dark bands) ====
    Thin light lines drifting down behind dark sections so a stats band reads as
@@ -564,41 +626,5 @@ if (contactForm) {
   rows.forEach(r => observer.observe(r));
 })();
 
-/* ============ QUOTE FORM ============
-   Card choices are real radio inputs, so keyboard and Netlify both work; the
-   progress bar reflects how much of the brief is filled in. */
-(function initQuoteForm(){
-  const form = document.getElementById('contactForm');
-  if (!form) return;
-
-  const cards = form.querySelectorAll('.quote-card input');
-  const bar = form.querySelector('#quoteProgress');
-
-  function syncCards(){
-    form.querySelectorAll('.quote-card').forEach(card => {
-      card.classList.toggle('is-selected', card.querySelector('input').checked);
-    });
-  }
-  cards.forEach(input => input.addEventListener('change', () => { syncCards(); updateProgress(); }));
-  syncCards();
-
-  const tracked = Array.from(form.querySelectorAll('[data-track]'));
-  function updateProgress(){
-    if (!bar) return;
-    const done = tracked.filter(el => {
-      if (el.type === 'radio') return !!form.querySelector('input[name="' + el.name + '"]:checked');
-      return el.value.trim().length > 1;
-    }).length;
-    const pct = Math.round((done / tracked.length) * 100);
-    bar.style.width = pct + '%';
-    bar.parentElement.setAttribute('data-complete', pct === 100 ? 'true' : 'false');
-  }
-  tracked.forEach(el => {
-    el.addEventListener('input', updateProgress);
-    el.addEventListener('change', updateProgress);
-    el.addEventListener('blur', () => {
-      if (el.required) el.classList.toggle('is-invalid', !el.checkValidity());
-    });
-  });
-  updateProgress();
-})();
+/* The stepped quote card lives in assets/quote.js — it owns its own
+   validation, progress rail and delivery, and is only loaded on contact.html. */
