@@ -458,8 +458,16 @@ attachTilt('.service-card', 2.6, -8);
          near-target in the first half second the way an ease-out does */
       const eased = p * p * (3 - 2 * p);
       el.textContent = format(target * eased, decimals, suffix, prefix);
+      /* published for the ember flow, which rides the same curve so the
+         lights surge exactly while the digits are climbing */
+      el.__countProgress = p;
+      el.__countRate = 1 - Math.abs(2 * p - 1);   // 0 at the ends, 1 mid-climb
       if (p < 1) requestAnimationFrame(tick);
-      else el.textContent = format(target, decimals, suffix, prefix);
+      else {
+        el.textContent = format(target, decimals, suffix, prefix);
+        el.__countProgress = 1;
+        el.__countRate = 0;
+      }
     }
     requestAnimationFrame(tick);
   }
@@ -645,3 +653,149 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 /* The stepped quote card lives in assets/quote.js — it owns its own
    validation, progress rail and delivery, and is only loaded on contact.html. */
+
+/* ============ EMBER FLOW ============
+   A column of golden lights rising through each stat tile, tied to the figure
+   counting up: the emission surges while the digits climb and settles to a
+   slow ember drift once the number lands.
+
+   One shared canvas per tile but a single rAF loop for all of them — six
+   independent loops on one screen is six times the scheduling for no gain.
+   The whole thing parks when the band scrolls away, and never starts under
+   prefers-reduced-motion. */
+(function initEmberFlow(){
+  const tiles = Array.from(document.querySelectorAll('.stat-tile'));
+  if (!tiles.length || reduceMotion) return;
+
+  /* One gold sprite, blitted per ember. Building a gradient per particle per
+     frame is what makes this kind of effect crawl. */
+  const SPR = 24;
+  const sprite = document.createElement('canvas');
+  sprite.width = sprite.height = SPR * 2;
+  {
+    const g = sprite.getContext('2d');
+    const grad = g.createRadialGradient(SPR, SPR, 0, SPR, SPR, SPR);
+    grad.addColorStop(0,    'rgba(255,236,190,1)');
+    grad.addColorStop(0.22, 'rgba(244,199,126,.62)');
+    grad.addColorStop(0.55, 'rgba(222,140,60,.16)');
+    grad.addColorStop(1,    'rgba(222,90,60,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, SPR * 2, SPR * 2);
+  }
+
+  const units = tiles.map(tile => {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'stat-flow';
+    canvas.setAttribute('aria-hidden', 'true');
+    tile.prepend(canvas);
+    return {
+      tile,
+      canvas,
+      ctx: canvas.getContext('2d'),
+      figure: tile.querySelector('[data-count]'),
+      embers: [],
+      w: 0, h: 0, dpr: 1,
+      spawnDebt: 0
+    };
+  });
+
+  function measure(u){
+    const r = u.canvas.getBoundingClientRect();
+    const w = Math.max(1, Math.round(r.width));
+    const h = Math.max(1, Math.round(r.height));
+    const dpr = Math.min(window.devicePixelRatio || 1, w < 500 ? 1.5 : 2);
+    if (w === u.w && h === u.h && dpr === u.dpr) return;
+    u.w = w; u.h = h; u.dpr = dpr;
+    u.canvas.width = Math.round(w * dpr);
+    u.canvas.height = Math.round(h * dpr);
+    u.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  units.forEach(measure);
+  window.addEventListener('resize', () => units.forEach(measure), { passive:true });
+
+  function spawn(u){
+    /* Embers start along the lower edge, biased toward the left where the
+       figure sits, so the light appears to lift off the number itself. */
+    const bias = Math.random() < 0.62 ? Math.random() * 0.45 : Math.random();
+    u.embers.push({
+      x: bias * u.w,
+      y: u.h + 8,
+      vy: 0.42 + Math.random() * 0.85,
+      sway: 0.4 + Math.random() * 1.1,
+      phase: Math.random() * Math.PI * 2,
+      r: 3.2 + Math.random() * 8.5,
+      life: 0,
+      span: 130 + Math.random() * 120,
+      hot: Math.random()
+    });
+  }
+
+  let running = false, raf = 0, last = 0;
+
+  function frame(now){
+    if (!running) return;
+    const dt = Math.min((now - last) / 16.667, 3);
+    last = now;
+
+    for (const u of units){
+      const fig = u.figure;
+      /* rate: a surge while counting, then a low idle so the tiles stay alive */
+      const climbing = fig && fig.__countRate ? fig.__countRate : 0;
+      const settled  = fig && fig.__countProgress >= 1 ? 1 : 0;
+      const rate = climbing * 1.55 + settled * 0.18;
+
+      u.spawnDebt += rate * dt;
+      while (u.spawnDebt >= 1){ spawn(u); u.spawnDebt -= 1; }
+
+      const ctx = u.ctx;
+      ctx.clearRect(0, 0, u.w, u.h);
+      ctx.globalCompositeOperation = 'lighter';
+
+      for (let i = u.embers.length - 1; i >= 0; i--){
+        const e = u.embers[i];
+        e.life += dt;
+        e.y -= e.vy * dt * 1.9;
+        const t = e.life / e.span;
+        if (t >= 1 || e.y < -20){ u.embers.splice(i, 1); continue; }
+
+        const x = e.x + Math.sin(e.phase + e.life * 0.045) * e.sway * 9;
+        /* fade in over the first fifth, then out — an ember that pops into
+           existence at full brightness reads as a glitch */
+        const fade = t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8;
+        const a = Math.max(0, fade) * (0.42 + e.hot * 0.5);
+        const rr = e.r * (0.65 + t * 0.7);
+        ctx.globalAlpha = a;
+        ctx.drawImage(sprite, x - rr, e.y - rr, rr * 2, rr * 2);
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start(){
+    if (running) return;
+    running = true; last = performance.now();
+    raf = requestAnimationFrame(frame);
+  }
+  function stop(){
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    units.forEach(u => { u.ctx.clearRect(0, 0, u.w, u.h); u.embers.length = 0; });
+  }
+
+  const band = tiles[0].closest('.stats-grid') || tiles[0].parentElement;
+  new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting){ units.forEach(measure); start(); }
+      else stop();
+    });
+  }, { threshold: 0.08 }).observe(band);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else if (band.getBoundingClientRect().top < window.innerHeight) start();
+  });
+})();

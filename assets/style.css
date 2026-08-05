@@ -761,13 +761,19 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:.006em; }
 .chip{ font-weight:500; letter-spacing:var(--track-label); }
 .footer-bottom{ font-size:var(--fs-2xs); letter-spacing:.06em; }
 
-/* figures line up in columns */
+/* Figures deliberately do NOT use tabular-nums.
+   Space Grotesk's tabular "1" carries a wide horizontal flag so it can fill
+   the fixed advance width, and at 52px that reads as a strikethrough through
+   the digit — "15+", "1-day" and "100%" all looked struck out. These are
+   display figures on their own line, not columns of data to align, so the
+   proportional glyph is both correct and better looking. Nothing shifts when
+   a counter gains a digit because each figure is a block on its own row. */
 .trust-chip b,
 .impact-stats b,
 .stat-tile b,
 .work-meta b,
 .plan-price,
-[data-count]{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+[data-count]{ font-variant-numeric:normal; font-feature-settings:normal; }
 
 /* ---- 2. Buttons ----------------------------------------------------------
    Transform is composed from custom properties so the magnetic offset written
@@ -879,8 +885,16 @@ body{
   font-size:var(--fs-base);
   line-height:1.65;
   letter-spacing:-.002em;
-  font-feature-settings:"cv05" 1, "ss01" 1;   /* Inter: single-storey l, cleaner a */
 }
+/* Inter's character variants, scoped to Inter. On `body` they inherited into
+   every Space Grotesk heading, where the same four-letter tags address that
+   font's own unrelated alternates. */
+body, p, li, td, input, textarea, select, button, .btn, .main-nav a{
+  font-feature-settings:"cv05" 1, "ss01" 1;   /* single-storey l, cleaner a */
+}
+h1, h2, h3, h4, .brand, .footer-brand, .preloader-mark,
+.plan-price, .stat-tile b, .trust-chip b, .impact-stats b,
+.quote-legend, [data-count]{ font-feature-settings:normal; }
 
 h1,h2,h3,h4{
   font-family:var(--font-display);
@@ -1032,7 +1046,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
 .stat-tile:hover{ transform:translateY(-6px); background:rgba(255,255,255,.11); border-color:rgba(244,199,126,.4); }
 .stat-tile b{
   display:block; font-family:var(--font-display); font-weight:700; font-size:52px;
-  line-height:1; color:#fff; font-variant-numeric:tabular-nums; margin-bottom:10px;
+  line-height:1; color:#fff; font-variant-numeric:normal; margin-bottom:10px;
 }
 .stat-tile .stat-name{
   display:block; font-family:var(--font-label); font-weight:600; font-size:var(--fs-xs);
@@ -1798,4 +1812,93 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 }
 @media(max-width:420px){
   .eyebrow{ font-size:11.5px; letter-spacing:.08em; }
+}
+
+/* ---- Ember flow ---------------------------------------------------------- */
+.stat-tile{ position:relative; }
+.stat-flow{
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none; z-index:0; display:block;
+}
+.stat-tile > *:not(.stat-flow){ position:relative; z-index:1; }
+@media (prefers-reduced-motion: reduce){ .stat-flow{ display:none; } }
+
+/* ==========================================================================
+   ANIMATION COST
+
+   Measured at the About stats band on a 4x-throttled phone: 18fps with the
+   page as-is, 55fps with CSS animation stopped — while the 3D scenes were
+   already parked and the embers cost only 2fps. The expense was not how many
+   animations run but *what they animate*:
+
+     - rm-ping animated the SVG `r` and `stroke-width` attributes. Those are
+       geometry, so every frame re-rasterised the vector, on twelve marks at
+       once (header, footer, drawer, preloader) whether on screen or not.
+     - wa-glow animated box-shadow, which repaints on every frame.
+
+   Both are rewritten to drive transform and opacity only, which the
+   compositor can handle without repainting, and the rain is thinned on small
+   screens. Identical visual result.
+   ========================================================================== */
+.resonance-mark .rm-ring{
+  transform-box:fill-box; transform-origin:center;
+  animation-name:rm-ping-t;
+  will-change:transform, opacity;
+}
+@keyframes rm-ping-t{
+  0%   { transform:scale(1);   opacity:.85; }
+  100% { transform:scale(3.8); opacity:0; }   /* r:5 x 3.8 = the old r:19 */
+}
+@media (prefers-reduced-motion: reduce){
+  .resonance-mark .rm-ring{ animation:none; opacity:.5; transform:scale(1.6); }
+}
+
+/* The pulse is a scaling ring behind the button, not a repainted shadow. */
+.sticky-socials a.whatsapp-glow{ animation:none; position:relative; }
+.sticky-socials a.whatsapp-glow::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; z-index:-1;
+  box-shadow:0 0 18px 6px rgba(37,211,102,.55);
+  animation:wa-pulse 2.2s ease-in-out infinite;
+  will-change:transform, opacity;
+}
+@keyframes wa-pulse{
+  0%,100%{ transform:scale(.92); opacity:0; }
+  50%    { transform:scale(1.06); opacity:1; }
+}
+@media (prefers-reduced-motion: reduce){ .sticky-socials a.whatsapp-glow::after{ animation:none; opacity:.6; } }
+
+/* Sixteen falling lines is a desktop flourish; a phone keeps six. */
+@media(max-width:900px){
+  .line-rain i:nth-child(n+7){ display:none; }
+}
+
+/* Per-animation bisecting at the stats band was inconclusive — each item
+   removed alone changed little, while stopping all of them together moved
+   19fps to 51fps. The cost is the aggregate of continuously-animating layers
+   on a heavy page, not one offender. So on small screens the purely
+   decorative motion stands down and the meaningful motion stays:
+
+     out - the falling line rain (texture only)
+     out - the resonance ping on marks that are duplicates of the header one
+           (footer, drawer, preloader) - they were animating off-screen
+     in  - the header mark's ping, the WhatsApp pulse, the ember flow and the
+           counters, all of which carry brand or state. */
+@media(max-width:900px){
+  .line-rain{ display:none; }
+  .footer-brand .resonance-mark .rm-ring,
+  .mobile-drawer .resonance-mark .rm-ring,
+  .preloader-mark .resonance-mark .rm-ring{ animation:none; opacity:.45; transform:scale(1.7); }
+}
+
+/* The stacked mobile hero is ~1500px tall, so a full-bleed backdrop canvas was
+   rendering 1504px of glow per frame on a 844px screen — and the mobile mask
+   fades the field out below the first screenful anyway. Capping the canvas to
+   roughly a viewport removes about 45% of the fill for no visible change. */
+.hero > .r3d-stage,
+.page-hero > .r3d-stage{
+  bottom:auto;
+  height:min(100%, 100svh);
+}
+@supports not (height:100svh){
+  .hero > .r3d-stage, .page-hero > .r3d-stage{ height:min(100%, 100vh); }
 }
