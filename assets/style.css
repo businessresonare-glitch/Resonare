@@ -26,10 +26,13 @@
   --spring: cubic-bezier(.22,1.15,.36,1);
 
   /* type roles — see assets/fonts.css, all self-hosted */
-  --font-display:'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-ui:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-label:'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-display:'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --font-ui:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-label:'Manrope', system-ui, -apple-system, sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /* The logo wordmark is a wide geometric sans, so it never takes the
+     display serif — Manrope at 800 with open tracking is the closest match. */
+  --font-wordmark:'Manrope', system-ui, -apple-system, sans-serif;
 
   /* small-text scale — overridden per-face in the Digilab pass at the
      bottom of this file, which is what actually ships */
@@ -236,7 +239,10 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 @media (prefers-reduced-motion: reduce){ .canvas-title::after{ animation:none; display:none; } .canvas-btn{ animation:none; } .canvas-bars i{ animation:none; } }
 
 .float-card{ position:absolute; background:rgba(255,255,255,.95); border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:12px; box-shadow:0 20px 50px -18px rgba(0,0,0,.45); font-size:13px; font-weight:600; color:var(--navy-deep); animation:float-bob 7s ease-in-out infinite;}
-.float-card b{ font-family:var(--font-display); font-size:20px; display:block;}
+/* Small UI chips keep the sans — the display serif is for headlines and
+   large editorial figures, not 20px numbers inside a floating card. */
+.float-card b{ font-family:var(--font-ui); font-weight:800; font-size:19px;
+  letter-spacing:-.02em; display:block;}
 @keyframes float-bob{ 0%,100%{ transform:translateY(0) rotate(0deg);} 50%{ transform:translateY(-14px) rotate(-1.1deg);} }
 .card-clients{ top:2px; right:0; animation-duration:8s; animation-delay:-2s;}
 .card-clients .dot{ width:10px; height:10px; border-radius:50%; background:#2FBE6E; box-shadow:0 0 0 4px rgba(47,190,110,.2); animation:dot-pulse 1.8s ease-in-out infinite;}
@@ -334,7 +340,7 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .tech-cell:hover{ transform:translateY(-6px); background:rgba(255,255,255,.09);}
 .tech-cell svg{ color:var(--rust-light);}
 .tech-cell span{ font-family:var(--font-label); font-size:11.5px; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.5);}
-.tech-cell b{ font-family:var(--font-display); font-size:18px; font-weight:600;}
+.tech-cell b{ font-family:var(--font-ui); font-size:16px; font-weight:700; letter-spacing:-.012em;}
 .cell-wide{ grid-column:span 2;}
 .cell-red{ background:linear-gradient(135deg, rgba(181,47,36,.35), rgba(181,47,36,.12)); }
 .wave-lines{ display:flex; gap:5px; align-items:flex-end; height:34px; margin-top:6px;}
@@ -354,7 +360,7 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .impact-card{ background:rgba(255,255,255,.05); border:1px solid var(--navy-line); border-radius:var(--radius-lg); padding:32px 30px; backdrop-filter:blur(8px); position:relative; overflow:hidden; transition:transform .4s var(--ease), background .4s var(--ease);}
 .impact-card:hover{ transform:translateY(-6px); background:rgba(255,255,255,.08);}
 .impact-card-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:10px;}
-.impact-company{ font-family:var(--font-display); font-weight:700; font-size:16.5px;}
+.impact-company{ font-family:var(--font-ui); font-weight:700; font-size:15px; letter-spacing:-.01em;}
 .impact-badge{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-label); font-size:11px; text-transform:uppercase; letter-spacing:.07em; padding:7px 13px; border-radius:100px; white-space:nowrap;
   opacity:0; transform:scale(.7); transition:opacity .5s var(--ease), transform .5s cubic-bezier(.34,1.56,.64,1);}
 .impact-grid.in .impact-badge{ opacity:1; transform:scale(1); transition-delay:1.9s;}
@@ -394,7 +400,7 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .mini-impact-label{ font-family:var(--font-label); font-size:11px; letter-spacing:.12em; text-transform:uppercase;}
 .mini-impact-label.down{ color:var(--rust-light);}
 .mini-impact-label.up{ color:#F4C77E;}
-.mini-impact-figure{ font-family:var(--font-display); font-weight:700; font-size:16px; color:#fff; display:inline-flex; align-items:baseline; gap:7px;}
+.mini-impact-figure{ font-family:var(--font-ui); font-weight:700; font-size:15px; color:#fff; display:inline-flex; align-items:baseline; gap:7px;}
 .mini-impact-figure small{ font-family:var(--font-label); font-weight:400; font-size:10px; color:rgba(255,255,255,.45); text-transform:uppercase;}
 .mini-delta{ font-family:var(--font-label); font-size:11px; font-weight:700; padding:3px 9px; border-radius:100px; color:#fff;}
 .mini-delta.down{ background:rgba(222,90,60,.35);}
@@ -434,7 +440,7 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .work-body p{ color:rgba(255,255,255,.6); font-size:14.5px; line-height:1.6; margin-bottom:18px;}
 .work-meta{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px;}
 .work-meta div{ display:flex; flex-direction:column; gap:2px;}
-.work-meta b{ font-family:var(--font-display); font-size:18px; color:#fff;}
+.work-meta b{ font-family:var(--font-display); font-weight:400; font-size:23px; color:#fff; letter-spacing:-.012em;}
 .work-meta span{ font-size:11px; color:rgba(255,255,255,.45); font-family:var(--font-label); text-transform:uppercase; letter-spacing:.06em;}
 @media(max-width:900px){ .work-grid{ grid-template-columns:1fr;} }
 
@@ -492,7 +498,7 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .review-stars{ display:flex; gap:3px; color:#F4C77E; margin-bottom:16px;}
 .review-card p{ color:rgba(255,255,255,.78); font-size:14.5px; line-height:1.65; margin-bottom:20px;}
 .review-person{ display:flex; align-items:center; gap:12px;}
-.review-avatar{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--rust-light),var(--rust)); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:14px;}
+.review-avatar{ width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--rust-light),var(--rust)); display:flex; align-items:center; justify-content:center; font-family:var(--font-ui); font-weight:800; font-size:14px;}
 .review-person b{ display:block; font-size:14px;}
 .review-person span{ font-size:12.5px; color:rgba(255,255,255,.5);}
 @media(max-width:900px){ .review-grid{ grid-template-columns:1fr; } }
@@ -890,37 +896,44 @@ body{
    every Space Grotesk heading, where the same four-letter tags address that
    font's own unrelated alternates. */
 body, p, li, td, input, textarea, select, button, .btn, .main-nav a{
-  font-feature-settings:"cv05" 1, "ss01" 1;   /* single-storey l, cleaner a */
+  font-feature-settings:normal;
 }
 h1, h2, h3, h4, .brand, .footer-brand, .preloader-mark,
 .plan-price, .stat-tile b, .trust-chip b, .impact-stats b,
 .quote-legend, [data-count]{ font-feature-settings:normal; }
 
+/* Instrument Serif ships ONE weight (400) plus an italic. It is drawn to be
+   set large at that weight, so nothing here asks for bold — a synthesised
+   bold would smear its thin strokes. Sizes step up and the negative tracking
+   comes almost all the way off: a high-contrast serif needs air where a
+   grotesque needed tightening. */
 h1,h2,h3,h4{
   font-family:var(--font-display);
-  font-weight:700;
-  letter-spacing:-.028em;                      /* Space Grotesk sets loose at display size */
-  line-height:1.04;
+  font-weight:400;
+  letter-spacing:-.012em;
+  line-height:1.06;
 }
+h1 em, h2 em, h3 em{ font-style:italic; }        /* the italic is the emphasis */
+
 .brand,
 .footer-brand,
-.preloader-mark{ font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; }
-.plan-price{ font-family:var(--font-display); font-weight:700; letter-spacing:-.03em; }
+.preloader-mark{ font-family:var(--font-wordmark); font-weight:800; letter-spacing:.06em; }
+.plan-price{ font-family:var(--font-display); font-weight:400; letter-spacing:-.015em; }
 
-.hero h1{ font-size:clamp(40px,6.2vw,78px); line-height:1.0; letter-spacing:-.034em; }
-.page-hero h1{ font-size:clamp(36px,5.6vw,68px); line-height:1.02; letter-spacing:-.032em; }
-.section-heading h2{ font-size:clamp(29px,4.1vw,50px); line-height:1.06; }
+.hero h1{ font-size:clamp(46px,7vw,92px); line-height:1.0; letter-spacing:-.02em; }
+.page-hero h1{ font-size:clamp(40px,6.4vw,80px); line-height:1.02; letter-spacing:-.02em; }
+.section-heading h2{ font-size:clamp(33px,4.7vw,58px); line-height:1.08; }
 .signal-copy h2,
-.contact-info h2{ font-size:clamp(27px,3.7vw,44px); line-height:1.08; }
-.final-cta h2{ font-size:clamp(30px,5vw,58px); line-height:1.04; }
-.mobile-drawer nav a{ font-family:var(--font-display); font-size:clamp(30px,8.4vw,42px); font-weight:600; letter-spacing:-.03em; }
+.contact-info h2{ font-size:clamp(31px,4.2vw,52px); line-height:1.1; }
+.final-cta h2{ font-size:clamp(34px,5.6vw,68px); line-height:1.04; }
+.mobile-drawer nav a{ font-family:var(--font-display); font-size:clamp(34px,9.6vw,48px); font-weight:400; letter-spacing:-.01em; }
 .service-card h3,
-.work-body h3{ font-size:23px; letter-spacing:-.024em; }
-.process-row h3{ font-size:25px; letter-spacing:-.024em; }
-.value-card h3{ font-size:20px; letter-spacing:-.022em; }
-.plan-price{ font-size:40px; }
+.work-body h3{ font-size:27px; letter-spacing:-.01em; }
+.process-row h3{ font-size:29px; letter-spacing:-.01em; }
+.value-card h3{ font-size:23px; letter-spacing:-.008em; }
+.plan-price{ font-size:46px; }
 .trust-chip b,
-.impact-stats b{ font-family:var(--font-display); font-size:27px; letter-spacing:-.03em; }
+.impact-stats b{ font-family:var(--font-display); font-weight:400; font-size:31px; letter-spacing:-.015em; }
 
 /* ---- The data voice ------------------------------------------------------
    Mono, uppercase, generously tracked. Restricted to true micro-labels: it
@@ -1047,6 +1060,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
 .stat-tile b{
   display:block; font-family:var(--font-display); font-weight:700; font-size:52px;
   line-height:1; color:#fff; font-variant-numeric:normal; margin-bottom:10px;
+  font-weight:400; letter-spacing:-.015em;
 }
 .stat-tile .stat-name{
   display:block; font-family:var(--font-label); font-weight:600; font-size:var(--fs-xs);
@@ -1138,7 +1152,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
   transition:transform .45s var(--spring), background .35s var(--ease);
 }
 .quote-card:hover .qc-icon{ transform:rotate(-8deg) scale(1.08); }
-.quote-card .qc-title{ font-family:var(--font-display); font-weight:700; font-size:18px; line-height:1.15; }
+.quote-card .qc-title{ font-family:var(--font-ui); font-weight:700; font-size:17px; line-height:1.2; letter-spacing:-.012em; }
 .quote-card .qc-sub{ font-size:var(--fs-xs); color:var(--ink-soft); line-height:1.5; }
 .quote-card .qc-check{
   position:absolute; top:14px; right:14px; width:21px; height:21px; border-radius:50%;
@@ -1423,8 +1437,8 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .quote-step.is-current{ opacity:1; transform:none; transition-delay:.1s; visibility:visible; }
 
 .quote-legend{
-  display:block; font-family:var(--font-display); font-weight:700;
-  font-size:21px; letter-spacing:-.024em; line-height:1.25; margin-bottom:5px;
+  display:block; font-family:var(--font-display); font-weight:400;
+  font-size:26px; letter-spacing:-.012em; line-height:1.2; margin-bottom:5px;
 }
 .quote-sub{ font-size:var(--fs-sm); color:var(--ink-soft); margin-bottom:20px; }
 
@@ -1936,4 +1950,277 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 
 @media(max-width:520px){
   .brand{ font-size:17px; }
+}
+
+/* ==========================================================================
+   LIQUID GLASS
+
+   The border is a gradient ring drawn by a ::before and masked to the padding
+   box, so the edge catches light at top and bottom the way real glass does —
+   a plain 1px border reads flat against a moving backdrop.
+   ========================================================================== */
+.liquid-glass{
+  background:rgba(255,255,255,.01);
+  background-blend-mode:luminosity;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  border:none;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.1);
+  position:relative;
+  overflow:hidden;
+}
+.liquid-glass::before{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  padding:1.4px; pointer-events:none;
+  background:linear-gradient(180deg,
+    rgba(255,255,255,.45) 0%, rgba(255,255,255,.15) 20%,
+    rgba(255,255,255,0) 40%,  rgba(255,255,255,0) 60%,
+    rgba(255,255,255,.15) 80%, rgba(255,255,255,.45) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+}
+.liquid-glass-strong{
+  backdrop-filter:blur(50px); -webkit-backdrop-filter:blur(50px);
+  box-shadow:4px 4px 4px rgba(0,0,0,.05), inset 0 1px 1px rgba(255,255,255,.15);
+}
+.liquid-glass-strong::before{
+  background:linear-gradient(180deg,
+    rgba(255,255,255,.5) 0%,  rgba(255,255,255,.2) 20%,
+    rgba(255,255,255,0) 40%,  rgba(255,255,255,0) 60%,
+    rgba(255,255,255,.2) 80%, rgba(255,255,255,.5) 100%);
+}
+/* backdrop-filter is the whole effect; without it the panel is invisible. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .liquid-glass{ background:rgba(12,10,60,.55); }
+  .liquid-glass-strong{ background:rgba(12,10,60,.78); }
+}
+
+/* ==========================================================================
+   CINEMATIC HERO
+
+   A full-height band whose backdrop is either a looping video or the page's
+   R3D scene. The video is optional: assets/hero.js only promotes it once it
+   is actually decoding, and `.has-video` is what stands the 3D scene down —
+   so a missing file leaves the 3D backdrop running instead of a black box.
+   ========================================================================== */
+.cine-hero{
+  position:relative; overflow:hidden; isolation:isolate;
+  min-height:100vh; display:flex; flex-direction:column;
+  background:linear-gradient(165deg, #0D0B5E 0%, var(--navy-deep) 55%, #05042E 100%);
+}
+@supports (min-height:100svh){ .cine-hero{ min-height:100svh; } }
+
+.hero-video{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:0; pointer-events:none;
+  will-change:opacity;
+}
+/* Once real video is playing the canvas scene retires rather than stacking. */
+.cine-hero.has-video > .r3d-stage{ opacity:0 !important; transition:opacity .6s ease; }
+
+/* A readability scrim. The reference prompts use no overlay because their
+   footage is dark; ours has to survive whatever file gets dropped in, and
+   white type on an unknown video is a contrast gamble without it. */
+.cine-hero::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(5,4,46,.72) 0%, rgba(5,4,46,.30) 38%, rgba(5,4,46,.55) 78%, rgba(5,4,46,.92) 100%),
+    radial-gradient(115% 80% at 22% 42%, rgba(5,4,46,.55), transparent 68%);
+}
+.cine-hero > *:not(.hero-video):not(.r3d-stage):not(::after){ position:relative; z-index:2; }
+.cine-hero .cine-inner{ position:relative; z-index:2; }
+
+.cine-inner{
+  flex:1; display:flex; flex-direction:column; justify-content:center;
+  padding:150px 7vw 96px; max-width:1400px; width:100%; margin:0 auto;
+}
+.cine-hero.is-centered .cine-inner{ align-items:center; text-align:center; }
+
+/* ---- Glass badge --------------------------------------------------------- */
+.cine-badge{
+  display:inline-flex; align-items:center; gap:11px; align-self:flex-start;
+  border-radius:100px; padding:5px 16px 5px 5px; margin-bottom:26px;
+  font-family:var(--font-ui); font-size:13.5px; color:rgba(255,255,255,.92);
+}
+.is-centered .cine-badge{ align-self:center; }
+.cine-badge .chip{
+  background:#fff; color:#0A0952; border-radius:100px;
+  padding:4px 12px; font-size:11.5px; font-weight:800;
+  letter-spacing:.06em; text-transform:uppercase;
+}
+
+/* ---- Headline ------------------------------------------------------------ */
+.cine-hero h1{
+  color:#fff; margin:0 0 22px;
+  font-size:clamp(44px,7.4vw,104px);
+  line-height:.98; letter-spacing:-.022em; max-width:17ch;
+}
+.is-centered .cine-hero h1{ max-width:20ch; }
+.cine-hero h1 em{
+  font-style:italic;
+  background:linear-gradient(115deg,#FF9A76,#F4C77E 62%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.cine-lede{
+  color:rgba(255,255,255,.78); font-size:clamp(15.5px,1.35vw,19px);
+  line-height:1.62; max-width:56ch; margin-bottom:34px;
+}
+
+/* ---- Word-by-word blur-in ------------------------------------------------ */
+.bt-word{
+  display:inline-block;
+  opacity:0; filter:blur(10px); transform:translateY(28px);
+  transition:opacity .7s cubic-bezier(.22,.61,.36,1),
+             filter .7s cubic-bezier(.22,.61,.36,1),
+             transform .7s cubic-bezier(.22,.61,.36,1);
+  will-change:opacity, filter, transform;
+}
+.bt-in .bt-word{ opacity:1; filter:blur(0); transform:none; }
+@media (prefers-reduced-motion: reduce){
+  .bt-word{ opacity:1; filter:none; transform:none; transition:none; }
+}
+
+/* ---- Actions and stat cards ---------------------------------------------- */
+.cine-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:16px; }
+.is-centered .cine-actions{ justify-content:center; }
+.btn-glass{
+  display:inline-flex; align-items:center; gap:10px;
+  border-radius:100px; padding:16px 30px; cursor:pointer;
+  font-family:var(--font-ui); font-size:14.5px; font-weight:600; color:#fff;
+  transition:transform .35s var(--spring);
+}
+.btn-glass:hover{ transform:scale(1.03); }
+.btn-glass svg{ transition:transform .3s var(--ease); }
+.btn-glass:hover svg{ transform:translate(3px,-3px); }
+
+.cine-stats{ display:flex; flex-wrap:wrap; gap:14px; margin-top:44px; }
+.is-centered .cine-stats{ justify-content:center; }
+.cine-stat{
+  border-radius:20px; padding:20px 22px; min-width:196px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.cine-stat svg{ color:#fff; opacity:.85; }
+.cine-stat b{
+  font-family:var(--font-display); font-weight:400; font-size:36px;
+  line-height:1; letter-spacing:-.02em; color:#fff;
+}
+.cine-stat span{
+  font-family:var(--font-mono); font-size:11px; font-weight:500;
+  letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.62);
+  line-height:1.45;
+}
+
+/* ---- Scroll hint --------------------------------------------------------- */
+.cine-foot{
+  position:relative; z-index:2; display:flex; justify-content:center;
+  padding:0 7vw 40px;
+}
+.cine-chip{
+  border-radius:100px; padding:9px 18px;
+  font-family:var(--font-mono); font-size:11px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.8);
+}
+
+/* ---- Small screens ------------------------------------------------------- */
+@media(max-width:900px){
+  .cine-inner{ padding:118px 6vw 64px; }
+  .cine-hero h1{ max-width:none; letter-spacing:-.016em; }
+  .cine-lede{ margin-bottom:28px; }
+  .cine-stats{ margin-top:32px; gap:10px; }
+  .cine-stat{ min-width:0; flex:1 1 calc(50% - 5px); padding:16px 16px; }
+  .cine-stat b{ font-size:29px; }
+  .btn-glass{ padding:15px 24px; }
+  .cine-foot{ padding-bottom:28px; }
+  /* Heavy blur across a full-bleed video is the single most expensive thing
+     on a phone; the glass panels keep their look with a cheaper blur. */
+  .liquid-glass-strong{ backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+}
+@media(max-width:560px){
+  .cine-actions .btn-glass,
+  .cine-actions .btn{ flex:1 1 100%; justify-content:center; }
+}
+
+/* ==========================================================================
+   CINEMATIC HERO — corrections found by inspecting the rendered page
+   ========================================================================== */
+
+/* 1. Stacking. `[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption)` scores
+      0,3,0 and was pinning the hero content to z-index 1 — the same layer as
+      the ::after scrim, which paints later and therefore on top. The headline
+      was being dimmed by its own readability scrim. */
+.cine-hero[data-r3d-host] > .cine-inner,
+.cine-hero[data-r3d-host] > .cine-foot{ position:relative; z-index:3; }
+.cine-hero::after{ z-index:1; }
+
+/* 2. The emphasis gradient lives on the word, not the <em>. A transformed
+      child establishes its own paint context, which breaks a
+      background-clip:text set on the ancestor — the words came out fully
+      transparent and simply vanished from the headline. */
+.cine-hero h1 em{ color:#fff; background:none; -webkit-text-fill-color:currentColor; }
+.cine-hero h1 em .bt-word{
+  background:linear-gradient(115deg,#FF9A76,#F4C77E 62%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+}
+/* No-JS / reduced-motion: the em never gets split, so it keeps its own fill. */
+.cine-hero h1:not(.bt-split) em{
+  background:linear-gradient(115deg,#FF9A76,#F4C77E 62%);
+  -webkit-background-clip:text; background-clip:text;
+  color:transparent; -webkit-text-fill-color:transparent;
+}
+
+/* 3. The stat value and its label are separate lines. */
+.cine-stat b,
+.cine-stat span{ display:block; }
+.cine-stat > div{ display:flex; flex-direction:column; gap:7px; }
+
+/* 4. Give the glass a little more presence over a dark backdrop — at the
+      reference's 0.01 alpha the panels all but disappear on navy. */
+.cine-hero .liquid-glass{ background:rgba(255,255,255,.045); }
+.cine-hero .liquid-glass-strong{ background:rgba(255,255,255,.10); }
+
+/* The hero has to fit a 900px laptop viewport: at the first pass the stat row
+   clipped mid-card and the scroll chip never appeared at all, which reads as a
+   broken layout rather than an invitation to scroll. */
+.cine-inner{ padding:122px 7vw 26px; }
+.cine-hero h1{ margin-bottom:18px; }
+.cine-lede{ margin-bottom:28px; }
+.cine-stats{ margin-top:34px; }
+.cine-foot{ padding-bottom:32px; }
+@media(max-height:820px){
+  .cine-inner{ padding-top:104px; }
+  .cine-hero h1{ font-size:clamp(40px,5.6vw,74px); }
+  .cine-stats{ margin-top:26px; }
+  .cine-stat{ padding:15px 18px; }
+  .cine-stat b{ font-size:30px; }
+}
+@media(max-width:900px){
+  .cine-inner{ padding:110px 6vw 22px; }
+}
+
+/* On a phone three stat cards wrapped to two rows and pushed the last one
+   under the floating contact dock. One snap-scrolling row keeps all three,
+   caps the hero height, and reads as deliberate rather than overflowing. */
+@media(max-width:640px){
+  .cine-stats{
+    flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    margin-left:-6vw; margin-right:-6vw; padding:2px 6vw 6px;
+    scrollbar-width:none;
+  }
+  .cine-stats::-webkit-scrollbar{ display:none; }
+  .cine-stat{ flex:0 0 min(58vw,196px); scroll-snap-align:start; }
+  .cine-stat span{ white-space:nowrap; }
+  .cine-actions{ gap:12px; }
+  .btn-glass{ padding:14px 22px; font-size:14px; }
+}
+
+/* Hold the new hero labels to the same 12px floor as the rest of the site. */
+@media(max-width:900px){
+  .cine-chip{ font-size:12px; letter-spacing:.1em; }
+  .cine-badge{ font-size:13px; }
+  .cine-badge .chip{ font-size:12px; letter-spacing:.05em; }
+  .cine-stat span{ font-size:12px; letter-spacing:.09em; }
 }

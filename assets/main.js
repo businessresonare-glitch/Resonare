@@ -554,6 +554,10 @@ attachTilt('.service-card', 2.6, -8);
 
   headings.forEach(h => {
     if (h.closest('.preloader')) return;
+    /* Cinematic hero headlines are owned by assets/hero.js, which splits them
+       per word for the blur-in. Letting this pass run too nested one splitter
+       inside the other and produced 38 "words" for a ten-word headline. */
+    if (h.hasAttribute('data-blur-text')) return;
     walk(h);
     const chars = h.querySelectorAll('.sr-char');
     if (!chars.length) return;

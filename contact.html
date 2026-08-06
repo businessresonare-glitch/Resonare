@@ -34,8 +34,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="site.webmanifest">
-<link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-serif-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","@id":"https://resonare.digital/#business","name":"RESONARE","url":"https://resonare.digital/","logo":"https://resonare.digital/assets/og-image.jpg","image":"https://resonare.digital/assets/og-image.jpg","description":"RESONARE builds high-impact websites, booking systems, and SEO-driven digital identities for ambitious local & trade businesses.","email":"business.resonare@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Kathmandu","addressCountry":"NP"},"areaServed":"Worldwide","priceRange":"$$","sameAs":["https://wa.me/9779767278212"]}</script>
@@ -103,16 +103,16 @@
 <main>
 
   <!-- ============ PAGE HERO ============ -->
-  <section class="page-hero" data-r3d-host style="min-height:46vh;">
-    <canvas class="r3d-stage" data-r3d="lattice" style="opacity:.45"></canvas>
-    <div class="page-hero-grid" aria-hidden="true"></div>
-    <div class="hero-breath" aria-hidden="true"></div>
-    <div class="page-hero-inner">
-      <div class="breadcrumb"><a href="index.html">Home</a> / Contact</div>
-      <div class="eyebrow"><span></span> Let's talk</div>
-      <h1><span class="kinetic-mask"><span class="kinetic-inner">Tell us about your business. We'll take it from there.</span></span></h1>
-      <p class="lede">Fill in the form, WhatsApp us, or send an email — however's easiest. We reply within one business day.</p>
+  <section class="cine-hero is-centered" data-r3d-host data-hero-video="assets/video/hero-contact.mp4" data-hero-poster="assets/video/hero-contact.jpg">
+    <canvas class="r3d-stage" data-r3d="lattice"></canvas>
+    <div class="cine-inner">
+      <span class="cine-badge liquid-glass"><span class="chip">Contact</span>We reply within one business day</span>
+      <h1 data-blur-text>Tell us about your business. <em>We will take it from there.</em></h1>
+      <p class="cine-lede">Fill in the brief, message us on WhatsApp, or send an email — whichever is easiest. Every message reaches a real person, not a queue.</p>
+      <div class="cine-actions"><a class="btn-glass liquid-glass-strong liquid-glass" href="#quote">Start the brief<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a><a class="btn-glass liquid-glass" href="https://wa.me/9779767278212?text=Hi%20Resonare!%20I%27m%20interested%20in%20getting%20a%20website%20for%20my%20business">Message on WhatsApp<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a></div>
+      
     </div>
+    <div class="cine-foot"><span class="cine-chip liquid-glass">Takes about a minute</span></div>
   </section>
 
   <!-- ============ CONTACT ============ -->
@@ -154,7 +154,7 @@
       </div>
 
       <div class="reveal">
-        <div class="quote-card-shell" data-r3d-host>
+        <div class="quote-card-shell" id="quote" data-r3d-host>
           <form id="quoteForm" novalidate
                 data-quote-email="business.resonare@gmail.com"
                 data-quote-whatsapp="9779767278212">
@@ -323,6 +323,7 @@
 </footer>
 <script src="assets/r3d.js" defer></script>
 <script src="assets/main.js" defer></script>
+<script src="assets/hero.js" defer></script>
 <script src="assets/quote.js" defer></script>
 </body>
 </html>

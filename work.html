@@ -34,8 +34,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="site.webmanifest">
-<link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/instrument-serif-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/style.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","@id":"https://resonare.digital/#business","name":"RESONARE","url":"https://resonare.digital/","logo":"https://resonare.digital/assets/og-image.jpg","image":"https://resonare.digital/assets/og-image.jpg","description":"RESONARE builds high-impact websites, booking systems, and SEO-driven digital identities for ambitious local & trade businesses.","email":"business.resonare@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Kathmandu","addressCountry":"NP"},"areaServed":"Worldwide","priceRange":"$$","sameAs":["https://wa.me/9779767278212"]}</script>
@@ -103,16 +103,16 @@
 <main>
 
   <!-- ============ PAGE HERO ============ -->
-  <section class="page-hero" data-r3d-host style="min-height:50vh;">
-    <canvas class="r3d-stage" data-r3d="resonance" style="opacity:.45"></canvas>
-    <div class="page-hero-grid" aria-hidden="true"></div>
-    <div class="hero-breath" aria-hidden="true"></div>
-    <div class="page-hero-inner">
-      <div class="breadcrumb"><a href="index.html">Home</a> / Our Work</div>
-      <div class="eyebrow"><span></span> Selected projects</div>
-      <h1><span class="kinetic-mask"><span class="kinetic-inner">Real sites, built for <em>real trade businesses</em>.</span></span></h1>
-      <p class="lede">Every project below is a live, working website — not a mockup. See the range across plumbing, fencing, and electrical.</p>
+  <section class="cine-hero" data-r3d-host data-hero-video="assets/video/hero-work.mp4" data-hero-poster="assets/video/hero-work.jpg">
+    <canvas class="r3d-stage" data-r3d="resonance"></canvas>
+    <div class="cine-inner">
+      <span class="cine-badge liquid-glass"><span class="chip">Work</span>Live builds across five trades</span>
+      <h1 data-blur-text>Real sites, built for <em>real trade businesses</em>.</h1>
+      <p class="cine-lede">Plumbing, fencing, electrical and more — each one built around the way its customers actually search, and the moment they decide to call.</p>
+      <div class="cine-actions"><a class="btn-glass liquid-glass-strong liquid-glass" href="contact.html">Start your project<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a><a class="btn-glass liquid-glass" href="about.html">How we work<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg></a></div>
+      <div class="cine-stats"><div class="cine-stat liquid-glass"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4"></path><path d="M12 17v4"></path><path d="M3 12h4"></path><path d="M17 12h4"></path><path d="m6 6 2.5 2.5"></path><path d="m15.5 15.5 2.5 2.5"></path><path d="m18 6-2.5 2.5"></path><path d="m8.5 15.5-2.5 2.5"></path></svg><div><b>15+</b><span>Sites shipped</span></div></div><div class="cine-stat liquid-glass"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"></path></svg><div><b>6+</b><span>Trade industries</span></div></div><div class="cine-stat liquid-glass"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><div><b>2-4 wks</b><span>Typical build time</span></div></div></div>
     </div>
+    <div class="cine-foot"><span class="cine-chip liquid-glass">Scroll to see the builds</span></div>
   </section>
 
   <!-- ============ FULL WORK GRID ============ -->
@@ -247,5 +247,6 @@
 </footer>
 <script src="assets/r3d.js" defer></script>
 <script src="assets/main.js" defer></script>
+<script src="assets/hero.js" defer></script>
 </body>
 </html>
