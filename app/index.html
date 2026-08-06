@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#000000" />
+
+    <!--
+      Fonts are self-hosted (see scripts/fetch-fonts.mjs), so there is no
+      third-party stylesheet on the critical path. Preloading the two faces used
+      above the fold lets them start downloading alongside the CSS rather than
+      after it, which is what closes the swap window on first paint.
+    -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/instrument-serif-400-normal-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/public-sans-400-normal-latin.woff2"
+      crossorigin
+    />
+
     <title>RESONARE — Web Design That Resonates</title>
     <meta
       name="description"

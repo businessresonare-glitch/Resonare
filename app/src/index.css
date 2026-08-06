@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+@import './fonts.css';
 @import './tokens.css';
 
 @tailwind base;
@@ -27,8 +27,22 @@
   --glass-edge-soft: rgba(255, 255, 255, 0.15);
   --glass-edge-none: rgba(255, 255, 255, 0);
 
-  /* Type */
-  --font-display: 'Instrument Serif', serif;
+  /*
+   * Type system.
+   *
+   * Display  — Instrument Serif: editorial, high-contrast, for a premium
+   *            service brand. Carries all headline weight.
+   * Body     — Public Sans: neutral and exceptionally well-hinted, built to
+   *            disappear underneath the display face.
+   * Mono     — IBM Plex Mono: designed as part of a full type system, so it
+   *            sits beside a neutral sans without clashing.
+   *
+   * Swapping the pairing is a change to these three lines and the <link> in
+   * index.html — nothing downstream references a family name directly.
+   */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Public Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
   /* Motion */
   --ease-entrance: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -54,8 +68,34 @@ body,
   height: 100%;
 }
 
+html {
+  font-family: var(--font-body);
+  /* Serif display faces at large sizes render heavy without this on macOS. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   background-color: #000;
+}
+
+/*
+ * Headings take the display face systematically rather than per component, so
+ * a section cannot drift onto the body font by omission.
+ */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
 }
 
 .liquid-glass {

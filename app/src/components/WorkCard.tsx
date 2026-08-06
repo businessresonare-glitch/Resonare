@@ -32,14 +32,17 @@ export default function WorkCard({ project, delay, active }: WorkCardProps) {
         </div>
 
         <div className="p-6 text-left">
+          {/* Technical label — the one place the mono face earns its download. */}
           <p
-            className="mb-3 text-xs font-semibold uppercase text-white/60"
-            style={{ letterSpacing: '0.1em' }}
+            className="mb-3 text-xs uppercase text-white/60"
+            style={{ fontFamily: 'var(--font-mono)', fontWeight: 500, letterSpacing: '0.1em' }}
           >
             {project.tag}
           </p>
-          <h3 className="mb-2 text-xl font-semibold text-white">{project.title}</h3>
-          <p className="text-sm leading-relaxed text-white/70">{project.blurb}</p>
+          {/* No weight utility here: Instrument Serif ships 400 only, and a
+              font-semibold would make the browser synthesise a fake bold. */}
+          <h3 className="mb-2 text-2xl text-white">{project.title}</h3>
+          <p className="text-pretty text-sm leading-relaxed text-white/70">{project.blurb}</p>
         </div>
       </div>
     </article>

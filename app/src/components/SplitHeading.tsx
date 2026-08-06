@@ -33,7 +33,7 @@ export default function SplitHeading({
   return (
     <Tag
       className={`flex flex-wrap justify-center ${className}`}
-      style={{ fontFamily: 'var(--font-display)', rowGap: '0.1em' }}
+      style={{ rowGap: '0.1em' }}
     >
       {words.map((word, index) => (
         <span

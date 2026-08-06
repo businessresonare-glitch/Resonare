@@ -54,7 +54,7 @@ export default function HeroContent() {
           </button>
         </form>
 
-        <p style={delay(1)} className="animate-enter px-4 text-sm leading-relaxed text-white">
+        <p style={delay(1)} className="animate-enter text-pretty px-4 text-sm leading-relaxed text-white">
           High-impact websites, booking systems, and SEO-driven identities for ambitious local and
           trade businesses. Leave your email and we will send the work that proves it.
         </p>

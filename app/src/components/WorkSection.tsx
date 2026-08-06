@@ -33,7 +33,7 @@ export default function WorkSection() {
 
         <p
           style={{ '--enter-delay': '0.25s' } as CSSProperties}
-          className={`mx-auto mb-14 max-w-2xl text-center text-sm leading-relaxed text-white/70 ${
+          className={`mx-auto mb-14 max-w-2xl text-pretty text-center text-sm leading-relaxed text-white/70 ${
             inView ? 'animate-enter' : 'pre-enter'
           }`}
         >
