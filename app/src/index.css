@@ -32,7 +32,12 @@
 
   /* Motion */
   --ease-entrance: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Overshoots past 1 so media settles with a slight spring. */
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-line: cubic-bezier(0.76, 0, 0.24, 1);
   --duration-entrance: 0.7s;
+  --duration-media: 0.65s;
+  --duration-line: 0.9s;
   --stagger-step: 0.09s;
   --enter-blur: 12px;
   --enter-distance: 28px;
@@ -140,19 +145,85 @@ body {
   animation-delay: var(--enter-delay, 0s);
 }
 
-.animate-word {
+/* Layout for split words, kept separate from the animation so a word can be
+   held pre-entrance without losing its spacing. */
+.word {
   display: inline-block;
   margin-right: 0.28em;
+}
+
+/* Trailing margin on the last word would pull a centered line off-center. */
+.word:last-child {
+  margin-right: 0;
+}
+
+.animate-word {
   animation: enter-word var(--duration-entrance) var(--ease-entrance) both;
   animation-delay: var(--enter-delay, 0s);
 }
 
-/* Trailing margin on the last word would pull a centered line off-center. */
-.animate-word:last-child {
-  margin-right: 0;
+@keyframes enter-media {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes line-reveal {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-media {
+  animation: enter-media var(--duration-media) var(--ease-overshoot) both;
+  animation-delay: var(--enter-delay, 0s);
+}
+
+.animate-line {
+  transform-origin: left;
+  animation: line-reveal var(--duration-line) var(--ease-line) both;
+  animation-delay: var(--enter-delay, 0s);
+}
+
+/*
+ * Held state for anything waiting on the viewport observer. Rendered by React
+ * on the first paint, so content never flashes in before being hidden.
+ */
+.pre-enter {
+  opacity: 0;
 }
 
 /* ---- Micro-interactions ------------------------------------------------ */
+
+/*
+ * Card lift. The overshoot curve stands in for the spring the brief specifies;
+ * the inner media trails by 150ms, which is what produces the layered depth.
+ */
+.card-hover {
+  transition: transform 0.35s var(--ease-overshoot);
+}
+
+.card-hover:hover {
+  transform: translateY(-7px) scale(1.018);
+}
+
+.card-media {
+  transition: transform 0.3s var(--ease-overshoot) 0.15s;
+}
+
+.card-hover:hover .card-media {
+  transform: translateY(-3px) scale(1.03);
+}
 
 .hover-lift {
   transition:
@@ -204,13 +275,17 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-enter,
-  .animate-word {
+  .animate-word,
+  .animate-media,
+  .animate-line {
     animation-name: enter-fade;
   }
 
   .hover-lift:hover,
   .hover-lift:active,
-  .hover-nudge:hover {
+  .hover-nudge:hover,
+  .card-hover:hover,
+  .card-hover:hover .card-media {
     transform: none;
   }
 

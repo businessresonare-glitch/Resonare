@@ -2,6 +2,7 @@ import BackgroundVideo from './components/BackgroundVideo';
 import HeroContent from './components/HeroContent';
 import SiteNav from './components/SiteNav';
 import SocialLinks from './components/SocialLinks';
+import WorkSection from './components/WorkSection';
 
 /**
  * Public CDN asset, not a secret — so it ships as a working default and
@@ -14,11 +15,16 @@ const HERO_VIDEO_URL = import.meta.env.VITE_HERO_VIDEO_URL || DEFAULT_HERO_VIDEO
 
 export default function App() {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-black">
-      <BackgroundVideo src={HERO_VIDEO_URL} className="translate-y-[17%]" />
-      <SiteNav />
-      <HeroContent />
-      <SocialLinks />
+    <div className="bg-black">
+      {/* The video is clipped to the hero, so it does not bleed into the work grid. */}
+      <div className="relative flex min-h-screen flex-col overflow-hidden">
+        <BackgroundVideo src={HERO_VIDEO_URL} className="translate-y-[17%]" />
+        <SiteNav />
+        <HeroContent />
+        <SocialLinks />
+      </div>
+
+      <WorkSection />
     </div>
   );
 }
