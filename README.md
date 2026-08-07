@@ -20,6 +20,39 @@ assets/
 
 ---
 
+## Deploying
+
+There is no build step. Drop the folder (or a zip of it) onto
+[app.netlify.com/drop](https://app.netlify.com/drop) and it is live. `index.html`
+must be at the **top level** of whatever you upload — if the zip contains a
+single folder that contains the site, Netlify serves a directory listing
+instead of the homepage.
+
+`netlify.toml` sets cache headers: an hour for `/assets/*` (the filenames are
+not content-hashed, so a long immutable cache would strand visitors on an old
+stylesheet after a redeploy) and a year for `/assets/fonts/*` and
+`/assets/video/*`, which only change when their filenames do.
+
+### Set the domain before you send anyone the link
+
+Every page carries absolute URLs — `<link rel="canonical">`, Open Graph and
+Twitter tags, JSON-LD, `sitemap.xml`, `robots.txt`. All 36 of them say
+`https://resonare.digital`.
+
+That is correct **once resonare.digital points at your host**. It is actively
+harmful while the site lives on a `*.netlify.app` preview subdomain: a canonical
+tag naming a domain that does not serve the site tells Google to index nothing.
+
+```sh
+./set-domain.sh https://your-site.netlify.app   # while on the preview URL
+./set-domain.sh https://resonare.digital        # once DNS is pointed
+```
+
+It rewrites whatever domain is currently baked in, so it is safe to run
+repeatedly and in either direction.
+
+---
+
 ## ⚠️ One-time setup: turn on quote emails
 
 **Until you do this, briefs will not arrive by email.** The form still works —
