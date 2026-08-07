@@ -2437,7 +2437,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .wa-pills{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:24px; }
 .wa-pill{
   display:inline-flex; align-items:center; gap:8px;
-  padding:10px 18px; border-radius:100px; cursor:pointer;
+  padding:10px 18px; min-height:44px; border-radius:100px; cursor:pointer;
   background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.16);
   color:rgba(255,255,255,.85); font-size:var(--fs-sm); font-weight:500;
   transition:background .28s var(--ease), border-color .28s var(--ease), color .28s var(--ease), transform .28s var(--spring);
@@ -2520,7 +2520,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   display:inline-flex; align-items:center; gap:8px;
   font-family:var(--font-label); font-size:var(--fs-xs); font-weight:600;
   letter-spacing:.04em; color:#128C7E; background:none; border:none; cursor:pointer;
-  padding:8px 2px; transition:gap .28s var(--ease), color .28s var(--ease);
+  padding:8px 2px; min-height:44px; transition:gap .28s var(--ease), color .28s var(--ease);
 }
 .quote-wa:hover{ gap:12px; color:#0E6E63; }
 
