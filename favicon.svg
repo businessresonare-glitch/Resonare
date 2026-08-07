@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="RESONARE">
-  <rect width="64" height="64" rx="13.44" fill="#0A0952"/>
+  <rect width="64" height="64" rx="13.44" fill="#000000"/>
   <g transform="translate(8.320 11.912) scale(0.488751)">
     <path d="M 0 0 L 75 0 A 25 25 0 0 1 75 50 L 18.75 50 L 5.6 32.8 L 75 32.8 A 7.8 7.8 0 0 0 75 17.2 L 14 17.2 Z" fill="#FFFFFF"/>
     <path d="M 43.75 50 L 71.9 50 L 96.9 82.2 L 68.75 82.2 Z" fill="#FFFFFF"/>

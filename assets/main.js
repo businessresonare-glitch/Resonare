@@ -1017,3 +1017,13 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
   renderStatus();
   syncSend();
 })();
+
+/* The hero's secondary CTA is a <button>, not an <a>, because it moves the
+   page rather than navigating — so it needs the smooth-scroll wiring that the
+   anchor handler above gives every in-page link for free. */
+document.querySelectorAll('[data-scroll-to]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.querySelector(btn.dataset.scrollTo);
+    if (target) smoothScrollTo(btn.dataset.scrollTo, -10);
+  });
+});

@@ -208,3 +208,67 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+/* ==========================================================================
+   TYPEWRITER HEADLINE
+
+   Types a string out character by character with a blinking caret, then
+   parks. Declared as data-typewriter="the text" on the heading; \n in the
+   attribute becomes a real line break (the heading is white-space:pre-wrap).
+
+   Two things this deliberately does NOT do:
+   - It does not run on prefers-reduced-motion; the full text is printed at
+     once, because a headline that withholds itself is a comprehension problem
+     before it is an animation preference.
+   - It does not start until the preloader has handed over, for the same
+     reason the blur-in headline waits: typing behind a loading screen means
+     the visitor arrives after the effect has already finished.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SPEED = 42;        // ms per character
+  var START_DELAY = 420;
+
+  function mount(el) {
+    var text = el.getAttribute('data-typewriter') || el.textContent;
+    text = text.replace(/\\n/g, '\n');
+
+    if (reduce) { el.textContent = text; el.classList.add('tw-done'); return; }
+
+    var out = document.createTextNode('');
+    var caret = document.createElement('span');
+    caret.className = 'tw-caret';
+    caret.setAttribute('aria-hidden', 'true');
+
+    /* The full string is exposed to assistive tech up front — a screen reader
+       should not have to sit through the animation to hear the headline. */
+    el.setAttribute('aria-label', text);
+    el.textContent = '';
+    el.appendChild(out);
+    el.appendChild(caret);
+
+    var i = 0, timer = null;
+    function step() {
+      out.textContent = text.slice(0, ++i);
+      if (i >= text.length) { el.classList.add('tw-done'); return; }
+      timer = setTimeout(step, SPEED);
+    }
+
+    function fire() { timer = setTimeout(step, START_DELAY); }
+
+    if (document.body.classList.contains('loaded')) fire();
+    else {
+      var mo = new MutationObserver(function () {
+        if (document.body.classList.contains('loaded')) { mo.disconnect(); fire(); }
+      });
+      mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      setTimeout(function () { if (!timer) fire(); }, 4000);   // preloader failsafe
+    }
+  }
+
+  function init() { document.querySelectorAll('[data-typewriter]').forEach(mount); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

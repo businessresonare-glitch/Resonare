@@ -58,6 +58,82 @@ Anything else is treated as a failure — see below.
 
 ---
 
+## The palette is monochrome — deliberately
+
+Black, shades of black, grey and white. Depth comes from **stacked surfaces and
+gradients**, never from hue. There is exactly one colour on the entire site:
+`--brand-red` (`#D8261F`), used in one place — the dot in the logo mark.
+
+That constraint is enforceable, so please enforce it. To check nothing has
+crept back in:
+
+```sh
+# any six-digit hex whose channels are not all equal, other than the brand red
+grep -ohE '#[0-9A-Fa-f]{6}' assets/*.css assets/*.js *.html \
+  | tr 'a-f' 'A-F' | sort -u \
+  | awk '{r=substr($0,2,2);g=substr($0,4,2);b=substr($0,6,2); if(r!=g||g!=b) print}'
+# should print D8261F and nothing else
+```
+
+The token *names* are historical (`--navy-deep`, `--rust`, `--cream`) and kept
+on purpose — renaming them would touch ~200 call sites for no visual gain.
+**Read them by role, not by name:**
+
+| Token | Role now |
+|---|---|
+| `--cream` | page background — black |
+| `--cream-dim` | raised chip surface |
+| `--ink` | deepest band background |
+| `--ink-soft` | muted body text |
+| `--navy-deep/mid/card/soft` | surface ramp, darkest → lightest |
+| `--rust` | primary accent — now white |
+| `--rust-light` | secondary accent — light grey |
+| `--text` / `--text-dim` | body text on the black page |
+
+Two traps this conversion already hit, both worth remembering:
+
+- **A white accent cannot carry white text.** `--rust` is white now, so every
+  `background:var(--rust)` needs `color:#000`. The selected-choice tick and the
+  primary button were both invisible until that was fixed.
+- **Muted text needs `.68` alpha, not `.62`.** On pure black, white at 62%
+  measures 4.4:1 — just under AA. `.68` clears it. `--ink-soft` is set there.
+
+The 3D scenes carry their own palette in `assets/r3d.js`; it is a luminance
+ladder using the same historical names, so scene bodies did not need rewriting.
+
+## Heroes
+
+All five pages have their own full-viewport hero. The four interior ones share
+`.cine-hero` and differ in copy, 3D scene and stats:
+
+| Page | Scene | Headline treatment |
+|---|---|---|
+| `about` | `orbit` | word-by-word blur-in |
+| `services` | `core` | word-by-word blur-in |
+| `work` | `resonance` | word-by-word blur-in |
+| `contact` | `lattice` | **typewriter** (`data-typewriter`) |
+
+Shared chrome, added on top of the base component:
+
+- **The nav is a floating glass pill** — a restyle of `.site-header`, not a
+  second navigation. One set of links, one tab order, no duplicate landmark.
+- **A trust bar** sits at the foot of every hero: a glass chip plus five client
+  names in italic serif. It becomes a snap-scrolling row under 820px.
+- **A third CTA** (`.cine-play`) — bare text with a filled play triangle. It is
+  a `<button>` because it moves the page rather than navigating, so it is wired
+  through `[data-scroll-to]` in `main.js` to reach the smooth-scroll helper.
+
+**The heroes are height-budgeted.** Adding the trust bar pushed the tallest two
+past the fold (1044px of content in a 900px viewport). There is a
+`min-width:881px and max-height:940px` block that tightens the rhythm so all
+four land at exactly one viewport on a short laptop. If you add anything to a
+hero, re-check that — the budget is real and it is tight.
+
+`data-typewriter` types its string out with a blinking caret. It exposes the
+full text via `aria-label` up front (a screen reader should not sit through the
+animation), prints instantly under `prefers-reduced-motion`, and waits for the
+preloader to hand over the same way the blur-in headline does.
+
 ## The WhatsApp composer
 
 `contact.html` opens with a composer that sits **above** the stepped brief and

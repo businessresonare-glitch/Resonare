@@ -19,12 +19,15 @@
 (function (global) {
   'use strict';
 
+  /* Monochrome ramp. The scene code mixes between these, so they are spaced
+     as a luminance ladder rather than a hue wheel — the names are kept so the
+     scene bodies below did not have to be rewritten. */
   var PALETTE = {
-    rust:  [222, 90, 60],
-    gold:  [244, 199, 126],
-    indigo:[108, 107, 232],
-    cream: [246, 242, 233],
-    navy:  [10, 9, 82]
+    rust:  [255, 255, 255],
+    gold:  [198, 198, 198],
+    indigo:[122, 122, 122],
+    cream: [244, 244, 244],
+    navy:  [10, 10, 10]
   };
 
   var reduceMotion = global.matchMedia('(prefers-reduced-motion: reduce)').matches;
