@@ -5,41 +5,57 @@
    ========================================================================== */
 
 :root{
-  /* ---- MONOCHROME PALETTE -------------------------------------------------
-     Black, shades of black, grey and white. Depth comes from stacked surfaces
-     and gradients rather than hue. The one surviving colour on the whole site
-     is --brand-red, and it is used in exactly one place: the dot in the logo
-     mark, so the brand stays recognisable at a glance.
+  /* ---- PALETTE: deep ink + an accent that echoes -------------------------
+     Not black. The ground is a blue-violet ink so the page has a temperature,
+     and surfaces step up from it in measured increments rather than by alpha.
 
-     The token NAMES are historical (navy-*, rust-*, cream) and kept on purpose
-     — renaming them would touch ~200 call sites for no visual gain. Read them
-     by role, not by name:
-       cream      → page background          (was light, now black)
-       cream-dim  → raised chip surface
-       ink        → deepest band background
-       ink-soft   → muted body text
-       navy-*     → surface ramp, darkest to lightest
-       rust       → primary accent (now white)
-       rust-light → secondary accent (light grey)
+     "Resonare" is to echo, so the accent is not fixed: each page carries its
+     own hue on <body data-accent="…">, and the same element — a link, a CTA,
+     a focus ring, the 3D scene — picks it up. Moving through the site, the
+     colour travels with you.
+
+     TEXT IS SOLID, NEVER ALPHA. Muted copy used to be rgba(255,255,255,.62);
+     over a moving hero video that reads as dirty grey and shifts brightness
+     with the footage. Solid values hold their contrast against anything.
      -------------------------------------------------------------------- */
-  --navy-deep:#0A0A0A;
-  --navy-mid:#060606;
-  --navy-card:#141414;
-  --navy-soft:#1F1F1F;
-  --navy-line: rgba(255,255,255,0.12);
-  --rust:#FFFFFF;
-  --rust-light:#C4C4C4;
-  --rust-glow: rgba(255,255,255,.28);
-  --cream:#000000;
-  --cream-dim:#191919;
-  --ink:#050505;
-  --ink-soft: rgba(255,255,255,.68);
-  --white:#FFFFFF;
+  --ink-900:#07070E;      /* page ground            */
+  --ink-850:#0B0B14;      /* deepest band           */
+  --ink-800:#101019;      /* section band           */
+  --ink-700:#16161F;      /* surface                */
+  --ink-600:#1E1E2B;      /* raised card            */
+  --ink-500:#2A2A3A;      /* hover / divider        */
 
-  /* Text roles. --ink used to mean "text on a light page"; the page is black
-     now, so anything that was ink-as-text reads from these instead. */
   --text:#FFFFFF;
-  --text-dim: rgba(255,255,255,.68);
+  --text-2:#C6C6D8;       /* muted body — solid     */
+  --text-3:#9292AC;       /* labels — solid         */
+
+  --accent:#6C7BFF;       /* overridden per page    */
+  --accent-soft:#A5AEFF;
+  --accent-deep:#3B49D6;
+  /* Text that sits ON the accent. Dark, not white: every accent here is a
+     mid-tone, and white on #6C7BFF measures 3.0:1 — under AA for small text.
+     Near-black clears 5:1 on all five hues. */
+  --accent-ink:#07070E;
+  --glow:#FF6B3D;         /* warm counter-note      */
+
+  /* ---- legacy token names, remapped ------------------------------------
+     Kept because renaming would touch ~200 call sites for no visual gain.
+     Read them by role: cream = page, ink = deepest band, navy-* = surface
+     ramp, rust = accent. -------------------------------------------------- */
+  --navy-deep:var(--ink-800);
+  --navy-mid:var(--ink-900);
+  --navy-card:var(--ink-700);
+  --navy-soft:var(--ink-600);
+  --navy-line: rgba(255,255,255,0.10);
+  --rust:var(--accent);
+  --rust-light:var(--accent-soft);
+  --rust-glow: rgba(108,123,255,.45);
+  --cream:var(--ink-900);
+  --cream-dim:var(--ink-700);
+  --ink:var(--ink-850);
+  --ink-soft:var(--text-2);
+  --white:#FFFFFF;
+  --text-dim:var(--text-2);
   --brand-red:#D8261F;
   --radius-lg: 28px;
   --radius-md: 18px;
@@ -49,13 +65,15 @@
   --spring: cubic-bezier(.22,1.15,.36,1);
 
   /* type roles — see assets/fonts.css, all self-hosted */
-  --font-display:'Instrument Serif', 'Iowan Old Style', Georgia, serif;
-  --font-ui:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-label:'Manrope', system-ui, -apple-system, sans-serif;
+  /* Times first — real Times New Roman where the OS has it. Tinos is metric
+     compatible, so machines without it get identical widths and line breaks. */
+  --font-display:'Times New Roman', 'Tinos', 'Liberation Serif', Times, serif;
+  --font-ui:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-label:'Inter', system-ui, -apple-system, sans-serif;
   --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   /* The logo wordmark is a wide geometric sans, so it never takes the
      display serif — Manrope at 800 with open tracking is the closest match. */
-  --font-wordmark:'Manrope', system-ui, -apple-system, sans-serif;
+  --font-wordmark:'Inter', system-ui, -apple-system, sans-serif;
 
   /* small-text scale — overridden per-face in the Digilab pass at the
      bottom of this file, which is what actually ships */
@@ -1179,7 +1197,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
 .quote-card .qc-sub{ font-size:var(--fs-xs); color:var(--ink-soft); line-height:1.5; }
 .quote-card .qc-check{
   position:absolute; top:14px; right:14px; width:21px; height:21px; border-radius:50%;
-  background:var(--rust); color:#000; display:flex; align-items:center; justify-content:center;
+  background:var(--rust); color:var(--accent-ink); display:flex; align-items:center; justify-content:center;
   opacity:0; transform:scale(.3); transition:opacity .3s var(--ease), transform .45s var(--spring);
 }
 .quote-card.is-selected .qc-inner{
@@ -1187,7 +1205,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
   box-shadow:0 0 0 4px rgba(255,255,255,.11), var(--shadow-1);
 }
 .quote-card.is-selected .qc-inner::after{ opacity:1; }
-.quote-card.is-selected .qc-icon{ background:linear-gradient(135deg,var(--rust-light),var(--rust)); color:#000; }
+.quote-card.is-selected .qc-icon{ background:linear-gradient(135deg,var(--rust-light),var(--rust)); color:var(--accent-ink); }
 .quote-card.is-selected .qc-check{ opacity:1; transform:scale(1); }
 .quote-card input:focus-visible + .qc-inner{ outline:2px solid var(--rust); outline-offset:3px; }
 @media(max-width:760px){ .quote-cards{ grid-template-columns:1fr; } .quote-card .qc-inner{ flex-direction:row; align-items:center; gap:14px; } .quote-card .qc-icon{ margin:0; } }
@@ -1355,12 +1373,20 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    get dragged back into normal flow.
 
    .r3d-caption  — would jump to the top of the frame.
+   .cine-inner /
+   .cine-foot    — the hero's own content. Pinned to z-index 1 it shared a
+                   stacking level with .cine-hero::after (the readability
+                   scrim), and a pseudo-element paints after its siblings at
+                   the same level — so the scrim was drawn ON TOP of the
+                   headline, lede, buttons and stat cards, dimming all of it.
+                   That was the "text opacity looks wrong" bug: paint order,
+                   not opacity.
    .hero-video   — would stop being an overlay and instead occupy its own
                    ~810px of layout, pushing the whole hero a screen down.
                    That is exactly what happened the day the videos were
                    switched on: the heroes still "worked", they were just
                    entirely below the fold. */
-[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption):not(.hero-video){ position:relative; z-index:1; }
+[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption):not(.hero-video):not(.cine-inner):not(.cine-foot){ position:relative; z-index:1; }
 
 /* A framed, interactive scene — used where the artwork is the subject rather
    than a backdrop. */
@@ -2058,8 +2084,9 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .cine-hero::after{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
   background:
-    linear-gradient(180deg, rgba(0,0,0,.74) 0%, rgba(0,0,0,.28) 38%, rgba(0,0,0,.56) 78%, rgba(0,0,0,.94) 100%),
-    radial-gradient(115% 80% at 22% 42%, rgba(0,0,0,.55), transparent 68%);
+    radial-gradient(120% 90% at 78% 8%, var(--rust-glow), transparent 62%),
+    linear-gradient(180deg, rgba(7,7,14,.80) 0%, rgba(7,7,14,.42) 36%, rgba(7,7,14,.66) 76%, rgba(7,7,14,.97) 100%),
+    radial-gradient(115% 80% at 20% 44%, rgba(7,7,14,.62), transparent 70%);
 }
 .cine-hero > *:not(.hero-video):not(.r3d-stage):not(::after){ position:relative; z-index:2; }
 .cine-hero .cine-inner{ position:relative; z-index:2; }
@@ -2074,7 +2101,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .cine-badge{
   display:inline-flex; align-items:center; gap:11px; align-self:flex-start;
   border-radius:100px; padding:5px 16px 5px 5px; margin-bottom:26px;
-  font-family:var(--font-ui); font-size:13.5px; color:rgba(255,255,255,.92);
+  font-family:var(--font-ui); font-size:13.5px; color:var(--text);
 }
 .is-centered .cine-badge{ align-self:center; }
 .cine-badge .chip{
@@ -2096,7 +2123,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 .cine-lede{
-  color:rgba(255,255,255,.78); font-size:clamp(15.5px,1.35vw,19px);
+  color:var(--text-2); font-size:clamp(15.5px,1.35vw,19px);
   line-height:1.62; max-width:56ch; margin-bottom:34px;
 }
 
@@ -2140,7 +2167,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 }
 .cine-stat span{
   font-family:var(--font-mono); font-size:11px; font-weight:500;
-  letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.62);
+  letter-spacing:.12em; text-transform:uppercase; color:var(--text-3);
   line-height:1.45;
 }
 
@@ -2152,7 +2179,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .cine-chip{
   border-radius:100px; padding:9px 18px;
   font-family:var(--font-mono); font-size:11px; font-weight:500;
-  letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.8);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--text);
 }
 
 /* ---- Small screens ------------------------------------------------------- */
@@ -2310,7 +2337,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .service-card.is-featured h3{ color:#fff; }
 .service-card.is-featured p{ color:rgba(255,255,255,.68); }
 .service-card.is-featured .service-number{ color:rgba(255,255,255,.62); }
-.service-card.is-featured .service-icon{ background:linear-gradient(135deg,var(--rust-light),var(--rust)); box-shadow:0 12px 28px -10px var(--rust-glow); }
+.service-card.is-featured .service-icon{ background:linear-gradient(135deg,var(--rust-light),var(--rust)); color:var(--accent-ink); box-shadow:0 12px 28px -10px var(--rust-glow); }
 .service-card.is-featured .tag-row span{ background:rgba(255,255,255,.10); color:rgba(255,255,255,.8); }
 .service-card.is-featured::before{ background:radial-gradient(500px circle at var(--mx,50%) var(--my,0%), rgba(255,255,255,.22), transparent 60%); }
 .service-flag{
@@ -2319,7 +2346,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   padding:8px 16px 8px 14px; border-bottom-left-radius:14px;
   background:linear-gradient(135deg,var(--rust-light),var(--rust));
   font-family:var(--font-label); font-size:var(--fs-2xs); font-weight:700;
-  letter-spacing:.1em; text-transform:uppercase; color:#fff;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--accent-ink);
 }
 .service-flag i{ width:6px; height:6px; border-radius:50%; background:#fff; animation:pulse 2.2s infinite; }
 .service-card.is-featured .service-top{ padding-right:150px; }
@@ -2415,7 +2442,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   flex:0 0 auto; width:40px; height:40px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   background:linear-gradient(135deg,var(--rust-light),var(--rust));
-  font-family:var(--font-ui); font-weight:800; font-size:var(--fs-sm); color:#fff;
+  font-family:var(--font-ui); font-weight:800; font-size:var(--fs-sm); color:var(--accent-ink);
 }
 .sat-person b{ display:block; font-size:var(--fs-sm); font-weight:600; color:#fff; }
 .sat-person span{ display:block; font-size:var(--fs-xs); color:rgba(255,255,255,.48); }
@@ -2649,7 +2676,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .cine-trust b{
   font-family:var(--font-display); font-weight:400; font-style:italic;
   font-size:clamp(20px,2.4vw,30px); letter-spacing:-.02em;
-  color:rgba(255,255,255,.9); white-space:nowrap;
+  color:var(--text); white-space:nowrap;
   transition:color .3s var(--ease), transform .4s var(--spring);
 }
 .cine-trust b:hover{ color:#fff; transform:translateY(-2px); }
@@ -2885,3 +2912,180 @@ body.hero-settled .cine-hero .cine-trust{ will-change:auto; }
   .faq-list{ grid-template-columns:1fr; }
   .faq-item{ padding:26px 22px; }
 }
+
+
+/* ==========================================================================
+   PER-PAGE ACCENT — the echo
+
+   Each page re-declares --accent (and the glow derived from it) on <body>.
+   Everything downstream reads the token, so one line per page re-colours
+   links, CTAs, focus rings, chips, the 3D scenes and the hero wash.
+   ========================================================================== */
+body[data-accent="indigo"] { --accent:#6C7BFF; --accent-soft:#A5AEFF; --accent-deep:#3B49D6; --rust-glow:rgba(108,123,255,.45); }
+body[data-accent="violet"] { --accent:#9B6BFF; --accent-soft:#C4A5FF; --accent-deep:#6B3BD6; --rust-glow:rgba(155,107,255,.45); }
+body[data-accent="cyan"]   { --accent:#22D3EE; --accent-soft:#7DE8F7; --accent-deep:#0E9BB4; --rust-glow:rgba(34,211,238,.42); }
+body[data-accent="rose"]   { --accent:#FF5C8A; --accent-soft:#FFA0BC; --accent-deep:#D62E5F; --rust-glow:rgba(255,92,138,.45); }
+body[data-accent="amber"]  { --accent:#FFB020; --accent-soft:#FFD27A; --accent-deep:#C77F00; --rust-glow:rgba(255,176,32,.42); }
+
+/* ==========================================================================
+   WHERE THE COLOUR ACTUALLY LANDS
+
+   A palette only reads as a palette if the accent appears on things people
+   look at. These are the surfaces that carry it, so changing --accent on
+   <body> visibly re-tunes the whole page.
+   ========================================================================== */
+
+/* ---- the primary button is the loudest accent on any page ---- */
+.btn-primary{
+  background:linear-gradient(135deg, var(--accent-soft), var(--accent) 55%, var(--accent-deep));
+  color:var(--accent-ink);
+  box-shadow:0 12px 30px -8px var(--rust-glow);
+}
+.btn-primary:hover{ box-shadow:0 20px 44px -10px var(--rust-glow); }
+.header-cta{
+  background:linear-gradient(135deg, var(--accent-soft), var(--accent) 60%) !important;
+  color:var(--accent-ink) !important;
+  box-shadow:0 8px 22px -10px var(--rust-glow) !important;
+}
+.header-cta:hover{ box-shadow:0 14px 30px -10px var(--rust-glow) !important; }
+
+/* ---- nav: the active page glows in its own hue ---- */
+@media(min-width:881px){
+  header.site-header .main-nav a.active{
+    background:linear-gradient(135deg, var(--accent-soft), var(--accent));
+    color:var(--accent-ink);
+  }
+  header.site-header .main-nav a:hover{ color:var(--accent-soft); }
+}
+.mobile-drawer nav a.active{ color:var(--accent-soft); }
+
+/* ---- eyebrows, indices and section labels pick up the hue ---- */
+.section-index{ color:var(--accent-soft); }
+.section-index.light{ color:var(--accent-soft); }
+.eyebrow{ color:var(--accent-soft); }
+.chip{ color:var(--accent-soft); }
+.process-num{ color:var(--accent-soft); }
+
+/* ---- glass chrome gets an accent edge instead of a plain white one ---- */
+.cine-badge .chip{ background:var(--accent); color:var(--accent-ink); }
+.cine-stat svg{ color:var(--accent-soft); opacity:1; }
+.cap-icon{ color:var(--accent-soft); }
+.service-icon{ background:linear-gradient(135deg, var(--ink-500), var(--ink-600)); color:var(--accent-soft); }
+.service-card:hover .service-icon{
+  background:linear-gradient(135deg, var(--accent-soft), var(--accent));
+  color:var(--accent-ink);
+  box-shadow:0 10px 24px -8px var(--rust-glow);
+}
+.service-card:hover{ border-color:color-mix(in srgb, var(--accent) 42%, transparent); }
+.service-card::before{
+  background:radial-gradient(500px circle at var(--mx,50%) var(--my,0%),
+             color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%);
+}
+
+/* ---- links and focus ---- */
+a:focus-visible, button:focus-visible{ outline-color:var(--accent); }
+.text-link{ color:var(--accent-soft); }
+.footer-col a:hover{ color:var(--accent-soft); }
+
+/* ---- data viz reads in the accent, not flat white ---- */
+.sat-bar i{ background:linear-gradient(90deg, var(--accent), var(--accent-soft)); }
+.sat-stars{ color:var(--accent-soft); }
+.scroll-progress{ background:linear-gradient(90deg, var(--accent), var(--accent-soft)); }
+.cursor-dot{ background:var(--accent); }
+.rm-dot{ fill:var(--accent); }
+
+/* ---- bands stop being flat black ---- */
+.signal-section{
+  background:
+    radial-gradient(90% 120% at 88% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 62%),
+    linear-gradient(165deg, var(--ink-800), var(--ink-850) 60%, var(--ink-900));
+}
+.final-cta{
+  background:
+    radial-gradient(80% 130% at 20% 0%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 66%),
+    linear-gradient(155deg, var(--ink-700) 0%, var(--ink-850) 62%, var(--ink-900) 100%);
+}
+.cta-band{
+  background:
+    radial-gradient(70% 140% at 90% 0%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 64%),
+    linear-gradient(135deg, var(--ink-700), var(--ink-600) 70%, var(--ink-500));
+}
+.cta-band::before{ background:none; }
+.satisfaction{
+  background:
+    radial-gradient(70% 100% at 12% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    var(--ink-850);
+}
+.work{
+  background:
+    radial-gradient(60% 90% at 90% 4%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 58%),
+    var(--ink-850);
+}
+.faq{
+  background:
+    radial-gradient(60% 90% at 8% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 58%),
+    var(--ink-900);
+}
+.faq-item{ background:var(--ink-900); }
+.faq-item h3{ color:var(--text); }
+
+/* color-mix is unsupported on older Safari; those builds simply get the flat
+   base layer underneath, which is still a designed surface rather than black. */
+
+/* ---- the composer keeps WhatsApp's own green: it is a recognised mark and
+        greyscaling it cost the button its meaning ---- */
+.wa-mark{ background:linear-gradient(135deg,#25D366,#128C7E); color:#fff; }
+.wa-send{
+  background:linear-gradient(135deg,#25D366,#128C7E); color:#fff;
+  box-shadow:0 16px 34px -16px rgba(37,211,102,.7);
+}
+.wa-send:hover{ background:linear-gradient(135deg,#2EE676,#15A38F); }
+.sticky-socials a.whatsapp-glow{ background:#25D366; color:#fff; }
+.sticky-socials a.whatsapp-glow:hover{ background:#2EE676; color:#fff; }
+.quote-wa{ color:#25D366; }
+.quote-wa:hover{ color:#5BE38A; }
+.wa-composer::before{ background:radial-gradient(520px 260px at 100% 0%, rgba(37,211,102,.22), transparent 60%); }
+.wa-status-live{ border-color:rgba(37,211,102,.34); }
+.wa-go{ color:#5BE38A; }
+.wa-pill[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.sat-verified, .sat-person .sat-verified{ color:#5BE38A; }
+
+/* ==========================================================================
+   THE HERO WASHOUT — fixed at the root
+
+   `.cine-hero::after` is the readability scrim and sits at z-index 1.
+   `.cine-hero .cine-inner` asked for z-index 2, but scores (0,2,0) and lost to
+   `[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption):not(.hero-video)`,
+   which scores (0,3,0) and pins every child to z-index 1.
+
+   Content and scrim therefore shared a stacking level — and a pseudo-element
+   paints after its siblings at the same level, so the scrim was drawn ON TOP
+   of the headline, the lede, the buttons and the stat cards. Every one of them
+   was being dimmed by a layer meant to sit behind them. That is what "the text
+   opacity looks wrong" was: not opacity at all, a paint order bug.
+
+   These selectors score (0,3,0) too and come later in the file, so they win.
+   ========================================================================== */
+/* .cine-inner and .cine-foot are excluded from the rule above (see the
+   SURFACES section), so their own z-index:2 now applies and clears the
+   scrim's z-index:1. */
+.cine-hero > .cine-inner,
+.cine-hero > .cine-foot{ position:relative; z-index:3; }
+
+/* Same trap, same fix, for the two bands that layer a scrim over content. */
+[data-r3d-host].signal-section > .signal-copy,
+[data-r3d-host].signal-section > .signal-grid,
+[data-r3d-host].capability > .section-heading,
+[data-r3d-host].capability > .cap-grid,
+[data-r3d-host].work > .section-heading,
+[data-r3d-host].work > .work-grid{ position:relative; z-index:3; }
+
+/* With the scrim behind the type again, the headline can be plain white and
+   the em can carry the accent instead of a grey gradient. */
+.cine-hero h1{ color:var(--text); }
+.cine-hero h1 em{
+  background:linear-gradient(112deg, var(--accent), var(--accent-soft) 78%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+em{ color:var(--accent-soft); }
+.dark em{ background:linear-gradient(115deg, var(--accent-soft), var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent; }

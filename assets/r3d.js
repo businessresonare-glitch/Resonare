@@ -22,12 +22,20 @@
   /* Monochrome ramp. The scene code mixes between these, so they are spaced
      as a luminance ladder rather than a hue wheel — the names are kept so the
      scene bodies below did not have to be rewritten. */
+  /* Read the page's accent so the scenes echo whatever hue the page carries.
+     Falls back to the greyscale ladder if the tokens are missing. */
+  function readToken(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    var m = v.match(/^#([0-9a-f]{6})$/i);
+    if (!m) return fallback;
+    return [parseInt(m[1].slice(0,2),16), parseInt(m[1].slice(2,4),16), parseInt(m[1].slice(4,6),16)];
+  }
   var PALETTE = {
-    rust:  [255, 255, 255],
-    gold:  [198, 198, 198],
-    indigo:[122, 122, 122],
-    cream: [244, 244, 244],
-    navy:  [10, 10, 10]
+    rust:   readToken('--accent',      [108,123,255]),
+    gold:   readToken('--accent-soft', [165,174,255]),
+    indigo: readToken('--accent-deep', [ 59, 73,214]),
+    cream:  [238, 238, 250],
+    navy:   [  7,   7,  14]
   };
 
   var reduceMotion = global.matchMedia('(prefers-reduced-motion: reduce)').matches;

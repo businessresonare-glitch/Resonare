@@ -153,48 +153,65 @@ Anything else is treated as a failure — see below.
 
 ---
 
-## The palette is monochrome — deliberately
+## Palette — deep ink, and an accent that echoes
 
-Black, shades of black, grey and white. Depth comes from **stacked surfaces and
-gradients**, never from hue. There is exactly one colour on the entire site:
-`--brand-red` (`#D8261F`), used in one place — the dot in the logo mark.
+Not black. The ground is a blue-violet ink (`#07070E`) so the page has a
+temperature, and surfaces step up from it in measured increments rather than by
+stacking alpha:
 
-That constraint is enforceable, so please enforce it. To check nothing has
-crept back in:
+| Token | Value | Role |
+|---|---|---|
+| `--ink-900` | `#07070E` | page ground |
+| `--ink-850` | `#0B0B14` | deepest band |
+| `--ink-800` | `#101019` | section band |
+| `--ink-700` | `#16161F` | surface |
+| `--ink-600` | `#1E1E2B` | raised card |
+| `--ink-500` | `#2A2A3A` | hover / divider |
 
-```sh
-# any six-digit hex whose channels are not all equal, other than the brand red
-grep -ohE '#[0-9A-Fa-f]{6}' assets/*.css assets/*.js *.html \
-  | tr 'a-f' 'A-F' | sort -u \
-  | awk '{r=substr($0,2,2);g=substr($0,4,2);b=substr($0,6,2); if(r!=g||g!=b) print}'
-# should print D8261F and nothing else
-```
+**RESONARE means to echo, so the accent travels.** Each page declares its own
+hue on `<body data-accent="…">` and every downstream component reads the token
+— links, CTAs, nav, focus rings, chips, section labels, the data bars, and the
+3D scenes, which sample `--accent` at runtime. Moving through the site, the
+colour moves with you.
 
-The token *names* are historical (`--navy-deep`, `--rust`, `--cream`) and kept
-on purpose — renaming them would touch ~200 call sites for no visual gain.
-**Read them by role, not by name:**
+| Page | Accent | |
+|---|---|---|
+| index | indigo | `#6C7BFF` |
+| about | violet | `#9B6BFF` |
+| services | cyan | `#22D3EE` |
+| work | rose | `#FF5C8A` |
+| contact | amber | `#FFB020` |
 
-| Token | Role now |
-|---|---|
-| `--cream` | page background — black |
-| `--cream-dim` | raised chip surface |
-| `--ink` | deepest band background |
-| `--ink-soft` | muted body text |
-| `--navy-deep/mid/card/soft` | surface ramp, darkest → lightest |
-| `--rust` | primary accent — now white |
-| `--rust-light` | secondary accent — light grey |
-| `--text` / `--text-dim` | body text on the black page |
+Adding a page means adding one `data-accent` value — nothing else.
 
-Two traps this conversion already hit, both worth remembering:
+### Two rules that are load-bearing
 
-- **A white accent cannot carry white text.** `--rust` is white now, so every
-  `background:var(--rust)` needs `color:#000`. The selected-choice tick and the
-  primary button were both invisible until that was fixed.
-- **Muted text needs `.68` alpha, not `.62`.** On pure black, white at 62%
-  measures 4.4:1 — just under AA. `.68` clears it. `--ink-soft` is set there.
+**Text colour is solid, never alpha.** Muted copy used to be
+`rgba(255,255,255,.62)`. Over a moving hero video that reads as dirty grey and
+its brightness shifts with the footage. `--text-2` (`#C6C6D8`) and `--text-3`
+(`#9292AC`) are solid values that hold their contrast against anything behind
+them.
 
-The 3D scenes carry their own palette in `assets/r3d.js`; it is a luminance
-ladder using the same historical names, so scene bodies did not need rewriting.
+**`--accent-ink` is dark, not white.** Every accent here is a mid-tone: white
+on `#6C7BFF` measures 3.0:1, under AA for small text. Near-black clears 5:1 on
+all five hues, so anything painting text *on* the accent uses `--accent-ink`.
+
+## Typography — Inter + Times New Roman
+
+Two faces, per the reference pairing.
+
+- **`--font-display`** → `'Times New Roman', 'Tinos', 'Liberation Serif', Times, serif`
+- **`--font-ui` / `--font-label`** → `'Inter', system-ui, …`
+- **`--font-mono`** → IBM Plex Mono, kept for micro-labels and data
+
+Times New Roman is not redistributable, so the stack asks the OS for it first
+and falls back to **Tinos**, which is metric-compatible — identical advance
+widths, so line breaks and layout are the same either way. Mac and Windows get
+real Times; Linux and most Android get Tinos and look the same.
+
+All faces are self-hosted with `unicode-range`, so an English page downloads
+~368KB (latin only) out of 1.2MB on disk. **Do not add a webfont `<link>`** —
+the no-external-requests rule in "Notes for future edits" still stands.
 
 ## Heroes
 
