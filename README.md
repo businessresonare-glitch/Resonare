@@ -20,6 +20,66 @@ assets/
 
 ---
 
+## SEO: why there is no server-side rendering here
+
+**The site is static HTML, which is what SSR exists to produce.** SSR is a fix
+for JavaScript frameworks that would otherwise ship an empty `<div id="root">`
+and build the page in the browser. This site has no framework and no build
+step — every heading, paragraph and link is already in the `.html` file on
+disk. There is nothing for a server to render.
+
+Adding SSR would mean adopting a framework, a build pipeline and a Node
+process, and would produce *the same bytes* Googlebot already receives, more
+slowly and with more to break. Don't.
+
+Verified with **JavaScript completely disabled** — the worst case for
+indexing, and a harder test than Googlebot applies:
+
+| Page | h1 | h2 | h3 | Words | Links |
+|---|---|---|---|---|---|
+| index | 1 | 7 | 5 | 574 | 31 |
+| about | 1 | 7 | 7 | 631 | 27 |
+| services | 1 | 6 | 15 | 707 | 28 |
+| work | 1 | 4 | 5 | 670 | 27 |
+| contact | 1 | 4 | 6 | 653 | 26 |
+
+To re-check after any edit:
+
+```sh
+curl -s https://your-domain/services.html | grep -o '<h[1-3][^>]*>' | sort | uniq -c
+```
+
+### Heading rules this site follows
+
+- **Exactly one `<h1>` per page**, carrying that page's primary keyword.
+- **No skipped levels.** Three real bugs were fixed to get here: `work.html`
+  jumped `h1 → h3` because the portfolio grid had no section heading; the
+  mid-page CTA bands used `h3` in sections with no `h2`; and every footer
+  jumped `h2 → h4` on "Site" / "Get in touch".
+- **Footer labels are not headings.** They are `<p class="footer-col-title">`.
+  "Site" and "Get in touch" carry no ranking value and were only creating a
+  skipped level.
+- **A heading describes a content section**, not a decorative band. If you add
+  a section, give it an `h2`; if you add cards inside it, they take `h3`.
+
+### Structured data
+
+Each page carries JSON-LD: `ProfessionalService` (NAP, email, WhatsApp,
+service area) and `BreadcrumbList` on all five, `Service` + `OfferCatalog` on
+services, and `FAQPage` on contact — six real questions, eligible for FAQ rich
+results. Validate at
+[search.google.com/test/rich-results](https://search.google.com/test/rich-results).
+
+### Still to do, by you
+
+1. **Set the real domain** (see below) — canonicals currently name
+   `resonare.digital`.
+2. **Submit the sitemap** in Google Search Console once the domain is live.
+3. **Create the Google Business Profile.** For local trade-adjacent searches
+   this moves the needle more than anything on the page.
+
+---
+
 ## Deploying
 
 There is no build step. Drop the folder (or a zip of it) onto

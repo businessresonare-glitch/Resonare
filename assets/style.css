@@ -579,7 +579,7 @@ footer.site-footer{ background:var(--ink); color:#fff; padding:80px 7vw 34px;}
 .footer-brand span{ color:var(--rust-light);}
 footer p{ color:rgba(255,255,255,.68); font-size:14.5px; margin-top:10px; max-width:280px; line-height:1.6;}
 .footer-cols{ display:flex; gap:60px; flex-wrap:wrap;}
-.footer-col h4{ font-size:12.5px; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.62); font-family:var(--font-label); margin-bottom:16px; font-weight:500;}
+.footer-col h4, .footer-col-title{ font-size:12.5px; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.62); font-family:var(--font-label); margin-bottom:16px; font-weight:500;}
 .footer-col{ display:flex; flex-direction:column; gap:11px;}
 .footer-col a{ color:rgba(255,255,255,.72); font-size:14.5px;}
 .footer-col a:hover{ color:#fff;}
@@ -784,7 +784,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:.006em; }
 .section-index,
 .plan-name,
 .work-tag,
-.footer-col h4,
+.footer-col h4, .footer-col-title,
 .mini-impact-label,
 .impact-badge,
 .chip{ font-weight:500; letter-spacing:var(--track-label); }
@@ -980,7 +980,7 @@ h1 em, h2 em, h3 em{ font-style:italic; }        /* the italic is the emphasis *
    fight the copy it is labelling. */
 .plan-name,
 .work-tag,
-.footer-col h4,
+.footer-col h4, .footer-col-title,
 .impact-badge,
 .chip,
 .plan-badge,
@@ -1269,7 +1269,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 
 @media(max-width:900px){
   .footer-col a{ padding:9px 0; display:inline-flex; align-items:center; min-height:44px; }
-  .footer-col h4{ margin-bottom:2px; }
+  .footer-col h4, .footer-col-title{ margin-bottom:2px; }
   .text-link{ padding:11px 0; min-height:44px; }
   .breadcrumb a{ padding:6px 0; display:inline-block; }
   .sticky-socials a{ min-width:48px; min-height:48px; }
@@ -2455,7 +2455,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   display:flex; align-items:center; justify-content:center;
   background:linear-gradient(135deg,#F2F2F2,#9A9A9A); color:#fff;
 }
-.wa-top b{ font-family:var(--font-display); font-weight:400; font-size:24px; letter-spacing:-.01em; }
+.wa-top h2{ font-family:var(--font-display); font-weight:400; font-size:24px; letter-spacing:-.01em; line-height:1.1; }
 .wa-top span{
   margin-left:auto; font-family:var(--font-label); font-size:var(--fs-2xs);
   letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.5);
@@ -2569,7 +2569,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    have the full width. */
 @media(max-width:560px){
   .wa-top{ flex-wrap:wrap; row-gap:6px; }
-  .wa-top b{ font-size:21px; flex:1 1 auto; min-width:0; }
+  .wa-top h2{ font-size:21px; flex:1 1 auto; min-width:0; }
   .wa-top span{ flex:1 1 100%; margin-left:0; padding-left:53px; }
 }
 
@@ -2846,4 +2846,42 @@ body.hero-settled .cine-hero .cine-trust{ will-change:auto; }
 @media (scripting: none){
   .cine-hero .cine-badge, .cine-hero .cine-lede, .cine-hero .cine-actions,
   .cine-hero .cine-stats, .cine-hero .cine-chip, .cine-hero .cine-trust{ opacity:1; }
+}
+
+/* The stepped brief needed a real heading rather than only a <legend> inside
+   the form — a page whose main conversion path is invisible to a heading
+   outline is a page search engines cannot summarise. */
+.quote-section-title{
+  font-size:clamp(24px,2.6vw,32px); color:var(--text);
+  letter-spacing:-.01em; margin-bottom:10px;
+}
+.quote-section-sub{
+  color:var(--ink-soft); font-size:var(--fs-base); line-height:1.6;
+  max-width:52ch; margin-bottom:26px;
+}
+
+/* ==========================================================================
+   FAQ
+   Real questions with real answers, in a heading outline Google can read.
+   Deliberately not an accordion: collapsed answers are still indexed, but a
+   visitor scanning for "how much" should not have to click six times, and the
+   whole section is only six items long.
+   ========================================================================== */
+.faq{ background:var(--cream); }
+.faq-list{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:2px;
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.09);
+  border-radius:var(--radius-lg); overflow:hidden;
+}
+.faq-item{ background:var(--cream); padding:34px 32px; }
+.faq-item h3{
+  font-size:clamp(19px,1.9vw,23px); color:var(--text);
+  letter-spacing:-.005em; line-height:1.25; margin-bottom:12px;
+}
+.faq-item p{
+  color:var(--ink-soft); font-size:var(--fs-base); line-height:1.72; max-width:56ch;
+}
+@media(max-width:860px){
+  .faq-list{ grid-template-columns:1fr; }
+  .faq-item{ padding:26px 22px; }
 }
