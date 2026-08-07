@@ -246,6 +246,54 @@ full text via `aria-label` up front (a screen reader should not sit through the
 animation), prints instantly under `prefers-reduced-motion`, and waits for the
 preloader to hand over the same way the blur-in headline does.
 
+## Motion
+
+Everything is CSS transitions/keyframes or small rAF loops — no animation
+library, in keeping with the no-external-requests rule.
+
+| Animation | Where | Driven by |
+|---|---|---|
+| Hero entrance stagger | all interior heroes | CSS keyframes off `body.loaded` |
+| Word-by-word blur-in | about / services / work headlines | `.bt-word` + IntersectionObserver |
+| Typewriter + caret | contact headline | `data-typewriter` in `hero.js` |
+| Video loop crossfade | all hero videos | rAF in `hero.js` |
+| **Mouse scrub** | contact hero, ≥1024px | `data-hero-scrub` in `hero.js` |
+| Cinematic work reveal | work grid | scroll-linked `--cine` in `main.js` |
+| Satisfaction bars / star pops | work | IntersectionObserver + CSS |
+| **Burger → X** | mobile nav, all pages | pure CSS off `aria-expanded` |
+| **Pill tick spring** | contact composer | CSS spring transition |
+| **Status banner spring** | contact composer | measured height + `bannerIn` |
+
+Every one has a `prefers-reduced-motion` path.
+
+### Mouse scrub needs HTTP Range — and degrades if it is missing
+
+On screens ≥1024px the contact hero's video is **driven by the cursor** rather
+than playing itself: horizontal mouse movement scrubs the timeline. Below that
+width there is no cursor, so it just loops. The breakpoint is checked live, not
+once, because a window can be resized across it.
+
+Two things make or break it:
+
+- **Dense keyframes.** `hero-contact.webm` is encoded with `-g 4` — a keyframe
+  every 0.2s. The other three use one keyframe per loop, which is fine for
+  linear playback but means every seek decodes from frame 0. If you re-encode
+  the contact clip, keep the dense GOP or scrubbing will crawl.
+- **HTTP Range support.** A browser cannot seek in a media file unless the
+  server answers range requests. Netlify does. **Python's `http.server` does
+  not** — so scrubbing appears completely dead when testing locally with it,
+  and the page is not at fault. Use a range-capable server (there is one in the
+  scratchpad, or `npx http-server`).
+
+Because a parked video that cannot seek is just a frozen frame, `hero.js`
+checks `video.seekable` and, if the host does not serve ranges, drops scrubbing
+and plays the clip normally instead. Verified both ways.
+
+Every path that would otherwise call `play()` — `loadeddata`, the loop handler,
+the intersection observer, `visibilitychange` — is gated on `scrubbing()`.
+Without that, autoplay and the scrub fight over `currentTime` and the picture
+judders.
+
 ## The WhatsApp composer
 
 `contact.html` opens with a composer that sits **above** the stepped brief and

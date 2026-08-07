@@ -83,6 +83,11 @@
     });
 
     var raf = null, fadingOut = false, live = false;
+    /* True only while the cursor is driving the timeline. Every path that
+       would otherwise call play() consults this, or autoplay and the scrub
+       fight each other for currentTime and the picture judders. */
+    var scrubs = host.hasAttribute('data-hero-scrub') && !reduceMotion;
+    function scrubbing() { return scrubs && window.innerWidth >= 1024; }
 
     function fadeTo(target, duration) {
       if (raf) cancelAnimationFrame(raf);
@@ -103,11 +108,13 @@
     }
 
     video.addEventListener('loadeddata', function () {
-      var p = video.play();
-      if (p && p.catch) {
-        /* Autoplay can still be refused even when muted. If it is, drop the
-           video entirely rather than leaving a frozen first frame. */
-        p.catch(function () { teardown(); });
+      if (!scrubbing()) {
+        var p = video.play();
+        if (p && p.catch) {
+          /* Autoplay can still be refused even when muted. If it is, drop the
+             video entirely rather than leaving a frozen first frame. */
+          p.catch(function () { teardown(); });
+        }
       }
       goLive();
       video.style.opacity = '0';
@@ -115,12 +122,13 @@
     });
 
     video.addEventListener('timeupdate', function () {
-      if (fadingOut || !video.duration) return;
+      if (scrubbing() || fadingOut || !video.duration) return;
       var left = video.duration - video.currentTime;
       if (left <= FADE_OUT_LEAD && left > 0) { fadingOut = true; fadeTo(0, FADE_MS); }
     });
 
     video.addEventListener('ended', function () {
+      if (scrubbing()) return;
       video.style.opacity = '0';
       setTimeout(function () {
         video.currentTime = 0;
@@ -151,7 +159,7 @@
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!video.parentNode) return;
-        if (en.isIntersecting) { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
+        if (en.isIntersecting) { if (!scrubbing()) { var p = video.play(); if (p && p.catch) p.catch(function () {}); } }
         else video.pause();
       });
     }, { threshold: 0.01 });
@@ -159,8 +167,91 @@
     document.addEventListener('visibilitychange', function () {
       if (!video.parentNode) return;
       if (document.hidden) video.pause();
-      else { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
+      else if (!scrubbing()) { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
     });
+
+
+    /* ---- mouse scrubbing ------------------------------------------------
+       On a wide screen the hero footage is driven by the cursor instead of
+       playing itself: horizontal mouse movement scrubs the timeline, so the
+       backdrop responds to the visitor rather than performing at them.
+
+       Three things this has to get right:
+
+       - Below 1024px there is no cursor to scrub with, so the video simply
+         loops as normal. The breakpoint is checked live, not once, because a
+         desktop window can be resized across it.
+       - Seeking is only cheap if the file has dense keyframes. hero-contact
+         is encoded with one every 0.2s for exactly this; a video with a single
+         keyframe per loop would decode from frame 0 on every mouse move.
+       - Seeks are queued, never stacked. Setting currentTime while a seek is
+         in flight throws the previous one away and the picture stutters, so a
+         pending target is held and applied on `seeked`.
+       -------------------------------------------------------------------- */
+    if (scrubs) {
+      var SCRUB_SPAN = 0.8;            // a full window width sweeps 80% of the clip
+      var prevX = null, target = 0, seeking = false, pending = false;
+
+      var wide = scrubbing;
+
+      var apply = function () {
+        if (seeking) { pending = true; return; }
+        seeking = true;
+        video.currentTime = target;
+      };
+
+      video.addEventListener('seeked', function () {
+        seeking = false;
+        if (pending) { pending = false; apply(); }
+      });
+
+      var onMove = function (e) {
+        if (!wide() || !video.duration) { prevX = null; return; }
+        if (prevX === null) { prevX = e.clientX; return; }
+        var delta = e.clientX - prevX;
+        prevX = e.clientX;
+        target += (delta / window.innerWidth) * SCRUB_SPAN * video.duration;
+        /* Wrap rather than clamp: a hard stop at either end makes the hero
+           feel broken when the visitor keeps moving the same direction. */
+        var d = video.duration;
+        target = ((target % d) + d) % d;
+        apply();
+      };
+
+      /* Scrubbing needs the host to answer HTTP Range requests; without them
+         the browser cannot seek and `seekable` stays empty. A parked video
+         that will not move is a frozen frame, so detect it and fall back to
+         ordinary playback. (Netlify serves ranges. Python's http.server does
+         not — which is worth knowing before blaming the page.) */
+      var canSeek = function () {
+        return video.seekable && video.seekable.length > 0 && video.seekable.end(0) > 0;
+      };
+
+      var stand = function () {
+        if (wide() && !canSeek()) {
+          scrubs = false;
+          host.classList.remove('is-scrubbable');
+          var r = video.play(); if (r && r.catch) r.catch(function () {});
+          return;
+        }
+        if (wide()) {
+          video.pause();
+          /* loadeddata's fade-in is skipped while scrubbing, so bring the
+             picture up here or the hero sits at opacity 0 until the first
+             mouse move. */
+          if (parseFloat(video.style.opacity) < 1) fadeTo(1, FADE_MS);
+        } else {
+          var q = video.play(); if (q && q.catch) q.catch(function () {});
+        }
+      };
+
+      window.addEventListener('mousemove', onMove, { passive: true });
+      window.addEventListener('resize', stand, { passive: true });
+      video.addEventListener('loadeddata', stand);
+      video.addEventListener('canplaythrough', stand);
+      setTimeout(stand, 2500);
+      host.classList.add('is-scrubbable');
+    }
 
     host.insertBefore(video, host.firstChild);
   }

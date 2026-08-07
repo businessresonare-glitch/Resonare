@@ -3089,3 +3089,68 @@ a:focus-visible, button:focus-visible{ outline-color:var(--accent); }
 }
 em{ color:var(--accent-soft); }
 .dark em{ background:linear-gradient(115deg, var(--accent-soft), var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+/* ==========================================================================
+   BURGER → X
+
+   Three bars that rotate into a cross. Driven entirely by aria-expanded,
+   which the drawer already toggles — so the state lives in one place and the
+   animation needs no JavaScript of its own. Get the accessible attribute
+   right and the visual follows for free.
+   ========================================================================== */
+.burger{
+  display:flex; flex-direction:column; justify-content:center;
+  gap:5px; width:24px; height:18px;
+}
+.burger i{
+  display:block; width:24px; height:2px; border-radius:2px;
+  background:var(--text);
+  transition:transform .3s var(--spring), opacity .2s var(--ease), background .3s var(--ease);
+  transform-origin:center;
+}
+.menu-button:hover .burger i{ background:var(--accent-soft); }
+/* 7px = one bar height + one gap, so the outer bars meet exactly in the middle */
+.menu-button[aria-expanded="true"] .burger i:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+.menu-button[aria-expanded="true"] .burger i:nth-child(2){ opacity:0; transform:scaleX(.4); }
+.menu-button[aria-expanded="true"] .burger i:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+@media (prefers-reduced-motion: reduce){ .burger i{ transition:none; } }
+
+/* ==========================================================================
+   SERVICE PILL — the tick springs in
+
+   The old tick slid its width from 0, which reads as the pill growing rather
+   than as a choice being confirmed. It now scales up past 1 and settles, on a
+   spring, while the pill itself gives a small press.
+   ========================================================================== */
+.wa-pill .wa-tick{
+  width:0; height:14px; overflow:visible; opacity:0;
+  transform:scale(.2) rotate(-30deg);
+  transition:width .28s var(--spring), opacity .18s var(--ease),
+             transform .42s cubic-bezier(.34,1.8,.44,1);
+}
+.wa-pill[aria-pressed="true"] .wa-tick{
+  width:14px; opacity:1; transform:scale(1) rotate(0);
+}
+/* A confirmed pill lifts; an unconfirmed one sits flat. */
+.wa-pill{ transition:background .28s var(--ease), border-color .28s var(--ease),
+                     color .28s var(--ease), transform .34s cubic-bezier(.34,1.6,.44,1),
+                     box-shadow .3s var(--ease); }
+.wa-pill[aria-pressed="true"]{ transform:translateY(-2px); }
+.wa-pill:active{ transform:scale(.95); }
+@media (prefers-reduced-motion: reduce){
+  .wa-pill, .wa-pill .wa-tick{ transition:opacity .15s linear, width .15s linear; transform:none !important; }
+}
+
+/* ---- the status banner springs its height rather than easing it ---- */
+.wa-status{ transition:height .5s cubic-bezier(.22,1.4,.36,1); }
+.wa-status-live{ animation:bannerIn .45s cubic-bezier(.34,1.56,.44,1) both; }
+@keyframes bannerIn{
+  from{ opacity:0; transform:translateY(-6px) scale(.98); }
+  to  { opacity:1; transform:none; }
+}
+.wa-status-idle{ animation:idleIn .3s var(--ease-out) both; }
+@keyframes idleIn{ from{ opacity:0; } to{ opacity:1; } }
+@media (prefers-reduced-motion: reduce){
+  .wa-status{ transition:none; }
+  .wa-status-live, .wa-status-idle{ animation:none; }
+}
