@@ -13,7 +13,7 @@ assets/
   hero.js       hero video slot, blur-in headline, typewriter
   quote.js      the stepped quote card and its delivery
   fonts.css     self-hosted @font-face rules
-  fonts/        6 variable woff2 files (~217KB total)
+  fonts/        Inter + Tinos + IBM Plex Mono, unicode-range subset
   work/         project screenshots
   video/        4 ambient hero loops (WebM) + poster frames
 ```
