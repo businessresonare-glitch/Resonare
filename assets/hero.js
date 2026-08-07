@@ -26,10 +26,11 @@
 
      Set to true once the MP4s are in assets/video/. Left false, the heroes use
      their 3D backdrop and the browser never requests a video at all — asking
-     for four files that do not exist yet would log a 404 on every page load
-     forever. Flip this one boolean and all four heroes light up.
+     for files that do not exist would log a 404 on every page load forever.
+
+     ON, because assets/video/ now ships four WebM loops.
      ------------------------------------------------------------------------ */
-  var VIDEO_ENABLED = false;
+  var VIDEO_ENABLED = true;
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var FADE_MS = 500;
@@ -38,8 +39,20 @@
   /* ---- 1. Background video ---------------------------------------------- */
   function mountVideo(host) {
     if (!VIDEO_ENABLED) return;
-    var src = host.getAttribute('data-hero-video');
-    if (!src) return;
+    /* Comma-separated candidates, best first. They become <source> elements,
+       so the browser picks the first format it can actually decode and simply
+       skips the rest — which is the upgrade path for MP4: encode the files,
+       add one token to the attribute, change nothing here. Only list formats
+       that exist, or the skipped ones 404 on every load. */
+    var raw = (host.getAttribute('data-hero-video') || '').trim();
+    /* A data: URI carries its own comma (`data:video/webm;base64,...`), so
+       splitting one on commas produces two broken sources and the hero falls
+       back to 3D for no reason. Inlined builds hit this; the site does not,
+       because file paths have no commas. One source either way. */
+    var srcList = raw.slice(0, 5).toLowerCase() === 'data:'
+      ? [raw]
+      : raw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!srcList.length) return;
 
     /* Data saver and metered connections: leave the 3D scene in place rather
        than pulling several megabytes of decoration. */
@@ -60,7 +73,14 @@
     var poster = host.getAttribute('data-hero-poster');
     if (poster) video.poster = poster;
     video.style.opacity = '0';
-    video.src = src;
+    srcList.forEach(function (url) {
+      var source = document.createElement('source');
+      source.src = url;
+      var ext = (url.split('.').pop() || '').toLowerCase();
+      if (ext === 'mp4') source.type = 'video/mp4';
+      else if (ext === 'webm') source.type = 'video/webm';
+      video.appendChild(source);
+    });
 
     var raf = null, fadingOut = false, live = false;
 
@@ -116,7 +136,13 @@
       host.classList.remove('has-video');
       if (video.parentNode) video.parentNode.removeChild(video);
     }
+    /* With <source> children the media element itself does not fire `error`;
+       the last source does, and only after every candidate has been tried. */
     video.addEventListener('error', teardown);
+    var last = video.lastElementChild;
+    if (last) last.addEventListener('error', function () {
+      if (!live) teardown();
+    });
     /* A source that never arrives should not hold the hero hostage. */
     setTimeout(function () { if (!live) teardown(); }, 8000);
 
@@ -200,8 +226,33 @@
     io.observe(el);
   }
 
+  /* The video is decoration and must never be on the critical path. Mounted
+     during DOMContentLoaded it joined the `window.load` race and pushed the
+     preloader's release out by ~190ms on a throttled 4G phone — for a
+     backdrop nobody is waiting to see. Mounting it after the preloader has
+     already handed over costs the visitor nothing: the hero is complete with
+     its 3D scene, and the video crossfades in on top whenever it is ready. */
+  function whenSettled(fn) {
+    if (document.body.classList.contains('loaded')) { fn(); return; }
+    var done = false;
+    var run = function () { if (done) return; done = true; fn(); };
+    var mo = new MutationObserver(function () {
+      if (document.body.classList.contains('loaded')) { mo.disconnect(); run(); }
+    });
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    setTimeout(run, 4000);            // same failsafe posture as the preloader
+  }
+
   function init() {
-    document.querySelectorAll('[data-hero-video]').forEach(mountVideo);
+    var hosts = document.querySelectorAll('[data-hero-video]');
+    if (hosts.length) whenSettled(function () {
+      hosts.forEach(function (host) {
+        /* Idle time if the browser offers it, otherwise a short beat after
+           the entrance animation has had the main thread to itself. */
+        if (window.requestIdleCallback) requestIdleCallback(function () { mountVideo(host); }, { timeout: 1200 });
+        else setTimeout(function () { mountVideo(host); }, 300);
+      });
+    });
     document.querySelectorAll('[data-blur-text]').forEach(mountHeadline);
   }
 

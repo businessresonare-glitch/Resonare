@@ -10,10 +10,12 @@ assets/
   style.css     design system + components
   main.js       preloader, nav, reveals, cursor, split headings
   r3d.js        3D renderer and the five scenes
+  hero.js       hero video slot, blur-in headline, typewriter
   quote.js      the stepped quote card and its delivery
   fonts.css     self-hosted @font-face rules
   fonts/        6 variable woff2 files (~217KB total)
   work/         project screenshots
+  video/        4 ambient hero loops (WebM) + poster frames
 ```
 
 ---
@@ -223,6 +225,20 @@ on-screen shots are measured, and the writes are batched into one rAF per
 scroll frame — setting a custom property on six elements straight from a
 scroll handler is the classic way to make a smooth page janky. Shots that
 leave upward park at 1 so scrolling back down does not replay the entrance.
+
+**Every `:not()` raises specificity, and that is how the hero video broke the
+heroes.** `[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption)` scores
+(0,3,0) and sets `position: relative`. `.hero-video` scores (0,1,0) and sets
+`position: absolute`. The rule wins, the video stops being an overlay, takes
+its own ~810px of layout, and pushes the entire hero a full screen below the
+fold — while still *playing*, so nothing looks broken until you notice the
+headline is gone. Any absolutely-positioned layer inside a `[data-r3d-host]`
+must be named in that `:not()` chain. Two are: `.r3d-caption`, `.hero-video`.
+
+This is also why `scripts/`-free visual checks are not enough: the device
+sweep passed with the heroes entirely below the fold, because it measured
+overflow and reveals but not hero geometry. It now asserts that the hero badge
+sits within the first screen and that `.hero-video` computes to `absolute`.
 
 **Never give an IntersectionObserver a percentage `threshold` for a tall
 element.** This one shipped a real bug. `threshold: 0.15` asks for 15% of the

@@ -1348,11 +1348,19 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   pointer-events:none; z-index:0; display:block;
 }
 [data-r3d-host]{ position:relative; }
-/* Lift real content above the canvas — but not the caption, which is
-   absolutely positioned inside the frame. Without excluding it, this rule
-   (specificity 0,2,0) outranks .r3d-caption (0,1,0) and forces it back into
-   flow at the top of the frame. */
-[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption){ position:relative; z-index:1; }
+/* Lift real content above the canvas — but not the layers that are meant to
+   sit behind or across it, which are absolutely positioned. Every :not() adds
+   specificity, so this rule scores (0,3,0) and outranks any bare single-class
+   rule those layers set for themselves; they have to be named here or they
+   get dragged back into normal flow.
+
+   .r3d-caption  — would jump to the top of the frame.
+   .hero-video   — would stop being an overlay and instead occupy its own
+                   ~810px of layout, pushing the whole hero a screen down.
+                   That is exactly what happened the day the videos were
+                   switched on: the heroes still "worked", they were just
+                   entirely below the fold. */
+[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption):not(.hero-video){ position:relative; z-index:1; }
 
 /* A framed, interactive scene — used where the artwork is the subject rather
    than a backdrop. */
