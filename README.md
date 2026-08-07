@@ -224,6 +224,35 @@ scroll frame — setting a custom property on six elements straight from a
 scroll handler is the classic way to make a smooth page janky. Shots that
 leave upward park at 1 so scrolling back down does not replay the entrance.
 
+**Never give an IntersectionObserver a percentage `threshold` for a tall
+element.** This one shipped a real bug. `threshold: 0.15` asks for 15% of the
+element to be on screen — which anything taller than `viewportHeight / 0.15`
+can *never* satisfy. On a 568px iPhone SE the single-column service grid is
+3860px tall (limit: 3787px), so it never fired and the entire section stayed at
+`opacity: 0`. The section-dot tracker had the same trap at `threshold: 0.5`.
+
+Both now express the intent in a height-independent way:
+
+```js
+// "once its leading edge comes up past 88% of the viewport"
+{ threshold: 0, rootMargin: '0px 0px -12% 0px' }
+// "whichever section crosses the middle of the screen"
+{ threshold: 0, rootMargin: '-45% 0px -45% 0px' }
+```
+
+If you add an observer, ask what happens when the target is taller than the
+screen. On a phone, most sections are.
+
+**The hero entrance is a CSS animation keyed off `body.loaded`,** not JS. Badge
+→ subheading → CTAs → stats → trust bar, each blurring up on its own delay,
+with the stat cards and partner names staggering within their rows. The
+headline is deliberately excluded — it has its own word-by-word blur or the
+typewriter, and animating the container too would fight it. `will-change` is
+released via `body.hero-settled` about 2.6s in, because six simultaneous blur
+filters is the heaviest frame the page paints and there is no reason to keep
+those layers promoted afterwards. There is a `@media (scripting: none)` block
+that shows everything if JS never runs.
+
 **3D scenes** are declared with `data-r3d="<scene>"` on a `<canvas class="r3d-stage">`
 inside a `[data-r3d-host]` element. Scenes available: `resonance`, `core`,
 `lattice`, `carousel`, `orbit`. They stop rendering when scrolled out of view or

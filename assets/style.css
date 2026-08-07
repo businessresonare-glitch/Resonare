@@ -2736,3 +2736,106 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   .cine-trust b{ font-size:clamp(17px,1.7vw,22px); }
   .cine-foot{ gap:11px; padding:0 7vw 18px; }
 }
+
+/* ==========================================================================
+   TAP TARGETS — 44px everywhere, not just on phones
+
+   A device sweep found the nav pill at 41px, footer links at 24px, the
+   back-to-top at 38px and the home section dots at 9px. Phones were already
+   clean; these were the desktop and tablet controls, and an iPad is a touch
+   device with a desktop-width viewport, so "it's desktop" is not a defence.
+
+   The hit area grows via padding while the painted size stays put, so nothing
+   moves visually.
+   ========================================================================== */
+@media(min-width:881px){
+  header.site-header .main-nav a{ padding-top:13px; padding-bottom:13px; }
+}
+.header-cta{ padding-top:13px; padding-bottom:13px; }
+.footer-col a{ padding:11px 0; margin:-11px 0; }
+.to-top{ min-width:46px; min-height:46px; }
+/* The dots stay 9px of ink inside a 44px reach. */
+.section-dots button{ box-sizing:content-box; padding:18px; margin:-18px; background-clip:content-box; }
+.text-link{ padding:11px 0; margin:-11px 0; }
+
+/* Every text-entry field is 16px on every width. Under 16px iOS Safari zooms
+   the viewport on focus and never zooms back out, which strands the visitor
+   mid-form at 1.4x. Desktop does not zoom, but one rule is easier to keep
+   true than a breakpoint that has to be remembered. */
+.form-group input, .form-group select, .form-group textarea,
+.contact-form input, .contact-form select, .contact-form textarea{ font-size:16px; }
+
+/* ==========================================================================
+   HERO ENTRANCE
+
+   The reference heroes bring their content in as a staggered blur-up rather
+   than all at once: badge, then subheading, then the CTAs, then the stat row,
+   then the trust bar. The headline is deliberately NOT in this list — it has
+   its own word-by-word blur (.bt-word) or the typewriter, and animating the
+   container as well would fight it.
+
+   Driven by body.loaded so it starts when the preloader hands over, not while
+   it is still covering the screen. Fill mode is `both`, so an element that has
+   not started yet is held at its first keyframe instead of flashing at full
+   opacity for a frame.
+   ========================================================================== */
+@keyframes heroRise{
+  from{ opacity:0; filter:blur(10px); transform:translateY(20px); }
+  to  { opacity:1; filter:blur(0);    transform:none; }
+}
+.cine-hero .cine-badge,
+.cine-hero .cine-lede,
+.cine-hero .cine-actions,
+.cine-hero .cine-stats,
+.cine-hero .cine-chip,
+.cine-hero .cine-trust{
+  opacity:0;
+  will-change:opacity, filter, transform;
+}
+body.loaded .cine-hero .cine-badge  { animation:heroRise .8s var(--ease-out) .15s both; }
+body.loaded .cine-hero .cine-lede   { animation:heroRise .8s var(--ease-out) .55s both; }
+body.loaded .cine-hero .cine-actions{ animation:heroRise .8s var(--ease-out) .75s both; }
+body.loaded .cine-hero .cine-stats  { animation:heroRise .8s var(--ease-out) .95s both; }
+body.loaded .cine-hero .cine-chip   { animation:heroRise .8s var(--ease-out) 1.1s both; }
+body.loaded .cine-hero .cine-trust  { animation:heroRise .8s var(--ease-out) 1.25s both; }
+
+/* Each stat card and each partner name arrives a beat after the one before,
+   so the rows read left-to-right instead of appearing as a block. */
+body.loaded .cine-hero .cine-stat{ animation:heroRise .7s var(--ease-out) both; }
+body.loaded .cine-hero .cine-stat:nth-child(1){ animation-delay:.95s; }
+body.loaded .cine-hero .cine-stat:nth-child(2){ animation-delay:1.05s; }
+body.loaded .cine-hero .cine-stat:nth-child(3){ animation-delay:1.15s; }
+body.loaded .cine-hero .cine-trust b{ animation:heroRise .6s var(--ease-out) both; }
+body.loaded .cine-hero .cine-trust b:nth-child(1){ animation-delay:1.30s; }
+body.loaded .cine-hero .cine-trust b:nth-child(2){ animation-delay:1.38s; }
+body.loaded .cine-hero .cine-trust b:nth-child(3){ animation-delay:1.46s; }
+body.loaded .cine-hero .cine-trust b:nth-child(4){ animation-delay:1.54s; }
+body.loaded .cine-hero .cine-trust b:nth-child(5){ animation-delay:1.62s; }
+
+/* A blur filter on six elements at once is the most expensive frame on the
+   page. Release will-change the moment the sequence is done so the compositor
+   layers are handed back. */
+body.hero-settled .cine-hero .cine-badge,
+body.hero-settled .cine-hero .cine-lede,
+body.hero-settled .cine-hero .cine-actions,
+body.hero-settled .cine-hero .cine-stats,
+body.hero-settled .cine-hero .cine-chip,
+body.hero-settled .cine-hero .cine-trust{ will-change:auto; }
+
+@media (prefers-reduced-motion: reduce){
+  .cine-hero .cine-badge, .cine-hero .cine-lede, .cine-hero .cine-actions,
+  .cine-hero .cine-stats, .cine-hero .cine-chip, .cine-hero .cine-trust{ opacity:1; }
+  body.loaded .cine-hero .cine-badge, body.loaded .cine-hero .cine-lede,
+  body.loaded .cine-hero .cine-actions, body.loaded .cine-hero .cine-stats,
+  body.loaded .cine-hero .cine-chip, body.loaded .cine-hero .cine-trust,
+  body.loaded .cine-hero .cine-stat, body.loaded .cine-hero .cine-trust b{
+    animation:none !important; opacity:1; filter:none; transform:none;
+  }
+}
+
+/* A hero that never gets `loaded` (JS blocked, preloader failsafe missed)
+   must not be an invisible screen. This is the belt to the failsafe's braces. */
+@media (scripting: none){
+  .cine-hero .cine-badge, .cine-hero .cine-lede, .cine-hero .cine-actions,
+  .cine-hero .cine-stats, .cine-hero .cine-chip, .cine-hero .cine-trust{ opacity:1; }
+}

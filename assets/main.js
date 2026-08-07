@@ -191,11 +191,18 @@ if (drawer) {
 
 /* ============ REVEAL ON SCROLL ============ */
 const revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+/* Deliberately NOT a percentage threshold.
+   `threshold: 0.15` asks for 15% of the element to be on screen, which an
+   element taller than viewport/0.15 can never satisfy — and on a 568px phone
+   the single-column service grid is 3860px tall, so it never revealed and the
+   whole section stayed at opacity 0. A negative bottom rootMargin says the
+   same thing in a way that does not depend on the element's height: fire once
+   its leading edge has come up past 88% of the viewport. */
 const io = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
   });
-}, { threshold: 0.15 });
+}, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
 revealEls.forEach(el => io.observe(el));
 
 /* ============ SERVICE / CARD CURSOR GLOW (local, mouse-follow spotlight) ============ */
@@ -350,7 +357,11 @@ if (dotButtons.length) {
         if (dotNav) dotNav.setAttribute('data-dark', darkSectionEls.includes(entry.target) ? 'true' : 'false');
       }
     });
-  }, { threshold: 0.5 });
+  /* Same trap as the reveal observer: a section taller than viewport/0.5
+     can never be 50% visible, so on a small phone the dots stopped
+     tracking entirely. "Which section am I in" is really "which one
+     crosses the middle of the screen", so express it as a band. */
+  }, { threshold: 0, rootMargin: '-45% 0px -45% 0px' });
   trackedSections.forEach(sec => sectionObserver.observe(sec));
 }
 
@@ -1027,3 +1038,18 @@ document.querySelectorAll('[data-scroll-to]').forEach(btn => {
     if (target) smoothScrollTo(btn.dataset.scrollTo, -10);
   });
 });
+
+/* Hand the hero's compositor layers back once its entrance has finished — six
+   simultaneous blur filters is the heaviest frame the page ever paints, and
+   there is no reason to keep promoting them afterwards. */
+(function releaseHeroLayers(){
+  if (!document.querySelector('.cine-hero')) return;
+  const settle = () => setTimeout(() => document.body.classList.add('hero-settled'), 2600);
+  if (document.body.classList.contains('loaded')) settle();
+  else {
+    const mo = new MutationObserver(() => {
+      if (document.body.classList.contains('loaded')) { mo.disconnect(); settle(); }
+    });
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
