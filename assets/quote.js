@@ -368,6 +368,17 @@
   });
   if (backBtn) backBtn.addEventListener('click', function () { setStep(current - 1); });
 
+  /* ---- WhatsApp, from any step -------------------------------------------
+     The relay route needs three completed steps before it can run. WhatsApp
+     needs none of that: whatever has been filled in so far is enough to start
+     a conversation, and a conversation is the actual goal. So this button is
+     live on every step and deliberately skips validateStep(). */
+  var waBtn = form.querySelector('[data-quote-whatsapp-send]');
+  if (waBtn) waBtn.addEventListener('click', function () {
+    saveDraft();
+    window.open(whatsappURL(reference()), '_blank', 'noopener');
+  });
+
   form.addEventListener('change', function (e) {
     if (e.target.closest('.quote-card')) syncCards();
     if (e.target.classList && e.target.classList.contains('is-invalid')) validateField(e.target);

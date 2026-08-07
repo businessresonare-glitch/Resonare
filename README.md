@@ -58,6 +58,44 @@ Anything else is treated as a failure — see below.
 
 ---
 
+## The WhatsApp composer
+
+`contact.html` opens with a composer that sits **above** the stepped brief and
+skips the relay entirely: pick services, type a sentence, and the whole thing
+leaves as a prefilled `wa.me` message on **+977 9767278212**.
+
+It is deliberately the first thing on the page. The relay route has a failure
+mode — a mail service that goes down takes the lead with it — and this one has
+none: the visitor reads the composed message inside WhatsApp before they press
+send, which is the only delivery confirmation on this site that has ever been
+literally true.
+
+```
+.wa-composer[data-wa-composer][data-wa-number="9779767278212"]
+  .wa-pill[aria-pressed]        multi-select, six services
+  [data-wa-status]              idle hint ⇄ "Ready to inquire about: …" + Let's go
+  [data-wa-detail]              free text — what they actually want
+  [data-wa-business/-name]      optional, appended to the message
+  [data-wa-send]                disabled until a pill or some text exists
+```
+
+Behaviour worth keeping if you edit it:
+
+- **The number lives in one place** — `data-wa-number` on the composer. The JS
+  falls back to the same digits, and `quote.js` reads `data-quote-whatsapp`
+  from the form. Change all three together or the routes disagree.
+- **The status banner animates from a measured height,** then releases back to
+  `auto`. `height: auto` is not animatable, so the measured value is what makes
+  it slide instead of jump; releasing it afterwards is what stops a long
+  service list from being clipped on a narrow screen.
+- **The draft is kept in `localStorage`** (`resonare.wa.draft`), same as the
+  stepped form, so a visitor who navigates away does not retype anything.
+
+The stepped form also carries a **Send on WhatsApp instead** button in its
+footer. That one is live on *every* step and deliberately skips validation —
+whatever has been filled in so far is enough to start a conversation, and a
+conversation is the actual goal.
+
 ## How the quote system behaves
 
 Three steps, validated one at a time, then delivered:
@@ -100,6 +138,15 @@ library, vendor it into `assets/`.
 **The preloader has a 3.5s failsafe** (`main.js`). It hides itself even if
 `window.load` never fires. Do not remove it: the ceiling is 92% until `load`,
 so without the failsafe one stalled asset seals the whole site.
+
+**The work grid is scroll-linked, not a one-shot reveal.** Each screenshot on
+`work.html` carries `.cine-shot`, and `main.js` writes a single `--cine` value
+(0 → 1) onto it from how far it has travelled through the viewport; the CSS
+builds the scale, blur, brightness and light-wipe from that one number. Only
+on-screen shots are measured, and the writes are batched into one rAF per
+scroll frame — setting a custom property on six elements straight from a
+scroll handler is the classic way to make a smooth page janky. Shots that
+leave upward park at 1 so scrolling back down does not replay the entrance.
 
 **3D scenes** are declared with `data-r3d="<scene>"` on a `<canvas class="r3d-stage">`
 inside a `[data-r3d-host]` element. Scenes available: `resonance`, `core`,

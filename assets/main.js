@@ -803,3 +803,217 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
     else if (band.getBoundingClientRect().top < window.innerHeight) start();
   });
 })();
+
+/* ==========================================================================
+   CINEMATIC WORK REVEAL
+
+   Each screenshot gets a --cine value between 0 and 1 derived from how far it
+   has travelled through the viewport, and the CSS builds the scale, blur and
+   light-wipe from that single number. Scroll-linked rather than a one-shot
+   class, so the grid reads as a camera moving over the work instead of six
+   cards popping in.
+
+   The write is batched into one rAF per scroll frame — setting a custom
+   property on six elements from a raw scroll handler is the classic way to
+   turn a smooth page into a janky one.
+   ========================================================================== */
+(function initCineShots(){
+  const shots = document.querySelectorAll('.cine-shot');
+  if (!shots.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    shots.forEach(s => s.style.setProperty('--cine', '1'));
+    return;
+  }
+
+  /* Only shots that are actually on screen are measured. */
+  const live = new Set();
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) live.add(en.target);
+      else {
+        live.delete(en.target);
+        /* Park it at the end state once it has left upward, so scrolling back
+           down past a card does not replay the entrance from blur. */
+        const r = en.target.getBoundingClientRect();
+        en.target.style.setProperty('--cine', r.top < 0 ? '1' : '0');
+      }
+    });
+    schedule();
+  }, { threshold: 0 });
+  shots.forEach(s => io.observe(s));
+
+  let queued = false;
+  function schedule(){
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(frame);
+  }
+
+  function frame(){
+    queued = false;
+    const vh = window.innerHeight;
+    live.forEach(el => {
+      const r = el.getBoundingClientRect();
+      /* 0 when the top edge is one third of a viewport below the fold,
+         1 by the time the shot's own centre has reached 62% up the screen.
+         The window is deliberately long — the reveal should take real scroll
+         distance, not snap the moment the element clips the edge. */
+      const start = vh * 1.02;
+      const end   = vh * 0.42;
+      const p = (start - r.top) / (start - end);
+      el.style.setProperty('--cine', Math.max(0, Math.min(1, p)).toFixed(3));
+    });
+  }
+
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule, { passive: true });
+  schedule();
+})();
+
+/* ==========================================================================
+   SATISFACTION BARS
+   The bar fills to the figure printed above it, read from data-fill so the
+   number and the bar cannot drift apart in the markup.
+   ========================================================================== */
+(function initSatScores(){
+  const scores = document.querySelectorAll('.sat-score[data-fill]');
+  if (!scores.length) return;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      en.target.style.setProperty('--fill', en.target.dataset.fill);
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.35 });
+  scores.forEach(s => io.observe(s));
+})();
+
+/* ==========================================================================
+   WHATSAPP COMPOSER
+
+   Pick services, type a sentence, and the whole thing leaves as a prefilled
+   wa.me message. There is no relay in this path and therefore nothing that
+   can silently fail — the visitor sees the composed message in WhatsApp
+   before they press send, which is the only delivery confirmation that has
+   ever actually been true on this site.
+   ========================================================================== */
+(function initWaComposer(){
+  const root = document.querySelector('[data-wa-composer]');
+  if (!root) return;
+
+  const number  = root.dataset.waNumber || '9779767278212';
+  const pills   = Array.prototype.slice.call(root.querySelectorAll('.wa-pill'));
+  const detail  = root.querySelector('[data-wa-detail]');
+  const nameEl  = root.querySelector('[data-wa-name]');
+  const bizEl   = root.querySelector('[data-wa-business]');
+  const status  = root.querySelector('[data-wa-status]');
+  const sendBtn = root.querySelector('[data-wa-send]');
+  const KEY = 'resonare.wa.draft';
+
+  const picked = () => pills.filter(p => p.getAttribute('aria-pressed') === 'true')
+                           .map(p => p.dataset.service || p.textContent.trim());
+
+  /* ---- the message ------------------------------------------------------ */
+  function compose(){
+    const services = picked();
+    const lines = ['Hi RESONARE — I would like to talk about a website.'];
+    if (services.length) lines.push('', 'Interested in: ' + services.join(', '));
+    const said = (detail && detail.value.trim()) || '';
+    if (said) lines.push('', 'What I need:', said);
+    const who = [];
+    if (bizEl && bizEl.value.trim())  who.push('Business: ' + bizEl.value.trim());
+    if (nameEl && nameEl.value.trim()) who.push('Name: ' + nameEl.value.trim());
+    if (who.length) lines.push('', who.join('\n'));
+    lines.push('', 'Sent from resonare.digital');
+    return lines.join('\n');
+  }
+
+  function send(){
+    if (!picked().length && !(detail && detail.value.trim())) return;
+    save();
+    window.open('https://wa.me/' + number + '?text=' + encodeURIComponent(compose()),
+                '_blank', 'noopener');
+  }
+
+  /* ---- the status banner ------------------------------------------------
+     Height is animated from a measured pixel value rather than left on auto,
+     because `height: auto` is not an animatable value and the banner would
+     otherwise appear as a jump. */
+  function renderStatus(){
+    if (!status) return;
+    const services = picked();
+    const from = status.offsetHeight;
+
+    status.innerHTML = services.length
+      ? '<div class="wa-status-live">' +
+          '<p>Ready to inquire about: <b>' + services.map(esc).join(', ') + '</b></p>' +
+          '<button type="button" class="wa-go" data-wa-send>Let&rsquo;s go' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>' +
+          '</button>' +
+        '</div>'
+      : '<p class="wa-status-idle">Please click to select the services above — or just type below.</p>';
+
+    const to = status.scrollHeight;
+    status.style.height = from + 'px';
+    requestAnimationFrame(() => { status.style.height = to + 'px'; });
+    /* Release the fixed height once the transition has run, so later text
+       wrapping (a long service list on a narrow screen) is not clipped. */
+    clearTimeout(renderStatus.t);
+    renderStatus.t = setTimeout(() => { status.style.height = 'auto'; }, 460);
+  }
+
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  }
+
+  function syncSend(){
+    if (!sendBtn) return;
+    sendBtn.disabled = !picked().length && !(detail && detail.value.trim());
+  }
+
+  /* ---- draft ------------------------------------------------------------- */
+  function save(){
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        services: picked(),
+        detail: detail ? detail.value : '',
+        name: nameEl ? nameEl.value : '',
+        business: bizEl ? bizEl.value : ''
+      }));
+    } catch (e) { /* private mode */ }
+  }
+
+  function restore(){
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      (d.services || []).forEach(s => {
+        const hit = pills.find(p => (p.dataset.service || p.textContent.trim()) === s);
+        if (hit) hit.setAttribute('aria-pressed', 'true');
+      });
+      if (detail && d.detail) detail.value = d.detail;
+      if (nameEl && d.name)   nameEl.value = d.name;
+      if (bizEl && d.business) bizEl.value = d.business;
+    } catch (e) { /* malformed draft */ }
+  }
+
+  /* ---- wiring ------------------------------------------------------------ */
+  pills.forEach(p => p.addEventListener('click', () => {
+    p.setAttribute('aria-pressed', p.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    renderStatus(); syncSend(); save();
+  }));
+
+  if (detail) detail.addEventListener('input', () => { syncSend(); save(); });
+  [nameEl, bizEl].forEach(el => el && el.addEventListener('input', save));
+  if (sendBtn) sendBtn.addEventListener('click', send);
+  /* The "Let's go" button lives inside re-rendered HTML, so it is delegated. */
+  if (status) status.addEventListener('click', e => {
+    if (e.target.closest('[data-wa-send]')) send();
+  });
+
+  restore();
+  renderStatus();
+  syncSend();
+})();
