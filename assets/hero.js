@@ -232,8 +232,15 @@
   var START_DELAY = 420;
 
   function mount(el) {
-    var text = el.getAttribute('data-typewriter') || el.textContent;
-    text = text.replace(/\\n/g, '\n');
+    /* The heading ships with its real text in the HTML and this reads it from
+       there, so the page still has a headline when this script never runs —
+       blocked, 404'd, or opened without its assets folder. The attribute is
+       only an override for when the typed string differs from the static one.
+       An empty <h1> that JS was supposed to fill is a blank page waiting to
+       happen. */
+    var text = el.getAttribute('data-typewriter') || el.textContent || '';
+    text = text.replace(/\\n/g, '\n').trim();
+    if (!text) return;
 
     if (reduce) { el.textContent = text; el.classList.add('tw-done'); return; }
 
