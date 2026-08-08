@@ -95,7 +95,16 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   if (href.length > 1) {
     a.addEventListener('click', (e) => {
       const target = document.querySelector(href);
-      if (target) { e.preventDefault(); smoothScrollTo(href, -10); }
+      if (target) {
+        e.preventDefault();
+        smoothScrollTo(href, -10);
+        /* preventDefault also cancels the hash the browser would have written,
+           which quietly breaks deep links and the back button. Put it back —
+           replaceState rather than pushState so a run of in-page jumps does
+           not bury the previous page under history entries. */
+        if (history.replaceState) history.replaceState(null, '', href);
+        else location.hash = href;
+      }
     });
   }
 });
@@ -1052,4 +1061,158 @@ document.querySelectorAll('[data-scroll-to]').forEach(btn => {
     });
     mo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
+})();
+
+/* ==========================================================================
+   ROTATING WORD
+
+   Swaps one word for another in place: the outgoing copy is absolutely
+   positioned over the incoming one for the length of the swap, so the line
+   never reflows. The element's width is locked to the widest word up front —
+   measured once, off a clone — because a rotator that resizes on every swap
+   drags the whole sentence around with it.
+
+   Declared as data-rotate="Design,Create,Inspire" with an optional
+   data-rotate-ms. Pauses when off screen or when the tab is hidden.
+   ========================================================================== */
+(function initRotators(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll('[data-rotate]').forEach(el => {
+    const words = el.dataset.rotate.split(',').map(w => w.trim()).filter(Boolean);
+    if (words.length < 2) return;
+    const every = +el.dataset.rotateMs || 2000;
+
+    el.classList.add('rotator');
+    el.textContent = '';
+    let current = document.createElement('span');
+    current.textContent = words[0];
+    el.appendChild(current);
+
+    /* Lock the width to the widest word so the sentence never shifts. */
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+    el.appendChild(probe);
+    let widest = 0;
+    words.forEach(w => { probe.textContent = w; widest = Math.max(widest, probe.offsetWidth); });
+    probe.remove();
+    if (widest) el.style.minWidth = widest + 'px';
+
+    if (reduce) return;                 // first word, no cycling
+
+    let i = 0, timer = null, visible = true;
+
+    function step(){
+      i = (i + 1) % words.length;
+      const next = document.createElement('span');
+      next.textContent = words[i];
+      const out = current;
+      out.classList.add('is-out');
+      el.appendChild(next);
+      current = next;
+      setTimeout(() => out.remove(), 320);
+    }
+
+    function start(){ if (!timer && visible) timer = setInterval(step, every); }
+    function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+
+    new IntersectionObserver(entries => {
+      entries.forEach(en => { visible = en.isIntersecting; visible ? start() : stop(); });
+    }, { threshold: 0 }).observe(el);
+
+    document.addEventListener('visibilitychange', () => {
+      document.hidden ? stop() : start();
+    });
+  });
+})();
+
+/* ==========================================================================
+   EXPLORATIONS PARALLAX
+
+   Writes a single 0→1 progress value onto the section as --par; the CSS turns
+   it into one transform per column. Same discipline as the work-grid reveal:
+   measure in a rAF, write one custom property, let the compositor do the rest.
+   ========================================================================== */
+(function initParallax(){
+  const section = document.querySelector('.explore');
+  if (!section) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let queued = false;
+  function frame(){
+    queued = false;
+    const r = section.getBoundingClientRect();
+    /* 0 when the section's top hits the viewport top, 1 when its bottom does */
+    const span = r.height - window.innerHeight;
+    if (span <= 0) return;
+    const p = Math.max(0, Math.min(1, -r.top / span));
+    section.style.setProperty('--par', p.toFixed(4));
+  }
+  function schedule(){ if (!queued) { queued = true; requestAnimationFrame(frame); } }
+
+  new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) { window.addEventListener('scroll', schedule, { passive: true }); schedule(); }
+      else window.removeEventListener('scroll', schedule);
+    });
+  }, { threshold: 0 }).observe(section);
+
+  window.addEventListener('resize', schedule, { passive: true });
+  schedule();
+})();
+
+/* ==========================================================================
+   PAGE TRANSITION
+
+   Same-origin navigations fade out through a veil, then the next page fades
+   it back off. Deliberately conservative:
+
+   - Only plain left-clicks on same-origin links. Modifier-clicks, middle
+     clicks, downloads, new tabs, hashes and mailto/tel/wa.me all pass through
+     untouched, because hijacking those is how a transition becomes a bug.
+   - A 550ms failsafe navigates anyway if anything stalls, so the veil can
+     never trap someone on a covered page.
+   - Skipped entirely under prefers-reduced-motion.
+   ========================================================================== */
+(function initPageTransition(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const veil = document.createElement('div');
+  veil.className = 'page-veil';
+  veil.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(veil);
+
+  /* Arriving: if we came through a transition, lift the veil. */
+  if (sessionStorage.getItem('resonare.transition') === '1') {
+    sessionStorage.removeItem('resonare.transition');
+    veil.classList.add('is-out');
+    requestAnimationFrame(() => requestAnimationFrame(() => veil.classList.remove('is-out')));
+  }
+
+  document.addEventListener('click', e => {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = e.target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+
+    const href = a.getAttribute('href');
+    if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return;
+
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin) return;
+    if (url.pathname === location.pathname) return;   // in-page anchor
+
+    e.preventDefault();
+    sessionStorage.setItem('resonare.transition', '1');
+    veil.classList.add('is-out');
+    let gone = false;
+    const go = () => { if (!gone) { gone = true; location.href = url.href; } };
+    veil.addEventListener('transitionend', go, { once: true });
+    setTimeout(go, 550);                                  // failsafe
+  });
+
+  /* Coming back via the bfcache would otherwise show a covered page. */
+  window.addEventListener('pageshow', e => {
+    if (e.persisted) veil.classList.remove('is-out');
+  });
 })();

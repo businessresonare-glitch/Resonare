@@ -184,6 +184,22 @@ colour moves with you.
 
 Adding a page means adding one `data-accent` value — nothing else.
 
+### Accent text has to clear AA at the *darkest* end of a gradient
+
+`--accent-ink` (near-black) sits on the accent because white on `#6C7BFF`
+measures only 3.0:1. That fixed the flat case, but the primary button is a
+gradient, and it used to finish on `--accent-deep` — where the same near-black
+label measures 2.97:1 on indigo and 3.08:1 on violet. Contrast has to hold at
+every stop the text can land on, not just the one you sampled. The gradient now
+ends on `--accent`, whose worst hue is 5.8:1.
+
+A related trap when auditing: a CSS-walking contrast checker that sums
+`background-color` up the tree reports gradient-backed elements as transparent
+and grades them against whatever dark section is behind them. Those are false
+failures. Measure painted pixels instead — and sample the background from
+*behind the glyphs* (a `Range` box with the text temporarily transparent), not
+from the element's left edge, where leading dots and icons will lie to you.
+
 ### Two rules that are load-bearing
 
 **Text colour is solid, never alpha.** Muted copy used to be
@@ -263,8 +279,62 @@ library, in keeping with the no-external-requests rule.
 | **Burger → X** | mobile nav, all pages | pure CSS off `aria-expanded` |
 | **Pill tick spring** | contact composer | CSS spring transition |
 | **Status banner spring** | contact composer | measured height + `bannerIn` |
+| **Rotating word** | hero eyebrow / badges, preloader | `data-rotate` + `initRotators()` |
+| **Scroll rail** | interior heroes, ≥900px | CSS `scroll-down` keyframes |
+| **Marquee band** | above the footer, all pages | one CSS keyframe, `translateX(-50%)` |
+| **Availability pulse** | footer, all pages | CSS `availPulse` |
+| **Gradient ring** | primary CTAs | `.grad-ring` + `gradient-shift` |
+| **Work hover reveal** | work grid | CSS blur scrim + spring pill |
+| **Explorations parallax** | work page | scroll-linked `--par` in `main.js` |
+| **Page transitions** | all internal links | `.page-veil` + `sessionStorage` |
 
 Every one has a `prefers-reduced-motion` path.
+
+### The animation kit, and the four traps in it
+
+The kit is CSS-first: JS writes one custom property or toggles one class, and
+the compositor does the rest. Four things in it are load-bearing and easy to
+break.
+
+**A rotating word must not resize its own line.** `initRotators()` measures
+every word off a hidden probe up front and pins `min-width` to the widest one.
+Without that, the sentence around it shifts on every swap. The outgoing word is
+absolutely positioned over the incoming one for the length of the swap, so the
+two never occupy flow at the same time. The real text stays in the HTML as the
+no-JS fallback — `data-rotate` alone would leave an empty span for crawlers.
+
+**`.eyebrow span` used to style every descendant span.** The hero eyebrow's
+decorative dot was set with `.eyebrow span { width:7px }`, so the moment a
+rotator went inside it, the rotator *and* its measuring probe became 7px dots
+and the word vanished. The rule is now `.eyebrow > span:first-child`. Any new
+markup inside a decorated container is worth checking for the same thing.
+
+**`overflow:hidden` and `position:sticky` cannot share an ancestor.** The
+explorations section clips its drifting columns, and `overflow:hidden` turns
+the section into a scroll container — which is what the sticky centre panel
+then sticks *inside*, so it silently rode past the viewport instead of pinning.
+The section uses `overflow:clip` (clips without creating a scroll container)
+and the columns carry their own `overflow:hidden`.
+
+**A parallax section has to be taller than the viewport.** `initParallax()`
+derives progress from `height − innerHeight`; at `100vh` that span is zero and
+nothing moves. `.explore` is `min-height:200vh`, and its grid uses
+`align-content:stretch` so the cards spread down the whole section — with
+`align-content:start` they all bunch into the first screen and the back half
+scrolls past empty.
+
+### Page transitions are deliberately narrow
+
+`initPageTransition()` only intercepts plain left-clicks on same-origin links
+with a different pathname. Modifier-clicks, middle-clicks, `target=_blank`,
+downloads, hashes, `mailto:`, `tel:` and `wa.me` all pass through untouched —
+hijacking those is how a transition becomes a bug. A 550ms failsafe navigates
+anyway if the transition stalls, so the veil can never trap anyone on a covered
+page, and `pageshow` clears it on bfcache restore.
+
+The smooth-scroll nav calls `preventDefault()`, which also cancels the hash the
+browser would have written. `history.replaceState` puts it back, so `#quote`
+and friends stay deep-linkable and the back button still works.
 
 ### Mouse scrub needs HTTP Range — and degrades if it is missing
 
