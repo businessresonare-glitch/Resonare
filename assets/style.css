@@ -1060,7 +1060,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
 
 /* ---- Line rain ----------------------------------------------------------- */
 [data-line-rain]{ position:relative; overflow:hidden; }
-[data-line-rain] > *:not(.line-rain){ position:relative; z-index:2; }
+[data-line-rain] > *:not(.line-rain):not(.r3d-stage):not(.r3d-caption):not(.hero-video){ position:relative; z-index:2; }
 .line-rain{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
 .line-rain i{
   position:absolute; top:-32%; width:1px; height:30%;
@@ -1075,7 +1075,7 @@ footer p{ font-size:var(--fs-sm); line-height:1.68; letter-spacing:-.004em; }
    padding. Denser grid, a rule that draws in above each figure, and real
    contrast on the card surface. */
 .stats-band{ position:relative; overflow:hidden; padding:96px 7vw 104px; }
-.stats-band > *:not(.line-rain){ position:relative; z-index:2; }
+.stats-band > *:not(.line-rain):not(.r3d-stage):not(.r3d-caption):not(.hero-video){ position:relative; z-index:2; }
 .stats-band .section-index{ display:block; }
 .stats-band h2{ margin:14px auto 8px; max-width:640px; }
 .stats-band .stats-sub{ color:rgba(255,255,255,.6); font-size:var(--fs-md); max-width:520px; margin:0 auto 52px; }
@@ -1386,7 +1386,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
                    That is exactly what happened the day the videos were
                    switched on: the heroes still "worked", they were just
                    entirely below the fold. */
-[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption):not(.hero-video):not(.cine-inner):not(.cine-foot){ position:relative; z-index:1; }
+[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption):not(.hero-video):not(.cine-inner):not(.cine-foot):not(.line-rain){ position:relative; z-index:1; }
 
 /* A framed, interactive scene — used where the artwork is the subject rather
    than a backdrop. */
@@ -2271,7 +2271,11 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   }
   .cine-stats::-webkit-scrollbar{ display:none; }
   .cine-stat{ flex:0 0 min(58vw,196px); scroll-snap-align:start; }
-  .cine-stat span{ white-space:nowrap; }
+  /* The card width is fixed by the flex basis above, so nowrap bought nothing
+     and cost the one label long enough to need two lines: "Mobile-first &
+     SEO-ready" measures ~212px against a 186px card and printed straight out
+     through the glass panel's edge. */
+  .cine-stat span{ white-space:normal; }
   .cine-actions{ gap:12px; }
   .btn-glass{ padding:14px 22px; font-size:14px; }
 }
@@ -2483,7 +2487,12 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   background:linear-gradient(135deg,#F2F2F2,#9A9A9A); color:#fff;
 }
 .wa-top h2{ font-family:var(--font-display); font-weight:400; font-size:24px; letter-spacing:-.01em; line-height:1.1; }
-.wa-top span{
+/* Direct child only. As a descendant selector this matched every <span> the
+   split-text reveal injects into the <h2>, so each character of "Send it
+   straight to our WhatsApp" picked up the label font, uppercase, tracking —
+   and, on phones, padding-left:53px — and the headline rendered as a grid of
+   scattered letters. */
+.wa-top > span:not(.wa-mark){
   margin-left:auto; font-family:var(--font-label); font-size:var(--fs-2xs);
   letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.5);
 }
@@ -2597,7 +2606,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 @media(max-width:560px){
   .wa-top{ flex-wrap:wrap; row-gap:6px; }
   .wa-top h2{ font-size:21px; flex:1 1 auto; min-width:0; }
-  .wa-top span{ flex:1 1 100%; margin-left:0; padding-left:53px; }
+  .wa-top > span:not(.wa-mark){ flex:1 1 100%; margin-left:0; padding-left:53px; }
 }
 
 /* ==========================================================================
@@ -3501,3 +3510,63 @@ em{ color:var(--accent-soft); }
 .spec-swatches i:nth-child(3){ background:#22D3EE; }
 .spec-swatches i:nth-child(4){ background:#FF5C8A; }
 .spec-swatches i:nth-child(5){ background:#FFB020; }
+
+/* ==========================================================================
+   MOBILE HERO FOOT — FLEX SHRINK
+   .cine-hero is a column flex container with min-height:100vh, so every
+   descendant flex item is shrinkable along the block axis. On a phone the
+   trust chip wraps to three lines, the foot gets squeezed, and the chip's
+   box ends up shorter than its own text — which is why the last line spilled
+   out below the pill's border. Nothing in the foot should ever shrink.
+   ========================================================================== */
+.cine-hero > .cine-foot{ flex:0 0 auto; }
+.cine-chip,
+.cine-trust{ flex:0 0 auto; }
+/* A pill radius on a three-line block reads as a mistake; square it off a
+   little once the text is guaranteed to wrap. */
+@media(max-width:640px){
+  .cine-chip{ border-radius:20px; letter-spacing:.1em; line-height:1.55; }
+}
+
+/* The trust row scrolls horizontally on small screens. Without an edge fade
+   the last name simply looks cut in half, so the row reads as broken rather
+   than swipeable. */
+@media(max-width:820px){
+  .cine-trust{
+    -webkit-mask-image:linear-gradient(90deg, #000 0, #000 84%, transparent 100%);
+    mask-image:linear-gradient(90deg, #000 0, #000 84%, transparent 100%);
+  }
+}
+
+/* ==========================================================================
+   ROTATOR INSIDE A FLEX CONTAINER
+   .eyebrow and .cine-badge are both inline-flex. A bare <span> dropped into
+   one becomes its own flex item, so the sentence splits in two: the lead-in
+   text takes one item, the rotating word takes another, and the container's
+   gap wedges them apart — badly enough on a phone that the word lands on the
+   far side of the badge. The word now travels inside a single text item.
+   ========================================================================== */
+.eyebrow-text,
+.cine-badge-text{ display:block; min-width:0; }
+.eyebrow-text .rotator,
+.cine-badge-text .rotator{ display:inline-block; }
+
+/* ==========================================================================
+   SPLIT-REVEAL SPANS ARE NOT DECORATION
+   initSplitHeadings() injects <span class="sr-word"><span class="sr-char">
+   into every h1/h2. Any ancestor rule written as `.foo span { … }` matches
+   them, and a single stray padding or flex-basis turns a headline into a grid
+   of loose letters. Two rules have already been caught this way (.eyebrow and
+   .wa-top). This resets the properties that can break a line of text — they
+   are pieces of a word and nothing else. Two classes (0,2,0) so it outranks
+   the `.foo span` (0,1,1) pattern that causes the damage.
+   ========================================================================== */
+.sr-split .sr-word,
+.sr-split .sr-char{
+  flex:0 0 auto; padding:0; margin:0;
+  width:auto; min-width:0; max-width:none;
+  background:none; border:0;
+  font-family:inherit; font-size:inherit; font-weight:inherit;
+  letter-spacing:inherit; text-transform:inherit; color:inherit;
+  line-height:inherit; text-align:inherit;
+}

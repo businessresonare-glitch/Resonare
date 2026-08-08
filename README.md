@@ -290,7 +290,7 @@ library, in keeping with the no-external-requests rule.
 
 Every one has a `prefers-reduced-motion` path.
 
-### The animation kit, and the four traps in it
+### The animation kit, and the traps in it
 
 The kit is CSS-first: JS writes one custom property or toggles one class, and
 the compositor does the rest. Four things in it are load-bearing and easy to
@@ -303,11 +303,36 @@ absolutely positioned over the incoming one for the length of the swap, so the
 two never occupy flow at the same time. The real text stays in the HTML as the
 no-JS fallback — `data-rotate` alone would leave an empty span for crawlers.
 
-**`.eyebrow span` used to style every descendant span.** The hero eyebrow's
-decorative dot was set with `.eyebrow span { width:7px }`, so the moment a
-rotator went inside it, the rotator *and* its measuring probe became 7px dots
-and the word vanished. The rule is now `.eyebrow > span:first-child`. Any new
-markup inside a decorated container is worth checking for the same thing.
+**Descendant selectors on bare `span` are the recurring hazard.** Three
+separate breaks came from the same shape — a rule written as `.foo span { … }`
+matching markup that JS injected later:
+
+- `.eyebrow span { width:7px }` (the decorative dot) collapsed the rotator
+  *and* its measuring probe to 7px dots, so the word vanished.
+- `.wa-top span { … padding-left:53px; text-transform:uppercase }` (the
+  "Fastest" badge) matched every `.sr-char` the split-text reveal injects into
+  the `<h2>`, and "Send it straight to our WhatsApp" rendered on phones as a
+  grid of loose capital letters.
+- `.cine-badge` and `.eyebrow` are `inline-flex`, so a bare `<span>` dropped
+  inside becomes its own flex item: the lead-in text took one item, the
+  rotating word took another, and the container's `gap` wedged them apart.
+
+All three are fixed at source — the first two scoped to a direct child, the
+third by wrapping the sentence in one `.eyebrow-text` / `.cine-badge-text`
+item. There is also a defensive reset late in the stylesheet: `.sr-split
+.sr-word, .sr-split .sr-char` neutralise padding, flex, font and case at
+(0,2,0), which outranks the `(0,1,1)` `.foo span` pattern that causes the
+damage. `scratchpad/glyphs.js` checks every split heading on every page and
+size for exactly this failure.
+
+**Two host attributes on one section will cross-pin each other's layers.**
+`[data-r3d-host] > *:not(…)` lifts real content above the canvas, and
+`[data-line-rain] > *:not(.line-rain)` does the same over the rain. A section
+carrying *both* — `.signal-section` on the home page, `.stats-band` on about —
+had each rule pin the *other* rule's absolutely-positioned layer into normal
+flow. The r3d canvas took 181px of real layout height and the section grew a
+250px empty band above its own copy. Each `:not()` chain now names the other's
+layers. If you add a third decorative layer, it has to go in both chains.
 
 **`overflow:hidden` and `position:sticky` cannot share an ancestor.** The
 explorations section clips its drifting columns, and `overflow:hidden` turns
@@ -315,6 +340,14 @@ the section into a scroll container — which is what the sticky centre panel
 then sticks *inside*, so it silently rode past the viewport instead of pinning.
 The section uses `overflow:clip` (clips without creating a scroll container)
 and the columns carry their own `overflow:hidden`.
+
+**`.cine-hero` is a column flex container, so everything in it can shrink.**
+With `min-height:100vh` and a phone-width trust chip wrapping to three lines,
+the foot got squeezed and the chip's box ended up shorter than its own text —
+the last line printed outside the pill's border. Nothing in `.cine-foot`
+shrinks now (`flex:0 0 auto`). The same shape caused the services hero's
+`Mobile-first & SEO-ready` label to run out through the glass: it was
+`white-space:nowrap` inside a fixed-width card it could not fit.
 
 **A parallax section has to be taller than the viewport.** `initParallax()`
 derives progress from `height − innerHeight`; at `100vh` that span is zero and
