@@ -406,6 +406,32 @@ card's bottom edge — and no stylesheet rule could relax it without
 its content first. `scratchpad/clipcheck.js` sweeps for anything else an
 `overflow:hidden` ancestor is cutting off.
 
+### Form fields: two light-theme survivors and one control the page cannot style
+
+`.form-group input:focus` carried `background:#fff` from the light theme. The
+field's text colour is white, so focusing any input in the brief turned it into
+white-on-white and whatever you typed vanished. Placeholders had the mirror
+problem — `rgba(85,85,85,.55)`, about 1.2:1 on a dark field. Focus now lifts the
+field to `rgba(255,255,255,.09)`; placeholders are light.
+
+The `<select>` popup is worse, because **the page cannot reach it**. The option
+list is drawn by the OS, and on Windows and Linux Chrome it defaults to a white
+sheet while inheriting the select's white text — so the list rendered as an
+empty white rectangle with only the row under the cursor visible, because the
+OS highlight supplies its own background. `option` needs `background-color` and
+`color` stated explicitly; nothing else in the stylesheet can affect it.
+
+`select` also gets `appearance:none` and its own chevron, because the native
+arrow is drawn in the UA's text colour and disappears on dark. That chevron
+lives in `background-image`, which is why the field rules use
+**`background-color`, not the `background` shorthand** — the shorthand resets
+`background-image` to none, and the first version of this fix lost the arrow on
+focus for exactly that reason.
+
+`scratchpad/fields.js` measures every control's text and placeholder against
+painted pixels, focused and unfocused; `scratchpad/quoteflow.js` walks all
+three steps of the brief.
+
 ### Page transitions are deliberately narrow
 
 `initPageTransition()` only intercepts plain left-clicks on same-origin links

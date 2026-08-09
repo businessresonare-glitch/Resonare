@@ -560,9 +560,14 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .form-group label{ font-size:13px; font-weight:600; color:var(--text);}
 .form-group input, .form-group select, .form-group textarea{
   font-family:var(--font-ui); font-size:14.5px; padding:13px 16px; border-radius:12px; border:1.5px solid rgba(255,255,255,0.18);
-  background:rgba(255,255,255,.05); color:var(--text); transition:border-color .3s var(--ease), background .3s var(--ease); resize:vertical;
+  /* background-COLOR, not the shorthand: the shorthand also resets
+     background-image, which is where the select keeps its chevron. */
+  background-color:rgba(255,255,255,.05); color:var(--text); transition:border-color .3s var(--ease), background-color .3s var(--ease); resize:vertical;
 }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus{ outline:none; border-color:var(--rust); background:#fff; }
+/* background:#fff here is a survivor of the light theme. On the dark site the
+   field text stays white, so focusing any input turned it into white-on-white
+   and whatever you typed vanished. Focus now *lifts* the field instead. */
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus{ outline:none; border-color:var(--rust); background-color:rgba(255,255,255,.09); }
 .contact-form .btn{ width:100%; justify-content:center; margin-top:6px;}
 .form-note{ font-size:12.5px; color:var(--ink-soft); margin-top:14px; text-align:center;}
 @media(max-width:980px){ .contact-grid{ grid-template-columns:1fr; } .form-row{ grid-template-columns:1fr; } }
@@ -877,8 +882,10 @@ header.site-header.scrolled{
   padding:14px 16px; border-radius:12px; border:1.5px solid rgba(255,255,255,0.16);
   transition:border-color .25s var(--ease-out), box-shadow .25s var(--ease-out), background .25s var(--ease-out);
 }
+/* Also a light-theme leftover: a dark-grey placeholder on a dark field
+   measures about 1.2:1. */
 .form-group input::placeholder,
-.form-group textarea::placeholder{ color:rgba(85,85,85,.55); }
+.form-group textarea::placeholder{ color:rgba(255,255,255,.42); }
 .form-group input:hover,
 .form-group select:hover,
 .form-group textarea:hover{ border-color:rgba(255,255,255,0.27); }
@@ -3675,4 +3682,42 @@ em{ color:var(--accent-soft); }
 }
 @media(max-width:900px){
   .mini-impact{ padding:30px 22px; }
+}
+
+/* ==========================================================================
+   NATIVE SELECT POPUP
+   The <option> list is drawn by the OS, not by the page, and on Windows and
+   Linux Chrome it defaults to a white sheet. The select's own colour is
+   inherited into it, so white-on-dark text became white-on-white and the whole
+   list read as empty — only the row under the cursor was visible, because the
+   OS highlight supplies its own background. Options need their colours stated
+   explicitly; nothing else in the page can reach them.
+   ========================================================================== */
+.form-group select,
+.wa-field select,
+select{
+  color:var(--text);
+  /* Chrome paints the closed control from background-color, not the
+     background shorthand's image, so state it too. */
+  background-color:var(--ink-700);
+}
+.form-group select option,
+.wa-field select option,
+select option{
+  background-color:var(--ink-800);
+  color:var(--text);
+}
+.form-group select option:checked,
+select option:checked{
+  background-color:var(--accent);
+  color:var(--accent-ink);
+}
+/* The native arrow is drawn in the UA's text colour and disappears on dark, so
+   the control supplies its own. */
+.form-group select{
+  -webkit-appearance:none; appearance:none;
+  padding-right:44px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%23C6C6D8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 16px center;
 }
