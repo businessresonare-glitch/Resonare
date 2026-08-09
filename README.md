@@ -406,6 +406,21 @@ card's bottom edge — and no stylesheet rule could relax it without
 its content first. `scratchpad/clipcheck.js` sweeps for anything else an
 `overflow:hidden` ancestor is cutting off.
 
+### A custom property is substituted where it is DECLARED
+
+`--rust` and `--rust-light` are legacy names, aliased at `:root` as
+`--rust: var(--accent)`. That alias is resolved **on `:root`**, against
+`:root`'s indigo, and what inherits down the tree is the already-substituted
+indigo — not a live reference. So redefining `--accent` on
+`body[data-accent="amber"]` never reached them, and every remaining `--rust`
+consumer stayed indigo on every page. On the contact page that was visible as
+an indigo step label and progress rail sitting inside an otherwise amber card.
+Each palette block now restates both aliases. If you add another token that
+aliases `--accent`, it has to go in those five blocks too, or it will silently
+freeze at the default.
+
+`scratchpad/accent.js` asserts `--rust` matches each page's accent.
+
 ### Form fields: two light-theme survivors and one control the page cannot style
 
 `.form-group input:focus` carried `background:#fff` from the light theme. The
@@ -414,19 +429,26 @@ white-on-white and whatever you typed vanished. Placeholders had the mirror
 problem — `rgba(85,85,85,.55)`, about 1.2:1 on a dark field. Focus now lifts the
 field to `rgba(255,255,255,.09)`; placeholders are light.
 
-The `<select>` popup is worse, because **the page cannot reach it**. The option
-list is drawn by the OS, and on Windows and Linux Chrome it defaults to a white
-sheet while inheriting the select's white text — so the list rendered as an
-empty white rectangle with only the row under the cursor visible, because the
-OS highlight supplies its own background. `option` needs `background-color` and
-`color` stated explicitly; nothing else in the stylesheet can affect it.
+The `<select>` popup is worse, because **the page cannot reach it**. That list
+is drawn outside the document by the browser's widget layer, and on Windows and
+Linux it defaults to a white sheet while inheriting the select's white text —
+so it rendered as an empty white rectangle with only the row under the cursor
+visible, because the OS highlight supplies the only background in it. Stating
+`option { background-color; color }` helps on some builds and is ignored on
+others, which is not a fix.
 
-`select` also gets `appearance:none` and its own chevron, because the native
-arrow is drawn in the UA's text colour and disappears on dark. That chevron
-lives in `background-image`, which is why the field rules use
-**`background-color`, not the `background` shorthand** — the shorthand resets
-`background-image` to none, and the first version of this fix lost the arrow on
-focus for exactly that reason.
+So the popup is gone. `initSelects()` in `main.js` builds a listbox out of
+ordinary DOM the stylesheet owns completely — `role="combobox"` button plus
+`role="listbox"`, full keyboard support including type-ahead, click-outside to
+close. The real `<select>` stays in the document and stays authoritative: it is
+what the form submits and what `quote.js` reads, and the custom control writes
+back to it and fires `change`. With JavaScript off nothing is injected and the
+native control is still there, visible and working (checked by
+`scratchpad/nojs.js`).
+
+The field rules also use **`background-color`, not the `background`
+shorthand** — the shorthand resets `background-image` to none, which is where a
+styled select keeps its chevron.
 
 `scratchpad/fields.js` measures every control's text and placeholder against
 painted pixels, focused and unfocused; `scratchpad/quoteflow.js` walks all

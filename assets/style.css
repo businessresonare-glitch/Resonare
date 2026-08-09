@@ -1478,7 +1478,9 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   transition:transform .55s var(--ease-out);
 }
 .quote-rail i.is-done::after{ transform:scaleX(1); }
-.quote-rail i.is-active::after{ transform:scaleX(.5); }
+/* Half-filling the live segment reads as a rendering fault, not as progress —
+   the eye sees a bar that failed to draw. The step you are on counts. */
+.quote-rail i.is-active::after{ transform:scaleX(1); }
 
 /* The viewport animates its own height so the card grows and shrinks with the
    step instead of reserving the tallest step's height on every screen. */
@@ -2940,11 +2942,18 @@ body.hero-settled .cine-hero .cine-trust{ will-change:auto; }
    Everything downstream reads the token, so one line per page re-colours
    links, CTAs, focus rings, chips, the 3D scenes and the hero wash.
    ========================================================================== */
-body[data-accent="indigo"] { --accent:#6C7BFF; --accent-soft:#A5AEFF; --accent-deep:#3B49D6; --rust-glow:rgba(108,123,255,.45); }
-body[data-accent="violet"] { --accent:#9B6BFF; --accent-soft:#C4A5FF; --accent-deep:#6B3BD6; --rust-glow:rgba(155,107,255,.45); }
-body[data-accent="cyan"]   { --accent:#22D3EE; --accent-soft:#7DE8F7; --accent-deep:#0E9BB4; --rust-glow:rgba(34,211,238,.42); }
-body[data-accent="rose"]   { --accent:#FF5C8A; --accent-soft:#FFA0BC; --accent-deep:#D62E5F; --rust-glow:rgba(255,92,138,.45); }
-body[data-accent="amber"]  { --accent:#FFB020; --accent-soft:#FFD27A; --accent-deep:#C77F00; --rust-glow:rgba(255,176,32,.42); }
+/* --rust and --rust-light are the legacy names, aliased at :root as
+   `--rust: var(--accent)`. A custom property is substituted where it is
+   DECLARED, not where it is used — so those aliases were resolved against
+   :root's --accent (indigo) and then inherited as a fixed indigo, no matter
+   what data-accent the <body> set. Every remaining --rust consumer (the quote
+   step label and its progress rail, focus rings, several chips) therefore
+   stayed indigo on an amber page. Each palette has to restate them. */
+body[data-accent="indigo"] { --accent:#6C7BFF; --accent-soft:#A5AEFF; --accent-deep:#3B49D6; --rust-glow:rgba(108,123,255,.45);  --rust:#6C7BFF; --rust-light:#A5AEFF;}
+body[data-accent="violet"] { --accent:#9B6BFF; --accent-soft:#C4A5FF; --accent-deep:#6B3BD6; --rust-glow:rgba(155,107,255,.45);  --rust:#9B6BFF; --rust-light:#C4A5FF;}
+body[data-accent="cyan"]   { --accent:#22D3EE; --accent-soft:#7DE8F7; --accent-deep:#0E9BB4; --rust-glow:rgba(34,211,238,.42);  --rust:#22D3EE; --rust-light:#7DE8F7;}
+body[data-accent="rose"]   { --accent:#FF5C8A; --accent-soft:#FFA0BC; --accent-deep:#D62E5F; --rust-glow:rgba(255,92,138,.45);  --rust:#FF5C8A; --rust-light:#FFA0BC;}
+body[data-accent="amber"]  { --accent:#FFB020; --accent-soft:#FFD27A; --accent-deep:#C77F00; --rust-glow:rgba(255,176,32,.42);  --rust:#FFB020; --rust-light:#FFD27A;}
 
 /* ==========================================================================
    WHERE THE COLOUR ACTUALLY LANDS
@@ -3720,4 +3729,62 @@ select option:checked{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%23C6C6D8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;
   background-position:right 16px center;
+}
+
+/* ==========================================================================
+   CUSTOM SELECT
+   Ordinary DOM, so the dark palette actually applies. See initSelects() in
+   main.js for why the native popup could not be trusted.
+   ========================================================================== */
+.sel{ position:relative; }
+/* The real <select> still submits; it just stops being the thing you see.
+   display:none would take it out of the form on some older engines, so it is
+   clipped instead. */
+.sel-native{
+  position:absolute; width:1px; height:1px; padding:0; margin:0;
+  opacity:0; pointer-events:none; overflow:hidden; clip-path:inset(50%);
+}
+.sel-btn{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  width:100%; text-align:left; cursor:pointer;
+  font-family:var(--font-ui); font-size:16px; color:var(--text);
+  padding:14px 16px; border-radius:12px;
+  border:1.5px solid rgba(255,255,255,0.16);
+  background-color:rgba(255,255,255,.05);
+  transition:border-color .25s var(--ease-out), background-color .25s var(--ease-out), box-shadow .25s var(--ease-out);
+}
+.sel-btn::after{
+  content:""; flex:0 0 auto; width:12px; height:8px;
+  background-color:var(--text-2);
+  clip-path:polygon(0 0, 50% 100%, 100% 0, 88% 0, 50% 76%, 12% 0);
+  transition:transform .25s var(--ease-out);
+}
+.sel.is-open .sel-btn::after{ transform:rotate(180deg); }
+.sel-btn:hover{ border-color:rgba(255,255,255,0.27); }
+.sel-btn:focus-visible{
+  outline:none; border-color:var(--rust);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.sel-list{
+  position:absolute; z-index:60; left:0; right:0; top:calc(100% + 6px);
+  margin:0; padding:6px; list-style:none;
+  max-height:264px; overflow-y:auto; overscroll-behavior:contain;
+  background:var(--ink-800);
+  border:1px solid var(--navy-line); border-radius:14px;
+  box-shadow:0 24px 48px -18px rgba(0,0,0,.75);
+}
+.sel-option{
+  padding:11px 14px; border-radius:9px; cursor:pointer;
+  font-family:var(--font-ui); font-size:15.5px; color:var(--text);
+  transition:background-color .15s var(--ease-out), color .15s var(--ease-out);
+}
+.sel-option:hover{ background-color:rgba(255,255,255,.09); }
+.sel-option.is-active{ background-color:var(--accent); color:var(--accent-ink); font-weight:600; }
+.sel-list::-webkit-scrollbar{ width:10px; }
+.sel-list::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.18); border-radius:10px;
+  border:3px solid var(--ink-800);
+}
+@media (prefers-reduced-motion: reduce){
+  .sel-btn, .sel-btn::after, .sel-option{ transition:none; }
 }

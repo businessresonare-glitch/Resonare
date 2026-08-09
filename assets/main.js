@@ -1216,3 +1216,176 @@ document.querySelectorAll('[data-scroll-to]').forEach(btn => {
     if (e.persisted) veil.classList.remove('is-out');
   });
 })();
+
+/* ==========================================================================
+   CUSTOM SELECT
+
+   The <option> list of a native <select> is drawn outside the page — by the
+   browser's own widget layer on Windows and Linux — and it only partially
+   honours CSS. On a dark site the usual failure is a white sheet with white
+   text: the list looks empty except for the row under the cursor, which the
+   OS highlight paints for you. Stating option colours helps on some builds and
+   does nothing on others, so this stops relying on it: the list below is
+   ordinary DOM the stylesheet owns completely.
+
+   The real <select> stays in the document and stays authoritative — it is what
+   the form submits and what quote.js reads. This is a presentation layer over
+   it, and if the script never runs the native control is still there, visible
+   and working.
+   ========================================================================== */
+(function initSelects(){
+  var uid = 0;
+
+  document.querySelectorAll('select').forEach(function (native) {
+    if (native.multiple || native.dataset.nativeSelect !== undefined) return;
+    if (!native.options.length) return;
+
+    var group = native.closest('.form-group') || native.parentElement;
+    var label = group ? group.querySelector('label') : null;
+    var id = 'sel' + (++uid);
+
+    if (label && !label.id) label.id = id + '-label';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'sel';
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sel-btn';
+    btn.id = id + '-btn';
+    btn.setAttribute('role', 'combobox');
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', id + '-list');
+    if (label) btn.setAttribute('aria-labelledby', label.id + ' ' + btn.id);
+
+    var value = document.createElement('span');
+    value.className = 'sel-value';
+    btn.appendChild(value);
+
+    var list = document.createElement('ul');
+    list.className = 'sel-list';
+    list.id = id + '-list';
+    list.setAttribute('role', 'listbox');
+    if (label) list.setAttribute('aria-labelledby', label.id);
+    list.hidden = true;
+
+    var items = [];
+    Array.prototype.forEach.call(native.options, function (opt, i) {
+      var li = document.createElement('li');
+      li.className = 'sel-option';
+      li.id = id + '-opt' + i;
+      li.setAttribute('role', 'option');
+      li.textContent = opt.textContent;
+      li.dataset.value = opt.value;
+      list.appendChild(li);
+      items.push(li);
+    });
+
+    native.parentNode.insertBefore(wrap, native);
+    wrap.appendChild(native);
+    wrap.appendChild(btn);
+    wrap.appendChild(list);
+
+    /* The native control is now decoration for accessibility tools that would
+       otherwise see it twice, but it still submits. */
+    native.classList.add('sel-native');
+    native.setAttribute('tabindex', '-1');
+    native.setAttribute('aria-hidden', 'true');
+
+    var open = false;
+    var active = Math.max(0, native.selectedIndex);
+
+    function paint() {
+      value.textContent = items[active] ? items[active].textContent : '';
+      items.forEach(function (li, i) {
+        var on = i === active;
+        li.setAttribute('aria-selected', on ? 'true' : 'false');
+        li.classList.toggle('is-active', on);
+      });
+      btn.setAttribute('aria-activedescendant', open && items[active] ? items[active].id : '');
+    }
+
+    function commit(i) {
+      active = i;
+      native.selectedIndex = i;
+      native.dispatchEvent(new Event('input', { bubbles: true }));
+      native.dispatchEvent(new Event('change', { bubbles: true }));
+      paint();
+    }
+
+    function setOpen(next) {
+      open = next;
+      list.hidden = !next;
+      btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+      wrap.classList.toggle('is-open', next);
+      if (next) {
+        paint();
+        /* keep the chosen row in view without scrolling the page around it */
+        if (items[active]) items[active].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    btn.addEventListener('click', function () { setOpen(!open); });
+
+    /* pointerdown, not click: the list closes on blur, and a click would land
+       after the row had already gone */
+    list.addEventListener('pointerdown', function (e) {
+      var li = e.target.closest('.sel-option');
+      if (!li) return;
+      e.preventDefault();
+      commit(items.indexOf(li));
+      setOpen(false);
+      btn.focus();
+    });
+
+    var typed = '', typedAt = 0;
+    btn.addEventListener('keydown', function (e) {
+      var k = e.key;
+      if (k === 'Escape') { if (open) { e.preventDefault(); setOpen(false); } return; }
+      if (k === 'Enter' || k === ' ' || k === 'Spacebar') {
+        e.preventDefault();
+        if (open) { setOpen(false); } else setOpen(true);
+        return;
+      }
+      if (k === 'ArrowDown' || k === 'ArrowUp' || k === 'Home' || k === 'End') {
+        e.preventDefault();
+        if (!open) setOpen(true);
+        var i = active;
+        if (k === 'ArrowDown') i = Math.min(items.length - 1, active + 1);
+        else if (k === 'ArrowUp') i = Math.max(0, active - 1);
+        else if (k === 'Home') i = 0;
+        else i = items.length - 1;
+        commit(i);
+        if (items[i]) items[i].scrollIntoView({ block: 'nearest' });
+        return;
+      }
+      /* type-ahead, same as the native control */
+      if (k.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        var now = Date.now();
+        typed = (now - typedAt < 800) ? typed + k : k;
+        typedAt = now;
+        var hit = items.findIndex(function (li) {
+          return li.textContent.toLowerCase().startsWith(typed.toLowerCase());
+        });
+        if (hit > -1) { commit(hit); if (items[hit]) items[hit].scrollIntoView({ block: 'nearest' }); }
+      }
+    });
+
+    document.addEventListener('pointerdown', function (e) {
+      if (open && !wrap.contains(e.target)) setOpen(false);
+    });
+    btn.addEventListener('blur', function () {
+      /* a pointerdown inside the list refocuses the button, so a real blur
+         means focus left the control entirely */
+      setTimeout(function () { if (open && !wrap.contains(document.activeElement)) setOpen(false); }, 0);
+    });
+
+    /* anything that sets the value programmatically stays in sync */
+    native.addEventListener('change', function () {
+      if (native.selectedIndex !== active) { active = native.selectedIndex; paint(); }
+    });
+
+    paint();
+  });
+})();
