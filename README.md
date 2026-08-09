@@ -356,6 +356,56 @@ nothing moves. `.explore` is `min-height:200vh`, and its grid uses
 `align-content:start` they all bunch into the first screen and the back half
 scrolls past empty.
 
+### Small bright points are the thing that reads as "glitchy"
+
+`about.html` used to run a generated WebM behind its hero. Those loops are
+fields of 1-2px specks, which is the single hardest content for a codec to hold
+together at this bitrate: the points pop in and out between frames and the
+whole hero looks like it is malfunctioning. It is now the `aurora` scene in
+`r3d.js` — five very large, very slow soft orbs on 40-60s periods, drawn to
+canvas. Nothing in it is small enough to flicker, and measured frame-to-frame
+pixel churn dropped from ~0.7% to ~0.03%. The same reasoning applies to the
+three remaining hero videos: if one starts looking noisy, this is why.
+
+`aurora` sets `fitMode:'none'`, which pins `stage.fit` at 1 so its radii are
+plain screen space rather than the 620px-referenced scale the projected scenes
+use.
+
+### The chart says which number is the bad one
+
+Before/after was drawn in two greys, so the reader had to work out from the
+slope which side was the problem. It is now red down / green up, from one pair
+of tokens (`--chart-down`, `--chart-up` and their `-soft` / `-tint` variants)
+shared by the home page's full-size pair and the about page's mini version.
+White on `#FF5A5A` measures 3.06:1, so the delta pills carry a tinted
+background with the colour in the *text* instead — every label lands between
+7.7:1 and 13.2:1.
+
+### A tap target and a painted dot are two different boxes
+
+The section-dot rail was one `<button>` doing both jobs: a 9px dot and an 18px
+padding ring for the tap target, held apart only by `background-clip:
+content-box`. The `background:` **shorthand** in the `[data-dark]` rules resets
+`background-clip` to `border-box` — so on the home page the rail rendered as six
+45px filled blobs, overlapping each other because `margin:-18px` had also eaten
+the 16px gap. The visible dot is now a `::before` and the button is a
+transparent 45x44 hit area with `gap:0`: no background rule can reach the hit
+area, and consecutive targets touch without overlapping.
+
+The 44px is deliberate rather than the 24px WCAG 2.5.8 asks for — the rail is
+visible from 1100px up, and an iPad Pro in landscape is 1194px, a touch device
+inside that range.
+
+### Inline styles cannot be undone by a media query
+
+The about page's before/after card carried `aspect-ratio:4/3` inline, and
+`.img-frame` clips. At ~370px wide that ratio gives the card 277px of height for
+~330px of content, so the entire "After RESONARE" chart was sliced off at the
+card's bottom edge — and no stylesheet rule could relax it without
+`!important`. The declarations now live in the stylesheet and the card sizes to
+its content first. `scratchpad/clipcheck.js` sweeps for anything else an
+`overflow:hidden` ancestor is cutting off.
+
 ### Page transitions are deliberately narrow
 
 `initPageTransition()` only intercepts plain left-clicks on same-origin links

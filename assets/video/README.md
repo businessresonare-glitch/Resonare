@@ -1,11 +1,19 @@
 # Hero background videos
 
-Four ambient loops, one per interior hero. **These ship and are switched on** —
-`assets/hero.js` has `VIDEO_ENABLED = true`.
+Three ambient loops. **These ship and are switched on** — `assets/hero.js` has
+`VIDEO_ENABLED = true`.
+
+> **about.html no longer uses one.** These clips are fields of small bright
+> points, which is the single hardest thing for a video codec to hold together
+> at this bitrate — the about loop broke up into visible flicker and read as a
+> glitch. It was replaced by the `aurora` scene in `r3d.js`: five very large,
+> very slow soft orbs, which cannot flicker because nothing in them is small
+> enough to. If another hero starts looking noisy, that is the cause and that
+> is the fix.
 
 | File | Used by | Size |
 |---|---|---|
-| `hero-about.webm` + `.jpg` | about.html | ~367 KB |
+| ~~`hero-about.webm`~~ | *removed* | — |
 | `hero-services.webm` + `.jpg` | services.html | ~354 KB |
 | `hero-work.webm` + `.jpg` | work.html | ~515 KB |
 | `hero-contact.webm` + `.jpg` | contact.html | ~401 KB |

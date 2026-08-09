@@ -589,6 +589,50 @@
     };
   };
 
+  /* 7. AURORA — the calm one.
+     Everything else in this file draws hundreds of small points. That reads as
+     energy on a hero you scroll past, but on a page about the studio itself it
+     reads as noise — and small points are also the one thing a video codec
+     cannot hold together, which is why the generated backdrop this replaces
+     looked like it was glitching. There is nothing here small enough to
+     flicker: five very large, very soft orbs on ~40-60s periods, drifting
+     against each other so the pattern never visibly repeats.
+     fitMode 'none' keeps fit at 1, so the radii below are plain screen space. */
+  SCENES.aurora = function () {
+    var ORBS = [
+      { x:0.30, y:0.30, r:0.62, col:'indigo', a:0.20, fx:0.0021, fy:0.0016, ax:0.10, ay:0.07, ph:0.0 },
+      { x:0.72, y:0.26, r:0.50, col:'rust',   a:0.16, fx:0.0017, fy:0.0025, ax:0.12, ay:0.06, ph:1.7 },
+      { x:0.50, y:0.70, r:0.70, col:'indigo', a:0.13, fx:0.0013, fy:0.0019, ax:0.09, ay:0.08, ph:3.1 },
+      { x:0.16, y:0.72, r:0.42, col:'gold',   a:0.09, fx:0.0024, fy:0.0014, ax:0.08, ay:0.05, ph:4.4 },
+      { x:0.86, y:0.60, r:0.46, col:'rust',   a:0.11, fx:0.0015, fy:0.0022, ax:0.07, ay:0.09, ph:5.6 }
+    ];
+    return {
+      fitMode: 'none',
+      draw: function (s) {
+        var ctx = s.ctx;
+        var m = Math.min(s.w, s.h);
+        ctx.globalCompositeOperation = 'lighter';
+
+        /* a wide standing wash so the hero never bottoms out to flat black */
+        s.glow(s.w * 0.5, s.h * 0.34, m * 1.05, PALETTE.indigo, 0.075);
+
+        for (var i = 0; i < ORBS.length; i++) {
+          var o = ORBS[i];
+          var x = (o.x + Math.sin(s.t * o.fx + o.ph) * o.ax) * s.w;
+          var y = (o.y + Math.cos(s.t * o.fy + o.ph * 0.7) * o.ay) * s.h;
+          var breath = 1 + Math.sin(s.t * o.fx * 0.6 + o.ph) * 0.12;
+          /* pointer parallax scaled by size, so the big soft ones lag behind
+             the small ones and the field reads as having depth */
+          x += s.px * (18 + o.r * 46);
+          y += s.py * (10 + o.r * 26);
+          s.glow(x, y, m * o.r * breath, PALETTE[o.col], o.a);
+        }
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+    };
+  };
+
   /* ---- Mounting ---------------------------------------------------------- */
   var mounted = [];
 

@@ -731,12 +731,15 @@ body.cursor-custom select{ cursor:auto; }
   opacity:0; transition:opacity .7s var(--ease) .6s;}
 body.loaded .section-dots{ opacity:1; }
 @media (prefers-reduced-motion: reduce){ .section-dots{ opacity:1; } }
-.section-dots button{ width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,0.23); border:none; cursor:pointer; padding:0; position:relative; transition:background .3s var(--ease), transform .3s var(--ease);}
+/* The visible dot moved to ::before (see SECTION DOTS, later in this file).
+   These rules keep only what still belongs on the <button> itself. */
+.section-dots button{ border:none; cursor:pointer; position:relative; }
 .section-dots button::after{ content:attr(data-label); position:absolute; right:20px; top:50%; transform:translateY(-50%); background:var(--ink); color:#fff; font-family:var(--font-label); font-size:11px; padding:6px 12px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .25s var(--ease), transform .25s var(--ease);}
 .section-dots button:hover::after{ opacity:1; transform:translateY(-50%) translateX(-4px); }
-.section-dots button.active{ background:var(--rust); transform:scale(1.35); }
-.section-dots[data-dark="true"] button{ background:rgba(255,255,255,.28); }
-.section-dots[data-dark="true"] button.active{ background:var(--rust-light); }
+/* background/transform now live on ::before — on the button they painted and
+   scaled the whole 45x25 tap area. */
+
+
 @media(max-width:1100px){ .section-dots{ display:none; } }
 
 /* ============ MISC PAGE UTILITIES ============ */
@@ -2799,7 +2802,7 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .footer-col a{ padding:11px 0; margin:-11px 0; }
 .to-top{ min-width:46px; min-height:46px; }
 /* The dots stay 9px of ink inside a 44px reach. */
-.section-dots button{ box-sizing:content-box; padding:18px; margin:-18px; background-clip:content-box; }
+/* tap target is set with the dot itself, later in this file */
 .text-link{ padding:11px 0; margin:-11px 0; }
 
 /* Every text-entry field is 16px on every width. Under 16px iOS Safari zooms
@@ -3569,4 +3572,107 @@ em{ color:var(--accent-soft); }
   font-family:inherit; font-size:inherit; font-weight:inherit;
   letter-spacing:inherit; text-transform:inherit; color:inherit;
   line-height:inherit; text-align:inherit;
+}
+
+/* ==========================================================================
+   BEFORE / AFTER CHART COLOUR
+   Both charts read as two shades of grey, which asks the visitor to work out
+   from the axis which one is the bad news. Red for the decline, green for the
+   recovery — one pair of tokens so the home page and the about page cannot
+   drift apart.
+   ========================================================================== */
+:root{
+  --chart-down:#FF5A5A;  --chart-down-soft:#FFA8A8;  --chart-down-tint:rgba(255,90,90,.18);
+  --chart-up:#3DDC84;    --chart-up-soft:#9BEEC2;    --chart-up-tint:rgba(61,220,132,.18);
+}
+
+/* ---- home page: the big before/after pair ---- */
+.impact-line.down{ stroke:var(--chart-down); }
+.impact-line.up{ stroke:var(--chart-up); }
+.impact-before .impact-dot{ fill:var(--chart-down); }
+.impact-after  .impact-dot{ fill:var(--chart-up); }
+/* the ring never had a stroke, so the pulse it animates was invisible */
+.impact-before .impact-dot-ring{ stroke:var(--chart-down); }
+.impact-after  .impact-dot-ring{ stroke:var(--chart-up); }
+.impact-badge-down{ background:var(--chart-down-tint); color:var(--chart-down-soft); }
+.impact-badge-up{ background:var(--chart-up-tint); color:var(--chart-up-soft); }
+
+/* ---- about page: the same story at a quarter of the size ---- */
+.mini-line.down{ stroke:var(--chart-down); }
+.mini-line.up{ stroke:var(--chart-up); }
+.mini-dot.down{ fill:var(--chart-down); }
+.mini-dot.up{ fill:var(--chart-up); }
+.mini-dot-ring.down{ stroke:var(--chart-down); }
+.mini-dot-ring.up{ stroke:var(--chart-up); }
+.mini-impact-label.down{ color:var(--chart-down-soft); }
+.mini-impact-label.up{ color:var(--chart-up-soft); }
+/* White on #FF5A5A is 3.06:1 — under AA at this size. Tint the pill and take
+   the colour into the text instead, same as the badges above. */
+.mini-delta.down{ background:var(--chart-down-tint); color:var(--chart-down-soft); }
+.mini-delta.up{ background:var(--chart-up-tint); color:var(--chart-up-soft); }
+
+/* ==========================================================================
+   SECTION DOTS
+   The visible dot is now a ::before, and the <button> is a transparent hit
+   area. It used to be the other way round: the button carried both the 9px
+   dot and an 18px padding ring for the tap target, held apart only by
+   background-clip:content-box — which the `background:` *shorthand* in the
+   [data-dark] rules silently reset to border-box. The result on the home page
+   was six 45px filled blobs, overlapping each other because margin:-18px also
+   swallowed the 16px gap. Splitting the two roles means no background rule can
+   ever paint the hit area again.
+   ========================================================================== */
+.section-dots{ gap:0; }
+.section-dots button{
+  box-sizing:content-box; width:9px; height:9px;
+  /* 45x44 target with gap:0, so consecutive targets touch but never overlap.
+     24px would clear WCAG 2.5.8, but these dots are visible from 1100px up and
+     an iPad Pro in landscape is 1194px — a touch device inside that range — so
+     they are held to the same 44px floor as every other control here. */
+  padding:17.5px 18px; margin:0;
+  background:none; border:none; border-radius:0;
+  transform:none; cursor:pointer; position:relative;
+}
+.section-dots button::before{
+  content:""; position:absolute; left:50%; top:50%;
+  width:9px; height:9px; margin:-4.5px 0 0 -4.5px;
+  border-radius:50%; background:rgba(255,255,255,.30);
+  transition:background .3s var(--ease), transform .3s var(--ease);
+}
+.section-dots button:hover::before{ background:rgba(255,255,255,.55); }
+.section-dots button.active::before{ background:var(--accent-soft); transform:scale(1.45); }
+.section-dots[data-dark="true"] button{ background:none; }
+.section-dots[data-dark="true"] button::before{ background:rgba(255,255,255,.32); }
+.section-dots[data-dark="true"] button.active::before{ background:var(--accent-soft); }
+.section-dots button:focus-visible::before{ box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* ==========================================================================
+   SCROLL RAIL — say what it is
+   A bare 1px hairline floating between the stat cards and the trust chip
+   reads as a rendering artefact, not an invitation. Labelled, it reads as the
+   scroll cue it is — matching .scroll-cue on the home page.
+   ========================================================================== */
+.cine-foot .scroll-rail::before{
+  content:"Scroll"; position:absolute; left:50%; bottom:calc(100% + 9px);
+  transform:translateX(-50%);
+  font-family:var(--font-label); font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--text-3); white-space:nowrap;
+}
+
+/* ==========================================================================
+   ABOUT: BEFORE/AFTER CARD
+   These declarations were inline on the element, which meant the hard
+   aspect-ratio:4/3 could not be relaxed by any media query — and .img-frame
+   clips. On a phone the card is ~370px wide, so 4/3 gives it 277px of height
+   for ~330px of content, and the whole "After RESONARE" chart was sliced off
+   at the card's bottom edge. The ratio is now a desktop-only nicety; the card
+   always sizes to its content first.
+   ========================================================================== */
+.mini-impact{
+  background:linear-gradient(135deg, var(--navy-deep), var(--navy-soft));
+  display:flex; align-items:center; justify-content:center;
+  padding:40px 34px;
+}
+@media(max-width:900px){
+  .mini-impact{ padding:30px 22px; }
 }
