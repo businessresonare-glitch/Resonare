@@ -454,6 +454,24 @@ styled select keeps its chevron.
 painted pixels, focused and unfocused; `scratchpad/quoteflow.js` walks all
 three steps of the brief.
 
+### A glow has to be the colour of the thing it comes off
+
+The WhatsApp dock button was a green circle wearing a **white** halo, pulsing
+on a 2.2s loop, on every page. Light coming off a green button is green; a
+white ring around it does not read as glow at all, it reads as a smudge on the
+screen — and an infinite pulse in the corner of every page is a lot of motion
+to spend on one link. The halo is now the button's own green, tight, and still,
+brightening on hover instead of on a timer.
+
+The primary CTAs were carrying `0 12px 30px -8px` at .45 alpha, which spreads
+far enough to look like a blurred duplicate of the button sitting behind it.
+Pulled in and pushed down (`0 10px 24px -14px`) with a small neutral shadow
+underneath, so it reads as lift with accent in it rather than as fog.
+
+`scratchpad/glowaudit.js` asserts, on all five pages, that the dock halo is
+green rather than white, that it is not animated, and that the primary CTA's
+blur stays inside 26px.
+
 ### Page transitions are deliberately narrow
 
 `initPageTransition()` only intercepts plain left-clicks on same-origin links

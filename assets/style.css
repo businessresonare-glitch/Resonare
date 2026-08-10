@@ -3788,3 +3788,35 @@ select option:checked{
 @media (prefers-reduced-motion: reduce){
   .sel-btn, .sel-btn::after, .sel-option{ transition:none; }
 }
+
+/* ==========================================================================
+   GLOW, TONED DOWN
+
+   The WhatsApp dock button was the worst of it: a WHITE halo pulsing around a
+   green circle, forever. A glow in a colour the button does not contain does
+   not read as light coming off the button — it reads as a smudge on the
+   screen, which is exactly what it looked like. The halo is now the button's
+   own green, tight, and still.
+
+   The primary CTAs were carrying a 30px blur at .45 alpha, which spreads far
+   enough to read as a blurry double of the button rather than as lift. Pulled
+   in and pushed down so it reads as a shadow with the accent in it.
+   ========================================================================== */
+.sticky-socials a.whatsapp-glow::after{
+  box-shadow:0 0 20px 1px rgba(37,211,102,.34);
+  animation:none;
+  transform:none;
+  opacity:1;
+  transition:box-shadow .35s var(--ease);
+}
+.sticky-socials a.whatsapp-glow:hover::after{
+  box-shadow:0 0 26px 3px rgba(37,211,102,.5);
+}
+@media (prefers-reduced-motion: reduce){
+  .sticky-socials a.whatsapp-glow::after{ animation:none; }
+}
+
+.btn-primary{ box-shadow:0 10px 24px -14px var(--rust-glow), 0 2px 6px -2px rgba(0,0,0,.5); }
+.btn-primary:hover{ box-shadow:0 16px 30px -16px var(--rust-glow), 0 3px 8px -2px rgba(0,0,0,.55); }
+.header-cta{ box-shadow:0 6px 16px -10px var(--rust-glow) !important; }
+.header-cta:hover{ box-shadow:0 10px 20px -12px var(--rust-glow) !important; }
