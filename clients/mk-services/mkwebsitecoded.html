@@ -2221,11 +2221,20 @@ body{overflow-x:clip}
    repaint of the band on every scroll frame on Android, which is the
    juddering this effect is normally blamed for.
 
-   How it holds still: .pinband-media is a full-viewport sticky layer whose
-   height is cancelled by an equal negative bottom margin, so it takes no
-   space in the flow. The copy that follows therefore starts at the top of
-   the section and travels up over the photograph, and the photograph
-   releases the moment the section ends.
+   How it holds still: .pinband-media is a full-viewport sticky layer, and
+   .pinband-flow is pulled back over it by an equal negative TOP margin. The
+   copy therefore starts at the top of the section and travels up over the
+   photograph, and the photograph releases the moment the section ends.
+
+   The negative margin belongs to the flow, not to the media, and that is not
+   a stylistic choice. A sticky element's constraint rectangle is its
+   containing block shrunk by its own margins — so putting margin-bottom:
+   -100lvh on the sticky layer instead GROWS that rectangle by a full
+   viewport, and the photograph is then allowed to travel a whole screen past
+   the end of its own band. It painted straight through the next section,
+   which has no background of its own, and the dark headline there landed on
+   top of a photograph. Keeping the media's margin box at its full height
+   pins it to the band exactly.
 
    Height units: the media uses lvh (largest viewport) so no gap appears when
    the mobile address bar retracts; the first screen of copy uses svh
@@ -2241,7 +2250,6 @@ body{overflow-x:clip}
 .pinband-media{
   position:sticky;top:0;z-index:0;
   height:100vh;height:100lvh;
-  margin-bottom:-100vh;margin-bottom:-100lvh;
   overflow:hidden;pointer-events:none;
   background:var(--navy-900);
 }
@@ -2273,7 +2281,10 @@ body{overflow-x:clip}
       rgba(8,11,24,0) 76%);
 }
 
-.pinband-flow{position:relative;z-index:1}
+.pinband-flow{
+  position:relative;z-index:1;
+  margin-top:-100vh;margin-top:-100lvh;
+}
 
 /* First screen: the photograph does the talking, so only an eyebrow, the
    headline and a caption sit on it, aligned to the bottom of the frame. */
@@ -2318,6 +2329,14 @@ body{overflow-x:clip}
    gradient belongs to the panel, not to the image, so it arrives with the
    text and leaves with it. */
 .pinband-panel{
+  /* The band has to be about twice the viewport for the photograph to stay
+     pinned while the whole panel travels over it: a sticky element's pinned
+     distance is the section's height minus its own, so a section only one
+     screen taller than the viewport releases the image halfway through the
+     copy. One screen of headline plus one screen of panel buys one full
+     screen of pinned scrolling. */
+  min-height:72vh;min-height:72lvh;
+  display:grid;align-content:center;
   padding-block:clamp(56px,9vh,112px) clamp(64px,10vh,110px);
   background:linear-gradient(180deg,
     rgba(8,11,24,0) 0%,
@@ -2370,10 +2389,13 @@ body{overflow-x:clip}
    sits in a portrait photograph. */
 @media (max-width:760px){
   .pinband-lead{
-    min-height:78vh;min-height:78svh;
+    min-height:88vh;min-height:88svh;
     padding-block:clamp(70px,12vh,110px) clamp(20px,3vh,32px);
   }
-  .pinband-panel{padding-block:clamp(46px,8vh,80px) clamp(52px,8vh,80px)}
+  .pinband-panel{
+    min-height:70vh;min-height:70lvh;
+    padding-block:clamp(46px,8vh,80px) clamp(52px,8vh,80px);
+  }
   .pinband h2{max-width:none}
   .pinband-facts div{padding:16px 18px}
   .pinband-cap{margin-top:18px;font-size:.79rem}
@@ -2391,10 +2413,11 @@ body{overflow-x:clip}
 @media (prefers-reduced-motion:reduce){
   .pinband-media{
     position:relative;top:auto;
-    height:clamp(240px,46vh,420px);margin-bottom:0;
+    height:clamp(240px,46vh,420px);
   }
+  .pinband-flow{margin-top:0}
   .pinband-lead{min-height:0;padding-block:clamp(34px,6vh,60px) 0}
-  .pinband-panel{background:none}
+  .pinband-panel{background:none;min-height:0;display:block}
   .pinband-scrim{
     background:linear-gradient(180deg,rgba(8,11,24,.18) 0%,rgba(8,11,24,.55) 100%);
   }

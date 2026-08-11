@@ -87,11 +87,26 @@ image jumps to an arbitrary crop and then stops moving) and forces a full
 repaint of the band on every scroll frame on Android. That is the juddering
 this effect normally gets blamed for.
 
-How it holds still: `.pinband-media` is a full-viewport sticky layer whose
-height is cancelled by an equal negative bottom margin, so it occupies no
-space in the flow. The copy that follows therefore begins at the top of the
-section and travels up over the photograph, and the photograph is released the
-moment the section ends.
+How it holds still: `.pinband-media` is a full-viewport sticky layer, and
+`.pinband-flow` is pulled back over it by an equal negative **top** margin. The
+copy therefore begins at the top of the section and travels up over the
+photograph, and the photograph is released the moment the section ends.
+
+The negative margin belongs to the flow, not to the media, and that is not a
+stylistic choice. A sticky element's constraint rectangle is its containing
+block shrunk by its own margins, so putting `margin-bottom:-100lvh` on the
+sticky layer instead *grows* that rectangle by a full viewport — the
+photograph is then allowed to travel a whole screen past the end of its own
+band. It painted straight through the following section, and on the pages
+where that section has no background of its own (Home, About, Coverage) the
+dark heading there landed on top of a photograph and became unreadable.
+Keeping the media's margin box at its full height pins it to the band exactly.
+
+The consequence is that a sticky element stays pinned for the section's height
+minus its own — so a band only one screen taller than the viewport releases
+the image halfway through the copy. The lead is one screen and the panel is
+about three quarters of one, which buys a full screen of pinned scrolling
+while the copy passes over.
 
 Heights use `lvh` for the image, so no gap appears when a mobile address bar
 retracts, and `svh` for the first screen of copy, so its call to action is
