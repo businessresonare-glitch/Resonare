@@ -42,8 +42,11 @@
   --ease-out:cubic-bezier(.22,.61,.36,1);
   --spring:cubic-bezier(.22,1.15,.36,1);
 
-  --font-ui:'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /* Archivo for everything set in prose, Archivo Narrow for annotation.
+     The width contrast is what separates a label from a sentence here — not
+     a change of case and half an em of tracking. */
+  --font-ui:'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-label:'Archivo Narrow', 'Archivo', system-ui, sans-serif;
 
   --shell:min(1240px, 92vw);
 }
@@ -113,8 +116,8 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 .brand-txt{ display:flex; flex-direction:column; line-height:1.12; min-width:0; }
 .brand-txt b{ font-size:17px; font-weight:800; letter-spacing:-.015em; white-space:nowrap; }
 .brand-txt span{
-  font-family:var(--font-mono); font-size:9.5px; font-weight:500;
-  letter-spacing:.19em; color:var(--amber); text-transform:uppercase; white-space:nowrap;
+  font-family:var(--font-label); font-size:11px; font-weight:600;
+  letter-spacing:.055em; color:var(--amber); text-transform:uppercase; white-space:nowrap;
 }
 .nav{ display:flex; align-items:center; gap:6px; }
 .nav a{
@@ -179,8 +182,8 @@ body.navopen .navtoggle span::after{ top:0; transform:rotate(-45deg); }
 
 .eyebrow{
   display:inline-flex; align-items:center; gap:10px;
-  font-family:var(--font-mono); font-size:11.5px; font-weight:600;
-  letter-spacing:.2em; text-transform:uppercase; color:var(--amber);
+  font-family:var(--font-label); font-size:13px; font-weight:700;
+  letter-spacing:.055em; text-transform:uppercase; color:var(--amber);
   padding:8px 15px; border:1px solid rgba(245,166,35,.3); border-radius:99px;
   background:rgba(245,166,35,.08); margin-bottom:26px;
 }
@@ -194,7 +197,7 @@ body.navopen .navtoggle span::after{ top:0; transform:rotate(-45deg); }
   100%{ box-shadow:0 0 0 0 rgba(245,166,35,0); }
 }
 
-h1,h2,h3{ font-weight:800; letter-spacing:-.03em; line-height:1.02; }
+h1,h2,h3{ font-weight:800; letter-spacing:-.022em; line-height:1.04; }
 h1{ font-size:clamp(40px, 7.4vw, 92px); }
 h2{ font-size:clamp(32px, 5vw, 60px); line-height:1.05; }
 h3{ font-size:clamp(19px, 2vw, 23px); letter-spacing:-.02em; line-height:1.2; }
@@ -256,7 +259,7 @@ h1 em, h2 em{
 .card p{ font-size:14.8px; color:var(--muted); line-height:1.6; }
 .card ul{ margin-top:16px; display:flex; flex-wrap:wrap; gap:7px; }
 .card ul li{
-  font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+  font-family:var(--font-label); font-size:12.5px; font-weight:600; letter-spacing:.02em; text-transform:uppercase;
   padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.05);
   border:1px solid var(--navy-line-soft); color:var(--paper-dim);
 }
@@ -268,11 +271,11 @@ h1 em, h2 em{
   display:block; font-size:clamp(30px,3.6vw,46px); font-weight:800; letter-spacing:-.04em; line-height:1;
   background:linear-gradient(120deg, var(--amber-hi), var(--amber-deep));
   -webkit-background-clip:text; background-clip:text; color:transparent;
-  font-variant-numeric:tabular-nums;
+  font-variant-numeric:tabular-nums; white-space:nowrap;
 }
 .stat span{
-  display:block; margin-top:10px; font-family:var(--font-mono); font-size:11px;
-  letter-spacing:.14em; text-transform:uppercase; color:var(--muted); line-height:1.45;
+  display:block; margin-top:10px; font-family:var(--font-label); font-size:12.5px; font-weight:600;
+  letter-spacing:.035em; text-transform:uppercase; color:var(--muted); line-height:1.4;
 }
 
 /* ============ PROCESS ============ */
@@ -285,7 +288,7 @@ h1 em, h2 em{
 .step:last-child::before{ background:linear-gradient(90deg, rgba(245,166,35,.5), transparent); }
 .step b{
   position:relative; display:grid; place-items:center; width:38px; height:38px; border-radius:50%;
-  font-family:var(--font-mono); font-size:13px; font-weight:600;
+  font-family:var(--font-label); font-size:14.5px; font-weight:700; font-variant-numeric:tabular-nums;
   background:var(--navy-700); border:1px solid rgba(245,166,35,.45); color:var(--amber);
   margin-bottom:20px;
 }
@@ -305,15 +308,15 @@ h1 em, h2 em{
 .shot figcaption{
   position:absolute; left:0; right:0; bottom:0; padding:34px 20px 16px;
   background:linear-gradient(0deg, rgba(7,10,24,.92), transparent);
-  font-family:var(--font-mono); font-size:11.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--paper-dim);
+  font-family:var(--font-label); font-size:13.5px; font-weight:600; letter-spacing:.005em; color:var(--paper-dim);
 }
 /* the placeholder state, shown until a real photo is dropped in */
 .shot.empty{ display:grid; place-items:center; }
 .shot.empty img{ display:none; }
 .shot.empty::after{
   content:attr(data-slot);
-  font-family:var(--font-mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase;
-  color:var(--muted); text-align:center; padding:0 18px; line-height:1.7;
+  font-family:var(--font-label); font-size:13px; font-weight:500; letter-spacing:.005em;
+  color:var(--muted); text-align:center; padding:0 18px; line-height:1.65;
 }
 .shot.empty figcaption{ background:none; }
 
@@ -339,8 +342,8 @@ h1 em, h2 em{
 .reel-brand img{ opacity:.95; margin-bottom:2px; }
 .reel-brand b{ font-size:19px; font-weight:800; letter-spacing:-.02em; color:#fff; }
 .reel-brand span{
-  font-family:var(--font-mono); font-size:11px; letter-spacing:.13em;
-  text-transform:uppercase; color:var(--muted);
+  font-family:var(--font-label); font-size:13px; font-weight:600; letter-spacing:.03em;
+  color:var(--muted);
 }
 .reel-play i{
   display:grid; place-items:center; width:76px; height:76px; border-radius:50%;
@@ -355,8 +358,8 @@ h1 em, h2 em{
 .form{ padding:34px 32px 32px; }
 .field{ margin-bottom:16px; }
 .field label{
-  display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+  display:block; font-family:var(--font-label); font-size:13.5px; font-weight:600;
+  letter-spacing:.005em; color:var(--paper-dim); margin-bottom:7px;
 }
 .field input,.field textarea,.field select{
   width:100%; padding:14px 16px; border-radius:var(--radius-sm);
@@ -406,8 +409,8 @@ h1 em, h2 em{
   display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:44px;
 }
 .foot-grid h4{
-  font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--amber); margin-bottom:18px; font-weight:600;
+  font-family:var(--font-label); font-size:12.5px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--amber); margin-bottom:16px; font-weight:700;
 }
 .foot-grid a, .foot-grid li{ font-size:14.5px; color:var(--muted); line-height:2; }
 .foot-grid a:hover{ color:#fff; }

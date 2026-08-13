@@ -927,7 +927,7 @@
       } else if (o.k === 't') {
         ctx.globalAlpha = a * 0.9;
         ctx.fillStyle = fog(o.c, o.d);
-        ctx.font = '700 ' + o.size.toFixed(1) + 'px "IBM Plex Mono", monospace';
+        ctx.font = '700 ' + o.size.toFixed(1) + 'px "Archivo Narrow", "Archivo", sans-serif';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(o.str, o.s.x, o.s.y);

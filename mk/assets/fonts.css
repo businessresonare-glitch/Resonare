@@ -1,0 +1,39 @@
+/* ==========================================================================
+   MK — type
+   Self-hosted, latin subset, zero external requests.
+
+   Archivo + Archivo Narrow, one superfamily at two widths.
+
+   Why this pairing: the previous system set every micro-label in a monospace,
+   uppercase, at .13–.20em tracking. That combination is the single most
+   recognisable house style of generated marketing pages, and it appeared nine
+   times on this one page — eyebrows, card tags, stat labels, step numbers,
+   captions, form labels, footer headings, the wordmark line and the reel
+   caption. Swapping the face alone would not have fixed it; the treatment was
+   as much of a tell as the typeface.
+
+   Archivo is a grotesque drawn for print at small sizes and for signage — it
+   has the slightly squared, workmanlike character an M&E contractor's drawing
+   sheet has, and it holds up at 11px where a geometric sans goes mushy. The
+   Narrow cut gives labels a genuine width contrast against the body, which is
+   how real technical documents separate annotation from prose. Both are
+   variable, so the whole weight range costs two files.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(fonts/archivo-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Archivo Narrow';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url(fonts/archivo-narrow-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

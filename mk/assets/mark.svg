@@ -1,19 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 900" width="1050" height="900" role="img" aria-label="MK Plumbing and Construction — Muhibah Kukuh">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="45 62 905 905" width="905" height="905" role="img" aria-label="MK — Muhibah Kukuh">
   <!--
-    Full lockup: the mark plus the arced MUHIBAH KUKUH wordmark.
+    The MK mark: a glossy orange sphere, a gold ribbon sashed across it, and a
+    brushed chrome crescent riding over the top.
 
-    The mark geometry below is a straight copy of mark.svg wrapped in a
-    transform — if mark.svg is edited, re-copy it here. Use mark.svg at UI
-    sizes; the arc text is illegible below about 160px, and this file exists
-    for social cards, print, and anywhere the mark is shown large.
+    A vector rebuild of the client's 3D render, not the render itself. Drawn in
+    flat gradients so it stays crisp at 46px in the header and as a favicon,
+    where the original's soft raytraced shading would go to mud. If the source
+    PNG is supplied it should replace this — see README.
 
-    The wordmark is live text in Archivo Narrow rather than outlines. That
-    keeps the file small and editable, but the face has to be available to
-    whatever renders it: inside an <img> tag the page's webfonts do not apply
-    and it falls back to a system condensed sans.
+    The wrap is sold by a blurred cast shadow on the sphere beneath the ribbon,
+    clipped to the ball. Without it the band reads as a flat sticker lying on a
+    circle rather than as something passing in front of a solid.
   -->
-<defs>
-    <path id="mkArc" d="M197.3 693.7 A 400 400 0 0 0 852.7 693.7" fill="none"/>
+  <defs>
     <radialGradient id="mkBall" cx="0.38" cy="0.27" r="0.88">
       <stop offset="0"    stop-color="#FFC64F"/>
       <stop offset="0.22" stop-color="#F98A22"/>
@@ -60,8 +59,7 @@
     </filter>
   </defs>
 
-  <g transform="translate(95,30) scale(0.86)">
-<!-- the sphere -->
+  <!-- the sphere -->
   <circle cx="500" cy="505" r="295" fill="url(#mkBall)"/>
   <g clip-path="url(#mkBallClip)">
     <ellipse cx="402" cy="340" rx="134" ry="90" fill="url(#mkSpec)" transform="rotate(-28 402 340)"/>
@@ -99,15 +97,4 @@
         fill="none" stroke="#FFFFFF" stroke-width="7" opacity=".85" stroke-linecap="round"/>
   <path d="M806 470 C812 424, 762 390, 674 364 C574 336, 442 318, 352 300"
         fill="none" stroke="#5B6874" stroke-width="4" opacity=".5" stroke-linecap="round"/>
-  </g>
-
-  <g font-family="'Archivo Narrow','Archivo','Arial Narrow',Helvetica,sans-serif"
-     font-size="86" font-weight="700" letter-spacing="1.5" text-anchor="middle">
-    <text fill="#8E3B05" transform="translate(4,6)">
-      <textPath href="#mkArc" startOffset="50%">MUHIBAH KUKUH</textPath>
-    </text>
-    <text fill="#F7941D">
-      <textPath href="#mkArc" startOffset="50%">MUHIBAH KUKUH</textPath>
-    </text>
-  </g>
 </svg>

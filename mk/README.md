@@ -11,19 +11,70 @@ or serve the folder with any static host.
 ```
 mk/
   index.html
+  build-single.js   portable one-file build (see below)
   assets/
-    mk.css      design system — navy + amber, taken from the MK badge
-    world.js    the 3D flight engine and the six world stations
-    site.js     nav, reveals, counters, the reel, the quote handoff
-    logo.svg    the MK mark, rebuilt as vector
-    photos/     job photographs (see below — currently empty)
-    video/      mk-reel.mp4
+    mk.css       design system — navy + amber, taken from the MK badge
+    world.js     the 3D flight engine and the six world stations
+    site.js      nav, reveals, counters, the reel, the quote handoff
+    fonts.css    Archivo + Archivo Narrow, self-hosted
+    mark.svg     the mark alone — header, footer, favicon
+    logo.svg     full lockup with the arced wordmark — social, print
+    fonts/       2 variable woff2 (~54KB total)
+    photos/      job photographs (see below — currently empty)
+    video/       mk-reel.mp4
 ```
 
-Fonts are **not** duplicated here. The page links `../assets/fonts.css` from the
-parent RESONARE site, so Manrope and IBM Plex Mono are shared and cost no extra
-bytes. If this site is ever deployed on its own, copy `assets/fonts.css` and
-`assets/fonts/` across and change that one `<link>`.
+This folder is self-contained: it vendors its own fonts rather than borrowing
+the parent RESONARE site's, so it can be lifted out and deployed on its own.
+
+---
+
+## The logo
+
+`mark.svg` and `logo.svg` are a **vector rebuild** of the client's 3D render,
+not the render itself — the original PNG was supplied as a chat image and never
+reached the repo. They match the composition (gloss orange sphere, gold ribbon
+sash, chrome crescent, arced MUHIBAH KUKUH) and the palette, but the shading is
+flat gradients rather than raytraced.
+
+**If you have the original PNG, use it.** Drop it in as `assets/mark.png`,
+then change the five `assets/mark.svg` references in `index.html`. Keep the
+`<link rel="icon">` pointing at an SVG or a small PNG.
+
+Two files, because they are for different sizes:
+
+| File | Use | Why |
+|---|---|---|
+| `mark.svg` | header (46px), footer, reel, favicon | The arc text is illegible below ~160px, so the mark drops it |
+| `logo.svg` | `og:image`, print, anywhere shown large | Full lockup, wordmark included |
+
+`logo.svg` embeds a copy of `mark.svg`'s geometry inside a transform. **If you
+edit `mark.svg`, re-copy those paths into `logo.svg`** or the two will drift.
+
+Its wordmark is live text in Archivo Narrow, not outlines — small and editable,
+but inside an `<img>` tag the page's webfonts do not apply and it falls back to
+a system condensed sans. Convert the text to outlines before sending it to a
+printer.
+
+---
+
+## Type
+
+Archivo for prose, Archivo Narrow for annotation — one superfamily at two
+widths, both variable, both latin-subset, ~54KB for the whole range.
+
+The previous system set every micro-label in monospace, uppercase, at
+.13–.20em tracking. That combination is the house style of generated marketing
+pages, and it appeared nine times on this one page: eyebrows, card tags, stat
+labels, step numbers, captions, form labels, footer headings, the wordmark line
+and the reel caption. Changing the typeface alone would not have fixed it — the
+treatment was as much of a tell as the face. So the tracking came down to
+.005–.055em, and the things that are not really labels (gallery captions, form
+fields) went back to sentence case, which is what real forms and real captions
+do.
+
+Width now does the work that tracking was doing: Narrow for annotation against
+regular for prose is how technical drawings separate the two.
 
 ---
 

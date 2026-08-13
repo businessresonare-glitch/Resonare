@@ -30,15 +30,12 @@ const read = p => fs.readFileSync(p, 'utf8');
 const b64 = p => fs.readFileSync(p).toString('base64');
 
 /* ---- fonts -------------------------------------------------------------
-   Only the latin subsets, and only the four faces mk.css actually asks for:
-   Manrope for UI, IBM Plex Mono at 400/500/600 for labels and data. The
-   parent site also ships latin-ext and Instrument Serif; neither is used
-   here, and carrying them would add weight this file does not need.        */
+   Both faces are variable and latin-subset, so the entire weight range of
+   the type system costs two files and ~54KB. MK vendors its own fonts rather
+   than borrowing the parent site's, so this folder is self-contained.       */
 const FACES = [
-  { family: 'Manrope',       weight: '200 800', file: 'manrope-latin.woff2' },
-  { family: 'IBM Plex Mono', weight: '400',     file: 'ibm-plex-mono-400-latin.woff2' },
-  { family: 'IBM Plex Mono', weight: '500',     file: 'ibm-plex-mono-500-latin.woff2' },
-  { family: 'IBM Plex Mono', weight: '600',     file: 'ibm-plex-mono-600-latin.woff2' }
+  { family: 'Archivo',        weight: '400 800', file: 'archivo-latin.woff2' },
+  { family: 'Archivo Narrow', weight: '400 700', file: 'archivo-narrow-latin.woff2' }
 ];
 
 const fontCss = FACES.map(f => `@font-face{
@@ -46,11 +43,12 @@ const fontCss = FACES.map(f => `@font-face{
   font-style:normal;
   font-weight:${f.weight};
   font-display:swap;
-  src:url(data:font/woff2;base64,${b64(path.join(ROOT, 'assets/fonts', f.file))}) format('woff2');
+  src:url(data:font/woff2;base64,${b64(path.join(MK, 'assets/fonts', f.file))}) format('woff2');
 }`).join('\n');
 
 /* ---- assets ------------------------------------------------------------ */
 const logoUri = 'data:image/svg+xml;base64,' + b64(path.join(MK, 'assets/logo.svg'));
+const markUri = 'data:image/svg+xml;base64,' + b64(path.join(MK, 'assets/mark.svg'));
 const css     = read(path.join(MK, 'assets/mk.css'));
 const worldJs = read(path.join(MK, 'assets/world.js'));
 const siteJs  = read(path.join(MK, 'assets/site.js'));
@@ -79,12 +77,13 @@ let html = read(path.join(MK, 'index.html'));
 html = html.replace(/^\s*<link rel="preload"[^>]*>\s*$/m, '');
 
 html = html.replace(
-  '<link rel="stylesheet" href="../assets/fonts.css">\n<link rel="stylesheet" href="assets/mk.css">',
+  '<link rel="stylesheet" href="assets/fonts.css">\n<link rel="stylesheet" href="assets/mk.css">',
   put(`<style>\n${fontCss}\n</style>\n<style>\n${css}\n</style>`)
 );
 
 html = html.replace(/(href|content)="assets\/logo\.svg"/g, (_m, attr) => `${attr}="${logoUri}"`);
-html = html.replace(/src="assets\/logo\.svg"/g, put(`src="${logoUri}"`));
+html = html.replace(/(href|content)="assets\/mark\.svg"/g, (_m, attr) => `${attr}="${markUri}"`);
+html = html.replace(/src="assets\/mark\.svg"/g, put(`src="${markUri}"`));
 
 if (hasVideo) {
   html = html.replace('src="assets/video/mk-reel.mp4"', put(`src="${videoUri}"`));
