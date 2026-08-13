@@ -50,7 +50,7 @@ const fontCss = FACES.map(f => `@font-face{
 const logoUri = 'data:image/svg+xml;base64,' + b64(path.join(MK, 'assets/logo.svg'));
 const markUri = 'data:image/svg+xml;base64,' + b64(path.join(MK, 'assets/mark.svg'));
 const css     = read(path.join(MK, 'assets/mk.css'));
-const worldJs = read(path.join(MK, 'assets/world.js'));
+const sceneJs = read(path.join(MK, 'assets/scene.bundle.js'));
 const siteJs  = read(path.join(MK, 'assets/site.js'));
 
 const videoPath = path.join(MK, 'assets/video/mk-reel.mp4');
@@ -145,15 +145,15 @@ html = html.replace(
 const leftovers = [...html.matchAll(/(?:src|href)="(?!data:|#|tel:|https?:|mailto:)([^"]+)"/g)]
   .map(m => m[1])
   .filter(u => !u.startsWith('assets/photos/'))    /* slots 404 by design */
-  .filter(u => !/^assets\/(world|site)\.js$/.test(u));  /* inlined just below */
+  .filter(u => !/^assets\/(scene\.bundle|site)\.js$/.test(u));  /* inlined just below */
 if (leftovers.length) {
   console.error('unresolved external references:', leftovers);
   process.exit(1);
 }
 
 html = html.replace(
-  '<script src="assets/world.js" defer></script>\n<script src="assets/site.js" defer></script>',
-  put(`<script>\n${worldJs}\n</script>\n<script>\n${siteJs}\n</script>`)
+  '<script src="assets/scene.bundle.js" defer></script>\n<script src="assets/site.js" defer></script>',
+  put(`<script>\n${sceneJs}\n</script>\n<script>\n${siteJs}\n</script>`)
 );
 
 if (bodyOnly) {

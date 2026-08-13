@@ -1,26 +1,31 @@
-# MK PLUMBING &amp; CONSTRUCTION — *Muhibah Kukuh*
+# MUHIBAH KUKUH SDN BHD
 
-A scroll-flown site for MK: one continuous 3D camera flight that starts high
-over a village road, drops into an open trench, flies through a box culvert,
-rises into a plant room past the 415V switchboard, tracks along a PLC/VFD
-control cabinet, and pulls back out over the finished site at dusk.
+The site for Muhibah Kukuh (1435825-T) — CIDB G5 contractor in Pagoh, Muar,
+Johor, trading in Kuala Lumpur as MK Electrician & Plumber.
 
-Static HTML/CSS/JS, no build step and no external requests. Open `index.html`,
-or serve the folder with any static host.
+A scroll-driven WebGL film: the MK mark resolves out of the dark, the camera
+moves past it onto a site, and an MK building assembles itself storey by storey
+as the visitor scrolls — frame, slabs, envelope, services, steel canopy —
+finishing lit at dusk.
+
+Static HTML/CSS/JS. The only build step is bundling the scene; everything else
+is served as-is, and nothing is fetched from a third party at runtime.
 
 ```
 mk/
   index.html
   build-single.js   portable one-file build (see below)
   assets/
-    mk.css       design system — navy + amber, taken from the MK badge
-    world.js     the 3D flight engine and the six world stations
-    site.js      nav, reveals, counters, the reel, the quote handoff
+    mk.css          design system — navy + amber, taken from the MK badge
+    scene.js        the WebGL film (source)
+    scene.bundle.js the same, bundled with three.js — this is what ships
+    vendor/         three.js + the postprocessing addons it imports
+    site.js         nav, reveals, counters, the reel, the quote handoff
     fonts.css    Archivo + Archivo Narrow, self-hosted
     mark.svg     the mark alone — header, footer, favicon
     logo.svg     full lockup with the arced wordmark — social, print
     fonts/       2 variable woff2 (~54KB total)
-    photos/      job photographs (see below — currently empty)
+    photos/      job photographs, extracted from the company profile
     video/       mk-reel.mp4
 ```
 
@@ -78,26 +83,19 @@ regular for prose is how technical drawings separate the two.
 
 ---
 
-## ⚠️ Drop the job photos in
+## The photographs
 
-The gallery is wired up but the image files are not in the repo yet. Until they
-are, each tile shows a labelled slot rather than a broken image — the page is
-presentable either way, so this is not urgent, but it is the single biggest
-improvement available.
+The eight gallery images were extracted from `MUHIBAH_Company_Profile_.pdf` —
+they are the company's own site photography, not stock. The PDF embeds them as
+DCTDecode streams, which are literally JPEG files, so they came out losslessly
+by scanning the PDF for image objects rather than by re-rendering pages.
 
-Put these five files in `assets/photos/`:
+They are small (the profile stored them at 200-700px), so they are set to
+`object-fit: cover` in tiles that never need more resolution than that. If
+higher-resolution originals exist, drop them in over the same filenames.
 
-| File | Shows |
-|---|---|
-| `01-culvert-road.jpg` | Backhoe laying box culverts along the village road |
-| `02-switchboard.jpg` | 415V switchboard — ammeter, voltmeter, indicator lamps |
-| `03-db-board.jpg` | DB board with the rows of MCBs |
-| `04-control-panel.jpg` | Machine cabinet with the PLC and green VFD drives |
-| `05-trench.jpg` | Open service trench beside the house |
-
-Roughly 1600px wide, JPEG, under ~400KB each. They are `loading="lazy"`, so
-they never delay the headline. **Nothing breaks if a file is missing** —
-`site.js` catches the error and marks the tile as an empty slot.
+**Nothing breaks if a file is missing** — `site.js` catches the load error and
+marks the tile as a labelled slot rather than showing a broken image.
 
 ## The reel
 
@@ -123,44 +121,52 @@ file normally — this is a toolchain gap, not a compatibility problem.
 
 ---
 
-## How the flight works
+## How the film works
 
-`world.js` is a small canvas-2D renderer — no three.js, no WebGL. The parent
-site's rule after a CDN stall was *vendor everything*, and flat-shaded convex
-quads through a painter's algorithm is all these scenes need: about 20KB of
-first-party code instead of ~600KB of library, and on a weak device it degrades
-by dropping geometry rather than by failing to boot.
+`scene.js` is three.js, bundled with esbuild into `scene.bundle.js` (549KB).
+three.js and its addons are vendored under `assets/vendor` — the parent site's
+rule after a CDN stall was *vendor everything*, and that still holds. Rebuild
+after editing:
 
-Per frame: ease the scroll, place the camera on a Catmull-Rom spline, window
-the world to the props near the camera (binary search over props sorted by z),
-project, clip, depth-sort, paint with distance fog.
+```bash
+npx esbuild mk/assets/scene.js --bundle --format=iife --minify --target=es2020 \
+  --alias:three=$PWD/mk/assets/vendor/three.module.min.js \
+  --outfile=mk/assets/scene.bundle.js
+```
 
-Three details that are load-bearing, so please do not "simplify" them:
+Quality decisions worth keeping:
 
-**Near-plane clipping** (`clipNear`). Throwing away any polygon with a vertex
-behind the camera throws away the whole polygon — and the biggest polygons are
-exactly the ones the camera flies *inside*: the road, the room floors, and every
-wall of the culvert. Without clipping the tunnel renders as a bare ring of ribs
-with no walls at all.
+- **ACES filmic tone mapping**, so gold and orange keep their saturation into
+  the highlights instead of clipping to white.
+- **A PMREM-prefiltered room probe.** Chrome and gold are metals, and a metal
+  with nothing to reflect renders as a flat grey blob. This is the single
+  biggest difference between "3D" and "expensive".
+- **Real shadow maps** from the key light, PCF-soft, with bias tuned to the
+  scene scale.
+- **Bloom above a luminance threshold**, so it catches lit windows and the
+  mark's specular without smearing the whole frame.
+- **The lighting rig lerps from working daylight to dusk** across the scroll —
+  the same building reads as a site while it is going up and as a finished
+  property once the windows come on.
 
-**Screen-size caps** on sprites, lines and text. A lamp the camera passes within
-a metre of has an unbounded projected radius; uncapped, an indicator lamp
-becomes a coloured blob over half the viewport and a lighting pole becomes a
-grey bar across the frame.
+Two things are load-bearing:
+
+**Time-based scroll smoothing.** `eased += (target - eased) * k` is the usual
+one-liner and it is frame-rate dependent: the catch-up per *frame* is fixed, so
+the camera converges in 0.3s at 60fps and takes ten seconds at 5fps. On a weak
+GPU the film trailed the scroll by half a section — measured, not theorised.
+Exponential decay against real elapsed time converges in the same wall-clock
+time at any frame rate.
 
 **The pacing table is measured, not hardcoded** (`buildPace`). Scroll position
-and spline position are different curves — waypoints are spaced by distance
-through the world, sections by copy height. The station→scroll mapping is read
-from the live DOM on load and on resize, because sections are `100svh` on
-desktop and `auto` on mobile, so any fixed table is wrong on one of them. Edit
-the copy freely; the camera re-syncs itself.
+and film position are different curves. The station→scroll mapping is read from
+the live DOM on load and on resize, because section heights differ between
+viewports and move whenever the copy is edited. Edit the copy freely; the camera
+re-syncs itself. To retime the film, change the `t` values in `STATIONS`.
 
-To retime the flight, change the `t` values in `STATIONS` — each names the
-section it belongs to and the spline position that frames its geometry.
-
-**Budget:** ~2,000 props built once. The loop parks entirely when the tab is
-hidden, and `prefers-reduced-motion` renders a single static frame per scroll
-event with no rAF loop at all.
+**Degradation:** no WebGL drops the canvas and lets a CSS gradient carry the
+page; `prefers-reduced-motion` renders one frame per scroll event with no rAF
+loop; a hidden tab parks the loop; a lost context is caught and restored.
 
 ---
 

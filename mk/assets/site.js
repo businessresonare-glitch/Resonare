@@ -81,14 +81,15 @@
   function runCount(el) {
     var target = parseFloat(el.getAttribute('data-count'));
     var suffix = el.getAttribute('data-suffix') || '';
+    var prefix = el.getAttribute('data-prefix') || '';
     if (isNaN(target)) return;
-    if (reduceMotion) { el.textContent = target + suffix; return; }
+    if (reduceMotion) { el.textContent = prefix + target + suffix; return; }
     var dur = 1500, t0 = null;
     function step(ts) {
       if (t0 === null) t0 = ts;
       var p = Math.min((ts - t0) / dur, 1);
       var eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = Math.round(target * eased) + suffix;
+      el.textContent = prefix + Math.round(target * eased) + suffix;
       if (p < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);

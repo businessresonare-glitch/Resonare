@@ -69,12 +69,22 @@ button{ font:inherit; color:inherit; cursor:pointer; }
 ::selection{ background:var(--amber); color:var(--navy-900); }
 :focus-visible{ outline:2px solid var(--amber); outline-offset:3px; border-radius:6px; }
 
-/* ============ THE WORLD (fixed 3D canvas) ============ */
-#world{
+/* ============ THE FILM (fixed WebGL canvas) ============ */
+#scene{
   position:fixed; inset:0; width:100%; height:100%;
   z-index:0; display:block; pointer-events:none;
+  /* painted before WebGL takes over, and the whole backdrop if it never does */
   background:
     radial-gradient(120% 90% at 50% 8%, #1A2242 0%, #0B1024 46%, #070A18 100%);
+  opacity:0; transition:opacity 1.1s var(--ease);
+}
+body.scene-ready #scene{ opacity:1; }
+/* No WebGL: the canvas is dropped and the gradient below carries the page.
+   Every section still reads — the film was never load-bearing for content. */
+body.no-webgl #scene{ display:none; }
+body.no-webgl{
+  background:
+    radial-gradient(120% 80% at 70% 6%, #1B2444 0%, #0B1024 48%, #070A18 100%) fixed;
 }
 .world-veil{
   position:fixed; inset:0; z-index:10; pointer-events:none;
@@ -263,6 +273,19 @@ h1 em, h2 em{
   padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.05);
   border:1px solid var(--navy-line-soft); color:var(--paper-dim);
 }
+
+/* ============ SPEC LISTS ============ */
+.spec{ display:grid; gap:0; margin-top:6px; }
+.spec li{
+  display:flex; justify-content:space-between; align-items:baseline; gap:16px;
+  padding:10px 0; border-bottom:1px solid var(--navy-line-soft);
+}
+.spec li:last-child{ border-bottom:0; }
+.spec span{
+  font-family:var(--font-label); font-size:13px; font-weight:600;
+  color:var(--muted); white-space:nowrap;
+}
+.spec b{ font-size:14.5px; font-weight:600; text-align:right; }
 
 /* ============ STATS ============ */
 .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:44px; }
