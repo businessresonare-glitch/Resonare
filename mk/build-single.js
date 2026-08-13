@@ -3,12 +3,11 @@
    Build a portable, single-file copy of the MK site.
 
    Everything the page needs — fonts, stylesheet, both scripts, the logo and
-   (optionally) the reel — is inlined as text or data: URIs, so the result
-   opens straight off disk with no server and no network. Useful for sending
+   the photographs — is inlined as text or data: URIs, so the result opens
+   straight off disk with no server and no network. Useful for sending
    the client a preview, or for viewing the site without a static host.
 
-     node mk/build-single.js                 # everything, reel included
-     node mk/build-single.js --no-video      # ~500KB, reel keeps its placeholder
+     node mk/build-single.js                 # the whole site in one file
      node mk/build-single.js --body-only     # fragment, no <html>/<head> wrapper
 
    The output is generated, not source: edit index.html and the assets, then
@@ -22,7 +21,6 @@ const path = require('path');
 const MK = __dirname;
 const ROOT = path.resolve(MK, '..');
 const args = process.argv.slice(2);
-const noVideo = args.includes('--no-video');
 const bodyOnly = args.includes('--body-only');
 const outArg = args.find(a => a.startsWith('--out='));
 
@@ -53,10 +51,6 @@ const css     = read(path.join(MK, 'assets/mk.css'));
 const sceneJs = read(path.join(MK, 'assets/scene.bundle.js'));
 const siteJs  = read(path.join(MK, 'assets/site.js'));
 
-const videoPath = path.join(MK, 'assets/video/mk-reel.mp4');
-const hasVideo = !noVideo && fs.existsSync(videoPath);
-const videoUri = hasVideo ? 'data:video/mp4;base64,' + b64(videoPath) : '';
-
 /* ---- assemble ----------------------------------------------------------
    Every substitution below goes through a replacement FUNCTION, never a
    replacement string.
@@ -84,28 +78,6 @@ html = html.replace(
 html = html.replace(/(href|content)="assets\/logo\.svg"/g, (_m, attr) => `${attr}="${logoUri}"`);
 html = html.replace(/(href|content)="assets\/mark\.svg"/g, (_m, attr) => `${attr}="${markUri}"`);
 html = html.replace(/src="assets\/mark\.svg"/g, put(`src="${markUri}"`));
-
-if (hasVideo) {
-  html = html.replace('src="assets/video/mk-reel.mp4"', put(`src="${videoUri}"`));
-} else {
-  /* Drop the source rather than leave a broken path, and retire the play
-     control with it. site.js keys the whole reel behaviour off #reelPlay, so
-     removing the id disables it cleanly — leaving the button in place would
-     give the page a control that looks live and does nothing. */
-  html = html.replace(/\s*src="assets\/video\/mk-reel\.mp4"/, '');
-  html = html.replace(
-    '<button class="reel-play" id="reelPlay" aria-label="Play the site reel">',
-    put('<div class="reel-play reel-static">')
-  );
-  html = html.replace(
-    /\s*<i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"\/><\/svg><\/i>\s*<\/button>/,
-    put('\n          </div>')
-  );
-  html = html.replace(
-    '<span>On the tools — drainage, boards and panels</span>',
-    put('<span>Reel plays in the full single-file build</span>')
-  );
-}
 
 /* Photo slots. In the hosted site a missing photo 404s and site.js marks the
    tile from the error handler. A portable file has no server to 404 against
@@ -172,6 +144,5 @@ const out = outArg
 
 fs.writeFileSync(out, html);
 console.log(
-  `${path.relative(process.cwd(), out)}  ${(Buffer.byteLength(html) / 1048576).toFixed(2)}MB` +
-  `  (reel ${hasVideo ? 'embedded' : 'omitted'})`
+  `${path.relative(process.cwd(), out)}  ${(Buffer.byteLength(html) / 1048576).toFixed(2)}MB`
 );

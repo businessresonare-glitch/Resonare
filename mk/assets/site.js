@@ -1,6 +1,6 @@
 /* ==========================================================================
    MK — site behaviour
-   Nav, scroll rail, reveals, counters, the reel, the photo slots and the
+   Nav, scroll rail, reveals, counters, the photo slots and the
    quote handoff. No dependencies, no external requests.
    ========================================================================== */
 (function () {
@@ -127,25 +127,6 @@
     if (img.complete && img.naturalWidth === 0) markEmpty();
     img.addEventListener('error', markEmpty);
   });
-
-  /* ---- the reel -----------------------------------------------------------
-     preload="none" until the visitor asks for it: the file is 5.4MB and this
-     is proof, not decoration. It must never compete with the headline.        */
-  var reel = $('#reel'), reelVideo = $('#reelVideo'), reelPlay = $('#reelPlay');
-  if (reel && reelVideo && reelPlay) {
-    reelPlay.addEventListener('click', function () {
-      reel.classList.add('playing');
-      reelVideo.controls = true;
-      reelVideo.play().catch(function () {
-        /* autoplay policies vary; controls are already on, so the visitor can
-           still start it themselves */
-        reel.classList.remove('playing');
-      });
-    });
-    reelVideo.addEventListener('pause', function () {
-      if (reelVideo.currentTime === 0) reel.classList.remove('playing');
-    });
-  }
 
   /* ---- quote form ---------------------------------------------------------
      Handed off to WhatsApp with the whole brief pre-filled. That route needs

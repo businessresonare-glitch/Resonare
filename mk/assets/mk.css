@@ -343,39 +343,6 @@ h1 em, h2 em{
 }
 .shot.empty figcaption{ background:none; }
 
-/* ============ REEL ============ */
-.reel{
-  position:relative; margin-top:44px; border-radius:var(--radius-lg); overflow:hidden;
-  border:1px solid var(--navy-line); background:var(--navy-800); aspect-ratio:16/9;
-  box-shadow:0 40px 90px -50px rgba(0,0,0,.95);
-}
-.reel video{ width:100%; height:100%; object-fit:cover; }
-/* The pre-play state is a designed panel, not an empty black rectangle: the
-   reel is preload="none", so there is no poster frame to show until the
-   visitor asks for one. */
-.reel-play{
-  position:absolute; inset:0; display:grid; place-items:center; gap:26px; border:0;
-  grid-auto-flow:row; align-content:center; text-align:center;
-  background:
-    radial-gradient(90% 70% at 50% 40%, rgba(245,166,35,.12), transparent 70%),
-    linear-gradient(155deg, var(--navy-600), var(--navy-900));
-  transition:opacity .4s var(--ease);
-}
-.reel-brand{ display:grid; justify-items:center; gap:9px; }
-.reel-brand img{ opacity:.95; margin-bottom:2px; }
-.reel-brand b{ font-size:19px; font-weight:800; letter-spacing:-.02em; color:#fff; }
-.reel-brand span{
-  font-family:var(--font-label); font-size:13px; font-weight:600; letter-spacing:.03em;
-  color:var(--muted);
-}
-.reel-play i{
-  display:grid; place-items:center; width:76px; height:76px; border-radius:50%;
-  background:linear-gradient(135deg, var(--amber-hi), var(--amber-deep));
-  box-shadow:0 16px 40px -10px var(--amber-glow);
-}
-.reel-play svg{ width:26px; height:26px; color:#1A0E03; margin-left:4px; }
-.reel.playing .reel-play{ opacity:0; pointer-events:none; }
-
 /* ============ QUOTE FORM ============ */
 .quote-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:start; }
 .form{ padding:34px 32px 32px; }

@@ -20,13 +20,12 @@ mk/
     scene.js        the WebGL film (source)
     scene.bundle.js the same, bundled with three.js — this is what ships
     vendor/         three.js + the postprocessing addons it imports
-    site.js         nav, reveals, counters, the reel, the quote handoff
+    site.js         nav, reveals, counters, the quote handoff
     fonts.css    Archivo + Archivo Narrow, self-hosted
     mark.svg     the mark alone — header, footer, favicon
     logo.svg     full lockup with the arced wordmark — social, print
     fonts/       2 variable woff2 (~54KB total)
     photos/      job photographs, extracted from the company profile
-    video/       mk-reel.mp4
 ```
 
 This folder is self-contained: it vendors its own fonts rather than borrowing
@@ -50,7 +49,7 @@ Two files, because they are for different sizes:
 
 | File | Use | Why |
 |---|---|---|
-| `mark.svg` | header (46px), footer, reel, favicon | The arc text is illegible below ~160px, so the mark drops it |
+| `mark.svg` | header (46px), footer, favicon | The arc text is illegible below ~160px, so the mark drops it |
 | `logo.svg` | `og:image`, print, anywhere shown large | Full lockup, wordmark included |
 
 `logo.svg` embeds a copy of `mark.svg`'s geometry inside a transform. **If you
@@ -72,7 +71,7 @@ The previous system set every micro-label in monospace, uppercase, at
 .13–.20em tracking. That combination is the house style of generated marketing
 pages, and it appeared nine times on this one page: eyebrows, card tags, stat
 labels, step numbers, captions, form labels, footer headings, the wordmark line
-and the reel caption. Changing the typeface alone would not have fixed it — the
+and the footer strap. Changing the typeface alone would not have fixed it — the
 treatment was as much of a tell as the face. So the tracking came down to
 .005–.055em, and the things that are not really labels (gallery captions, form
 fields) went back to sentence case, which is what real forms and real captions
@@ -96,28 +95,6 @@ higher-resolution originals exist, drop them in over the same filenames.
 
 **Nothing breaks if a file is missing** — `site.js` catches the load error and
 marks the tile as a labelled slot rather than showing a broken image.
-
-## The reel
-
-`assets/video/mk-reel.mp4` is the supplied site footage, H.264 with faststart,
-5.4MB. It is `preload="none"` and only fetched when the visitor presses play,
-so its weight never competes with the first paint.
-
-Two things worth doing when a machine with `ffmpeg` is handy:
-
-```bash
-# strip the audio track (it is muted anyway) and shed ~10% of the file
-ffmpeg -i mk-reel.mp4 -an -c:v copy -movflags +faststart mk-reel-clean.mp4
-
-# a real poster frame, so the panel shows the site instead of the placeholder
-ffmpeg -i mk-reel.mp4 -ss 2.5 -vframes 1 -q:v 4 mk-reel.jpg
-```
-
-Then add `poster="assets/video/mk-reel.jpg"` to the `<video>` in `index.html`.
-This could not be done in the build environment: the only available `ffmpeg`
-was Playwright's stripped build, which cannot open H.264, and headless
-open-source Chromium has no H.264 decoder either. Ordinary browsers play the
-file normally — this is a toolchain gap, not a compatibility problem.
 
 ---
 
