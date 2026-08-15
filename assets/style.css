@@ -2315,3 +2315,26 @@ h1 em, h2 em, h3 em, h4 em{
   font-family:var(--font-ui); font-weight:800;
   font-size:clamp(30px,8.4vw,42px); letter-spacing:-.034em;
 }
+
+/* The micro-label voice moves off the monospace here too — see the second
+   type pass in assets/world.css for why. IBM Plex Mono is kept for genuine
+   data readouts (the preloader percentage, the quote reference) where a
+   fixed advance actually earns its place. */
+.eyebrow,
+.section-index,
+.mini-impact-label,
+.canvas-label,
+.scroll-cue-label,
+.breadcrumb,
+.footer-bottom,
+.work-tag,
+.cine-stat span,
+.contact-line span,
+.process-list li > span,
+.stack-layers li span{
+  font-family:var(--font-ui);
+  font-weight:700;
+  letter-spacing:.05em;
+}
+.section-index{ font-size:12.5px; }
+.footer-bottom{ font-size:12.5px; }

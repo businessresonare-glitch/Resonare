@@ -97,23 +97,6 @@
 }
 
 /* ------------------------------------------------------------------- type */
-.chapter-eyebrow{
-  display:inline-flex; align-items:center; gap:11px;
-  font-family:var(--font-mono); font-size:11.5px; font-weight:500;
-  letter-spacing:.2em; text-transform:uppercase;
-  color:rgba(255,255,255,.62);
-  padding:9px 16px 9px 13px; border-radius:100px;
-  border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(14px) saturate(140%);
-  -webkit-backdrop-filter:blur(14px) saturate(140%);
-  margin-bottom:26px;
-}
-.chapter-eyebrow::before{
-  content:""; width:6px; height:6px; border-radius:50%;
-  background:var(--ember, #DE5A3C);
-}
-
 .chapter h1,
 .chapter h2{
   font-family:var(--font-ui);
@@ -208,10 +191,6 @@
   transition:padding-left .4s var(--ease), border-color .4s var(--ease);
 }
 .work-row:hover{ padding-left:14px; border-color:rgba(255,255,255,.32); }
-.work-row i{
-  font-family:var(--font-mono); font-style:normal; font-size:11px;
-  letter-spacing:.14em; color:var(--ember, #DE5A3C); width:28px; flex:none;
-}
 .work-row b{
   font-family:var(--font-ui); font-weight:700; font-size:clamp(17px,2vw,23px);
   letter-spacing:-0.02em; color:#fff;
@@ -223,7 +202,7 @@
 }
 @media(max-width:640px){
   .work-row{ flex-wrap:wrap; gap:6px 14px; }
-  .work-row span{ margin-left:46px; width:100%; }
+  .work-row span{ margin-left:0; width:100%; }
 }
 
 /* ------------------------------------------------------------ scroll cue */
@@ -313,7 +292,6 @@ body.no-world .world-cue{ display:none; }
    so the type and the sky change together.
    ========================================================================== */
 .world-veil,
-.chapter-eyebrow,
 .chapter h1, .chapter h2, .chapter p.lede, .chapter .fine,
 .stat, .stat b, .stat span,
 .glass, .glass h3, .glass p, .glass ul li,
@@ -330,11 +308,6 @@ body.no-world .world-cue{ display:none; }
 .world.is-light .chapter h1,
 .world.is-light .chapter h2{ color:var(--ink); }
 .world.is-light .chapter p.lede{ color:var(--ink-soft); }
-.world.is-light .chapter-eyebrow{
-  color:var(--ink-soft);
-  border-color:rgba(11,10,30,.16);
-  background:rgba(255,255,255,.62);
-}
 .world.is-light .btn-glass{
   background:rgba(11,10,30,.05); color:var(--ink);
   border-color:rgba(11,10,30,.20);
@@ -372,7 +345,6 @@ body.no-world .world-cue{ display:none; }
   .stat b{ font-size:23px; }
   .stat span{ font-size:10px; letter-spacing:.1em; }
 
-  .chapter-eyebrow{ margin-bottom:20px; font-size:10.5px; letter-spacing:.16em; }
   .chapter p.lede{ margin-top:20px; }
   .chapter-actions{ margin-top:30px; gap:10px; }
   .glass-grid{ margin-top:32px; gap:12px; }
@@ -387,3 +359,85 @@ body.no-world .world-cue{ display:none; }
       rgba(5,4,31,.58) 62%, rgba(5,4,31,.90) 100%);
   }
 }
+
+/* ==========================================================================
+   TYPE, SECOND PASS
+
+   Three complaints, all about the same thing — the micro-type.
+
+   1. The mono pill above every heading ("03 — SELECTED WORK") is gone. A
+      wide-tracked monospace label sitting over a 74px grotesk headline is two
+      typographic voices arguing in a 40px space, and it was the first thing
+      you read on every chapter. The heading says it better on its own.
+   2. The 01–05 column down the work list went with it, for the same reason.
+   3. Everything that stayed small moves off IBM Plex Mono onto the grotesk at
+      700 with the tracking pulled in by roughly half. Mono is a data voice; on
+      a label like "TRADE SITES SHIPPED" it just reads as small and awkward.
+
+   And the headings go up a size and a weight across the board.
+   ========================================================================== */
+
+.chapter h1{ font-size:clamp(44px, 6.4vw, 92px); letter-spacing:-0.042em; line-height:0.93; }
+.chapter h2{ font-size:clamp(38px, 5.4vw, 76px); letter-spacing:-0.042em; line-height:0.94; }
+.chapter p.lede{
+  margin-top:30px; max-width:46ch;
+  font-size:clamp(17px, 1.5vw, 21px); font-weight:500; line-height:1.55;
+  color:rgba(255,255,255,.82);
+}
+
+/* the small voice: grotesk, heavier, tighter */
+.stat span,
+.glass ul li,
+.work-row span,
+.glass-num,
+.world-cue,
+.world-rail a,
+.chapter .fine{
+  font-family:var(--font-ui);
+  font-weight:700;
+  letter-spacing:.05em;
+}
+.stat b{ font-size:clamp(30px, 2.6vw, 40px); letter-spacing:-0.04em; }
+.stat span{ font-size:11.5px; margin-top:5px; color:rgba(255,255,255,.62); }
+.stat{ padding:20px 26px; min-width:150px; }
+
+.glass h3{ font-size:23px; font-weight:800; letter-spacing:-0.03em; }
+.glass p{ font-size:15.5px; color:rgba(255,255,255,.72); }
+.glass ul li{ font-size:11px; letter-spacing:.04em; color:rgba(255,255,255,.66); }
+.glass-num{ font-size:12px; letter-spacing:.12em; font-weight:800; }
+
+.work-row b{ font-size:clamp(20px,2.5vw,30px); font-weight:800; letter-spacing:-0.032em; }
+.work-row span{ font-size:12px; letter-spacing:.04em; color:rgba(255,255,255,.58); }
+.work-row{ padding:22px 4px; }
+
+.world-cue{ font-size:11.5px; letter-spacing:.1em; }
+.world-rail a{ font-size:11px; letter-spacing:.05em; }
+
+/* No blur on the heading reveal. Mid-transition it printed a soft grey ghost
+   of the headline behind itself — at 92px that is a smudge the width of the
+   screen, and it is what the "get rid of this" screenshot caught. */
+.chapter h1[data-rise],
+.chapter h2[data-rise]{
+  filter:none;
+  transform:translateY(40px);
+  transition:opacity .85s var(--ease), transform .85s var(--ease);
+}
+.chapter.is-in h1[data-rise],
+.chapter.is-in h2[data-rise]{ transform:none; }
+
+@media(max-width:820px){
+  .chapter h1{ font-size:clamp(38px, 10.5vw, 56px); }
+  .chapter h2{ font-size:clamp(34px, 9.5vw, 50px); }
+  .chapter p.lede{ font-size:16.5px; margin-top:22px; }
+}
+
+/* The opening headline is five lines of 92px type over a stat row. At a
+   640px column that overflowed the sticky panel and printed its first line
+   across the logo, so the hero gets a wider column and a slightly smaller
+   ceiling than the chapters that follow. */
+#ch-open .chapter-col{ max-width:820px; }
+#ch-open h1{ font-size:clamp(42px, 5.8vw, 84px); }
+@media(max-width:820px){ #ch-open .chapter-col{ max-width:100%; } }
+
+/* the cue is inside the sticky panel now, so it pins to the viewport */
+.world-cue{ position:absolute; left:7vw; bottom:44px; }

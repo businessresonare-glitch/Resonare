@@ -19,8 +19,9 @@ output file, not linked.
 
 | file | job |
 |---|---|
-| `index.js` | the scene: geometry, lighting, the camera curve, the frame loop |
-| `boot.js`  | finds the canvas, maps page scroll to curve `t`, handles the fallbacks |
+| `index.js`    | the scene: geometry, lighting, the camera curve, the frame loop |
+| `blackhole.js`| the opening: horizon, photon ring, accretion disk shader, lensed arcs |
+| `boot.js`     | finds the canvas, maps page scroll to curve `t`, handles the fallbacks |
 
 ## The one idea
 
@@ -43,7 +44,7 @@ while the words are on screen.
 
 ```
    z ~ +18   camera start
-   z  -60    the resonance rings                CH.field
+   z  -62    the black hole                     CH.field
    z  -84 … -238   the city of local businesses  CH.city
    z -322    the site assembling itself          CH.assembly
    z -346 … -450   the corridor of real work     CH.gallery
@@ -81,6 +82,34 @@ material has no shading to sell its form, so a tower that passes within a few
 units of the lens reads as a flat coloured wall rather than a building; the
 `|x| < 15` corridor exists for that reason.
 
+## Making it look real
+
+Realism here is rendering technique, not imported meshes. Four things carry it:
+
+- **Image-based lighting.** A metal is defined by what it reflects, so a metal
+  with nothing to reflect resolves to a flat colour however you set the
+  roughness. `PMREMGenerator.fromScene` builds a roughness-mipped environment
+  from a handful of large emissive panels in the palette's own hues — one
+  render at start-up, no bytes over the wire, and the reflections agree with
+  the lighting instead of fighting it. Before this every tower and panel read
+  as painted cardboard.
+- **Bloom.** Everything bright in this world is emissive, and emissive geometry
+  without bloom is a bright polygon with a hard edge. Desktop only: it is two
+  extra full-screen passes and a phone spends that budget better on frame rate.
+  Note the `OutputPass` at the end of the chain — without it the composer hands
+  back a linear buffer and the page washes out by about a stop and a half.
+- **Facade textures.** A tower is a stretched cube; 760 flat-lit cubes read as
+  a bar chart. One shared canvas of windows — lit in runs, not per-cell noise,
+  because runs read as occupancy — turns them into buildings. The stretching
+  from per-instance scaling is what varies the floor heights for free.
+- **Metal and roughness that mean something.** The street is roughness 0.14 at
+  metalness 0.94, which is why it is wet.
+
+Bloom is also why the black hole needs restraint. Its inner lip was `exp(-rn *
+13) * 2.6`; with bloom on, that smeared straight across the shadow and the hole
+stopped being a hole. It is `exp(-rn * 24) * 0.85` now, and the disk starts at
+1.62 horizon radii rather than 1.28 so the shadow has room to read.
+
 ## Rules that are load-bearing
 
 **Nothing in the canvas may carry meaning.** Every word, number and link on the
@@ -89,8 +118,10 @@ nothing: no WebGL, `save-data`, or under 2GB of device memory and `boot.js`
 sets `body.no-world`, which swaps in a CSS gradient that keeps the same
 night-to-daylight arc.
 
-**No postprocessing.** Glow is an additive sprite on a camera-facing plane, not
-a bloom pass. It survives on phones that would drop frames under one.
+**Postprocessing is desktop-only.** Bloom is real on a laptop and absent on a
+phone, where the additive glow sprites carry the job alone. Anything added to
+the chain has to degrade the same way — `wantBloom` is the single switch, and
+`composer` is null when it is off.
 
 **The loop parks itself.** Out of view or tab hidden, `setActive(false)` stops
 the rAF entirely. Under `prefers-reduced-motion` there is no loop at all — the

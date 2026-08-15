@@ -20,9 +20,14 @@ import {
   InstancedMesh, LineBasicMaterial, LineSegments, Mesh,
   MeshBasicMaterial, MeshStandardMaterial, Object3D, PerspectiveCamera,
   PlaneGeometry, PointLight, Points, PointsMaterial, RingGeometry,
-  SRGBColorSpace, Scene, Sphere, TextureLoader, TorusGeometry, Vector3,
-  WebGLRenderer, ACESFilmicToneMapping
+  RepeatWrapping, SRGBColorSpace, Scene, Sphere, TextureLoader,
+  Vector2, Vector3, WebGLRenderer, ACESFilmicToneMapping, PMREMGenerator
 } from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { createBlackHole } from './blackhole.js';
 
 /* ---------------------------------------------------------------- palette */
 /* Rust and navy are the brand, and they anchor the flight — the mark at the
@@ -153,6 +158,47 @@ function glowTexture() {
   return _glowTex;
 }
 
+/* ==========================================================================
+   FACADE TEXTURE
+
+   A tower is a stretched cube. Lit flat it reads as a coloured brick, and 760
+   coloured bricks read as a bar chart, not a city. What sells it as a building
+   is windows: a grid of small emissive cells, most of them off, a few on, at a
+   density the eye reads as floors.
+
+   Drawn once into one canvas and shared by every tower — the instances vary by
+   colour and scale, and the stretching that causes is what gives the skyline
+   its variety of floor heights for free.
+   ========================================================================== */
+let _facadeTex = null;
+function facadeTexture() {
+  if (_facadeTex) return _facadeTex;
+  const w = 256, h = 512, cv = document.createElement('canvas');
+  cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#05041a';
+  g.fillRect(0, 0, w, h);
+
+  const cols = 10, rows = 34;
+  const cw = w / cols, ch = h / rows;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const on = Math.random();
+      /* Windows come in runs — a whole floor lit, then three dark. Random
+         per-cell noise reads as static; runs read as occupancy. */
+      const floorLit = (y * 7919 % 11) < 4;
+      const lit = floorLit ? on < 0.72 : on < 0.14;
+      const v = lit ? 0.55 + Math.random() * 0.45 : 0.02 + Math.random() * 0.05;
+      g.fillStyle = `rgba(255,255,255,${v.toFixed(3)})`;
+      g.fillRect(x * cw + cw * 0.18, y * ch + ch * 0.22, cw * 0.64, ch * 0.5);
+    }
+  }
+  _facadeTex = new CanvasTexture(cv);
+  _facadeTex.colorSpace = SRGBColorSpace;
+  _facadeTex.wrapS = _facadeTex.wrapT = RepeatWrapping;
+  return _facadeTex;
+}
+
 function glowPlane(size, color, opacity) {
   const m = new Mesh(
     new PlaneGeometry(size, size),
@@ -269,6 +315,65 @@ export function createWorld(canvas, opts) {
   const camPath = curve(PATH);
   const lookPath = curve(LOOK);
 
+  /* ============================================== IMAGE-BASED LIGHTING =====
+     The single biggest step from "3D graphics" to "photograph". A metal is
+     defined by what it reflects, so a metal with nothing to reflect resolves
+     to a flat colour no matter how the roughness is set — which is why every
+     tower and every panel read as painted cardboard before this.
+
+     The environment is built here rather than loaded: a handful of large
+     emissive planes in the palette's own hues, prefiltered by PMREM into a
+     roughness-mipped cube map. It costs one render at start-up, no bytes over
+     the wire, and it is the same colours the flight is lit by, so reflections
+     agree with the lighting instead of fighting it. */
+  {
+    const pmrem = new PMREMGenerator(renderer);
+    const envScene = new Scene();
+    envScene.background = new Color(0x0A0838);
+    const panel = (color, x, y, z, w, h, intensity) => {
+      const m = new Mesh(
+        new PlaneGeometry(w, h),
+        new MeshBasicMaterial({ color, side: DoubleSide, toneMapped: false })
+      );
+      m.material.color.multiplyScalar(intensity);
+      m.position.set(x, y, z);
+      m.lookAt(0, 0, 0);
+      envScene.add(m);
+    };
+    /* a key, two coloured kickers, a warm bounce off the floor and a rim */
+    panel(0xFFFFFF, 0, 14, -10, 20, 12, 3.2);
+    panel(C.magenta, -16, 2, 6, 22, 26, 2.4);
+    panel(C.cyan, 16, 4, 4, 22, 26, 2.2);
+    panel(C.gold, 0, -12, -6, 30, 14, 1.4);
+    panel(C.violet, 0, 6, 18, 26, 20, 1.6);
+    scene.environment = pmrem.fromScene(envScene, 0.02).texture;
+    scene.environmentIntensity = 1.15;
+    pmrem.dispose();
+    envScene.traverse(o => { if (o.geometry) { o.geometry.dispose(); o.material.dispose(); } });
+  }
+
+  /* =========================================================== BLOOM ======
+     Every bright thing in this world is emissive — neon towers, the light
+     rails, the accretion disk — and emissive geometry without bloom is just a
+     bright polygon with a hard edge. Bloom is what makes it read as light
+     coming off a surface rather than paint on one.
+
+     Desktop only. It is two extra full-screen passes at half resolution and a
+     phone spends that budget better on frame rate; there, the additive glow
+     sprites carry the job on their own. */
+  let composer = null, bloom = null;
+  const wantBloom = !small && !reduced;
+  if (wantBloom) {
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    bloom = new UnrealBloomPass(new Vector2(1, 1), 0.46, 0.7, 0.8);
+    composer.addPass(bloom);
+    /* tone mapping and colour space move to the end of the chain; without
+       this the composer hands back a linear buffer and the whole page washes
+       out by about a stop and a half */
+    composer.addPass(new OutputPass());
+  }
+
   /* -------------------------------------------------------------- lighting */
   const hemi = new HemisphereLight(C.cyan, C.magenta, 1.15);
   scene.add(hemi);
@@ -303,46 +408,28 @@ export function createWorld(canvas, opts) {
   const field = new Group();
   scene.add(field);
 
-  const rings = new Group();
-  rings.position.set(0, 0, -60);
-  field.add(rings);
-  /* Five rings, five hues, walking the wheel outward from magenta to gold.
-     The camera passes through all of them, so this is the first thing the
-     visitor sees and it sets the rule for the rest of the flight. */
-  const RING_HUES = [C.magenta, C.violet, C.azure, C.mint, C.gold];
-  for (let i = 0; i < 5; i++) {
-    const r = 5 + i * 4.6;
-    const c = RING_HUES[i];
-    const ring = new Mesh(
-      new TorusGeometry(r, 0.18 + i * 0.035, 10, 110),
-      new MeshStandardMaterial({
-        color: c, emissive: c,
-        emissiveIntensity: 1.5 - i * 0.12, roughness: 0.28, metalness: 0.35
-      })
-    );
-    ring.userData.spin = (i % 2 ? 1 : -1) * (0.12 + i * 0.05);
-    ring.userData.tilt = i * 0.06;
-    ring.userData.glow = glowPlane(r * 2.6, c, 0.16);
-    ring.userData.glow.position.z = -1.2 - i * 0.2;
-    rings.add(ring);
-    rings.add(ring.userData.glow);
-  }
+  /* The opening is a supermassive black hole — see blackhole.js. The camera
+     holds off it for the length of the headline, then falls straight through
+     the horizon into the city. */
+  const blackHole = createBlackHole({ horizon: 7, outer: 34, mid: 0xFFA23C, cool: C.rust });
+  blackHole.group.position.set(0, 0, -62);
+  field.add(blackHole.group);
 
-  /* Shards drifting through the rings, one per spectrum stop. */
+  /* Debris caught in the hole's gravity, one shard per spectrum stop. */
   const shards = new Group();
   shards.position.set(0, 0, -58);
   field.add(shards);
   for (let i = 0; i < 14; i++) {
     const c = hue(i);
     const s = new Mesh(
-      new BoxGeometry(0.8 + Math.random() * 1.6, 0.8 + Math.random() * 1.6, 0.5),
+      new BoxGeometry(0.45 + Math.random() * 1.0, 0.45 + Math.random() * 1.0, 0.35),
       new MeshStandardMaterial({
         color: c, emissive: c, emissiveIntensity: 0.75,
         roughness: 0.25, metalness: 0.5
       })
     );
     const a = (i / 14) * Math.PI * 2;
-    const rad = 8 + Math.random() * 18;
+    const rad = 17 + Math.random() * 26;
     s.position.set(Math.cos(a) * rad, Math.sin(a) * rad * 0.7, (Math.random() - 0.5) * 40);
     s.userData.spin = (Math.random() - 0.5) * 1.2;
     s.userData.phase = Math.random() * 6.28;
@@ -350,8 +437,10 @@ export function createWorld(canvas, opts) {
     shards.add(s);
   }
 
-  const ringGlow = glowPlane(52, C.violet, 0.42);
-  ringGlow.position.set(0, 0, -61.5);
+  /* one soft bloom seed behind the hole so the horizon reads against the
+     void even before the disk resolves */
+  const ringGlow = glowPlane(58, 0xFF9A4C, 0.16);
+  ringGlow.position.set(0, 0, -70);
   field.add(ringGlow);
 
   /* Dust — one field spanning the whole journey, fogged so it reads as depth.
@@ -405,14 +494,19 @@ export function createWorld(canvas, opts) {
      paints the instance colour flat at full strength, which is exactly what a
      neon sign looks like. One draw call, ten hues. */
   const blockGeo = new BoxGeometry(1, 1, 1);
+  const facade = facadeTexture();
   const darkBlocks = new InstancedMesh(
     blockGeo,
-    new MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.35 }),
+    new MeshStandardMaterial({
+      color: 0xffffff, roughness: 0.34, metalness: 0.72,
+      map: facade, emissiveMap: facade, emissive: 0xffffff, emissiveIntensity: 0.55,
+      envMapIntensity: 1.4
+    }),
     blockCount - litCount
   );
   const litBlocks = new InstancedMesh(
     blockGeo,
-    new MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),
+    new MeshBasicMaterial({ color: 0xffffff, map: facade, toneMapped: false }),
     litCount
   );
   darkBlocks.instanceMatrix.setUsage(DynamicDrawUsage);
@@ -461,8 +555,10 @@ export function createWorld(canvas, opts) {
 
   /* the ground, and a grid over it so speed is legible */
   const ground = new Mesh(
-    new PlaneGeometry(600, 260),
-    new MeshStandardMaterial({ color: 0x180C52, roughness: 0.62, metalness: 0.55 })
+    new PlaneGeometry(1000, 420),
+    new MeshStandardMaterial({
+      color: 0x120A44, roughness: 0.14, metalness: 0.94, envMapIntensity: 1.8
+    })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(0, -0.05, (CITY_Z0 + CITY_Z1) / 2);
@@ -523,8 +619,8 @@ export function createWorld(canvas, opts) {
       color: tone,
       emissive: tone,
       emissiveIntensity: pale ? 0.18 : 0.62,
-      roughness: 0.42, metalness: 0.18, transparent: true, opacity: 1,
-      side: DoubleSide
+      roughness: 0.2, metalness: 0.6, envMapIntensity: 1.5,
+      transparent: true, opacity: 1, side: DoubleSide
     });
     const p = new Mesh(new PlaneGeometry(w, h), mat);
     p.userData.home = new Vector3(x, y, 0);
@@ -580,7 +676,7 @@ export function createWorld(canvas, opts) {
       new PlaneGeometry(w + 0.8, h + 0.8),
       new MeshStandardMaterial({
         color: tone, emissive: tone, emissiveIntensity: 0.45,
-        roughness: 0.3, metalness: 0.4, side: DoubleSide
+        roughness: 0.16, metalness: 0.86, envMapIntensity: 1.6, side: DoubleSide
       })
     );
     const shot = new Mesh(
@@ -638,7 +734,7 @@ export function createWorld(canvas, opts) {
       new BoxGeometry(3.2, 1, 3.2),
       new MeshStandardMaterial({
         color: c, emissive: c,
-        emissiveIntensity: 0.5, roughness: 0.22, metalness: 0.55
+        emissiveIntensity: 0.5, roughness: 0.12, metalness: 0.9, envMapIntensity: 1.7
       })
     );
     bar.position.set(-20 + i * 5, 0, 0);
@@ -812,23 +908,28 @@ export function createWorld(canvas, opts) {
     lampA.intensity = lampB.intensity = lerp(34, 0, daylight);
     rimWarm.intensity = lerp(1.5, 0.5, daylight);
     rimCool.intensity = lerp(1.3, 0.4, daylight);
+    if (bloom) {
+      const fallFlash = smooth(clamp((span(t, CH.field) - 0.52) / 0.36, 0, 1));
+      /* strong through the black hole and the neon city, restrained once the
+         sky turns — bloom on a cream sky is just fog */
+      bloom.strength = lerp(0.5, 0.22, daylight) + fallFlash * 0.5;
+      bloom.threshold = lerp(0.78, 0.9, daylight);
+    }
 
     /* ---- ch.1 field ---- */
     const pField = span(t, CH.field);
-    rings.children.forEach((r, i) => {
-      if (!r.userData.spin) { r.lookAt(camera.position); return; }   /* the glows */
-      r.rotation.z += r.userData.spin * dt;
-      r.rotation.x = Math.sin(clock * 0.4 + i) * 0.18 + r.userData.tilt;
-      r.material.emissiveIntensity = (1.5 - i * 0.12) * (1 - pField * 0.45);
-      r.userData.glow.material.opacity = 0.16 * (1 - pField);
-    });
+    /* The hole holds full strength for the first two thirds of the chapter —
+       the length of the headline — then the camera falls in and it blows out
+       past the lens. `1 - fall` is also what pumps the bloom for the flash. */
+    const fall = smooth(clamp((pField - 0.52) / 0.36, 0, 1));
+    blackHole.update(dt, clock, 1 - fall, camera);
     shards.children.forEach((s, i) => {
       s.rotation.x += s.userData.spin * dt;
       s.rotation.y += s.userData.spin * dt * 0.7;
       s.position.y = s.userData.baseY + Math.sin(clock * 0.6 + s.userData.phase) * 1.6;
-      s.material.emissiveIntensity = 0.75 * (1 - pField * 0.6);
+      s.material.emissiveIntensity = 0.22 * (1 - pField * 0.6);
     });
-    ringGlow.material.opacity = 0.42 * (1 - pField);
+    ringGlow.material.opacity = 0.16 * (1 - pField);
     ringGlow.lookAt(camera.position);
 
     /* ---- ch.2 city ---- */
@@ -903,14 +1004,14 @@ export function createWorld(canvas, opts) {
 
     /* ---- cull the chapters behind and ahead of us ---- */
     const z = camera.position.z;
-    field.visible    = z >  -110;
+    field.visible    = z >  -118;
     city.visible     = z >  -290 && z < -20;
     assembly.visible = t > 0.32 && t < 0.58;
     gallery.visible  = z <  -280 && z > -520;
     rise.visible     = t > 0.68;
     arrival.visible  = t > 0.80;
 
-    renderer.render(scene, camera);
+    if (composer) composer.render(); else renderer.render(scene, camera);
   }
 
   /* ------------------------------------------------------------ lifecycle */
@@ -922,6 +1023,10 @@ export function createWorld(canvas, opts) {
     camera.fov = w / h < 0.85 ? 72 : 58;   /* portrait needs a wider lens */
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    if (composer) {
+      composer.setSize(w, h);
+      bloom.setSize(w, h);
+    }
     render(current, 0.016);
   }
 
