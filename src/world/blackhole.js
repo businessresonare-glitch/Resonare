@@ -212,21 +212,44 @@ export function createBlackHole(opts) {
   return {
     group,
     horizonRadius: horizonR,
-    /* `fade` runs 1 → 0 as the camera falls in; the whole thing scales up as
-       it goes so the last thing on screen is the inner edge blowing past. */
-    update(dt, clock, fade, camera) {
+    /* `fall` runs 0 → 1 as the camera drops in.
+
+       The obvious way to animate this — scale the whole thing up as the
+       camera nears — is what produced the bug in the shipped build: the
+       camera path passes through the centre, so at fall ~0.5 the horizon was
+       a seven-metre black sphere four metres from the lens. It filled two
+       thirds of the screen as a hard-edged black shape cut off by the frame,
+       and it did it while the opening headline was still at full opacity.
+
+       So the horizon does the opposite. It COLLAPSES: shrinking to nothing
+       between fall 0.15 and 0.55, which reads as diving into the singularity
+       and is never a black wall. The disk, meanwhile, scales up and whips
+       past the lens, which is the part that should feel fast. */
+    update(dt, clock, fall, camera) {
+      const fade = 1 - fall;
       for (const m of shaded) {
         m.material.uniforms.uTime.value = clock;
-        m.material.uniforms.uOpacity.value = fade;
+        /* the disk holds its brightness far longer than the horizon holds
+           its size — it is the thing you are falling through */
+        m.material.uniforms.uOpacity.value = Math.pow(fade, 0.6);
       }
-      photon.material.opacity = 0.95 * fade;
-      horizon.visible = fade > 0.02;
+
+      const collapse = Math.max(0, 1 - Math.max(0, (fall - 0.15) / 0.4));
+      horizon.scale.setScalar(collapse);
+      horizon.visible = collapse > 0.01;
+      photon.scale.setScalar(collapse);
+      photon.material.opacity = collapse;
       photon.lookAt(camera.position);
+
       /* the halo arcs are a screen-space effect — they have to keep facing
          the camera or they resolve into two flat rings the moment it drifts */
       haloTop.quaternion.copy(camera.quaternion);
       haloBottom.quaternion.copy(camera.quaternion);
-      group.scale.setScalar(1 + (1 - fade) * 0.9);
+
+      disk.scale.setScalar(1 + fall * 2.4);
+      haloTop.scale.set(1 + fall * 2.4, 0.46 * (1 + fall * 2.4), 1);
+      haloBottom.scale.set(1 + fall * 2.4, 0.46 * (1 + fall * 2.4), 1);
+      group.visible = fall < 0.995;
     }
   };
 }

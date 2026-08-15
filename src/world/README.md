@@ -21,6 +21,9 @@ output file, not linked.
 |---|---|
 | `index.js`    | the scene: geometry, lighting, the camera curve, the frame loop |
 | `blackhole.js`| the opening: horizon, photon ring, accretion disk shader, lensed arcs |
+| `warp.js`     | the fall through the horizon — a shell of stretching light streaks |
+| `stars.js`    | the sky: size distribution, diffraction spikes, per-star twinkle |
+| `street.js`   | ground level in the city: road, kerbs, food stalls, lamps, trails |
 | `boot.js`     | finds the canvas, maps page scroll to curve `t`, handles the fallbacks |
 
 ## The one idea
@@ -44,7 +47,7 @@ while the words are on screen.
 
 ```
    z ~ +18   camera start
-   z  -62    the black hole                     CH.field
+   z  -62    the black hole, and the warp        CH.field  (fall: FALL_T0→FALL_T1)
    z  -84 … -238   the city of local businesses  CH.city
    z -322    the site assembling itself          CH.assembly
    z -346 … -450   the corridor of real work     CH.gallery
@@ -102,13 +105,40 @@ Realism here is rendering technique, not imported meshes. Four things carry it:
   a bar chart. One shared canvas of windows — lit in runs, not per-cell noise,
   because runs read as occupancy — turns them into buildings. The stretching
   from per-instance scaling is what varies the floor heights for free.
-- **Metal and roughness that mean something.** The street is roughness 0.14 at
-  metalness 0.94, which is why it is wet.
+- **Metal and roughness that mean something.** The road is metalness 0.9, which
+  is why it is wet. Watch the roughness though: at 0.10 every travelling lamp
+  became one hard specular blob sitting in the corner of the frame. 0.34
+  spreads it into a sheen.
+
+One rule the street chapter taught: **`toneMapped: false` is for a handful of
+neon signs, never for a hundred street lights.** It sends a colour straight to
+linear 1.0, above every bloom threshold, so two hundred lamps and lane markings
+turned the whole frame milky. The neon tower faces keep it; nothing in
+`street.js` does.
 
 Bloom is also why the black hole needs restraint. Its inner lip was `exp(-rn *
 13) * 2.6`; with bloom on, that smeared straight across the shadow and the hole
 stopped being a hole. It is `exp(-rn * 24) * 0.85` now, and the disk starts at
 1.62 horizon radii rather than 1.28 so the shadow has room to read.
+
+## The fall
+
+The camera path goes through the centre of the black hole. Two things follow
+from that and both are easy to get wrong.
+
+**The fall must be driven off raw `t`, not `span(t, CH.field)`.** Chapter
+progress is eased, so a fall keyed to it started around `t≈0.055` — the middle
+of the opening headline's full-opacity window. The shipped build showed a
+seven-metre black sphere four metres from the lens, cut off by the frame,
+behind live copy. `FALL_T0`/`FALL_T1` are raw curve positions chosen so the
+fall begins as the headline dissolves and ends exactly where the curve reaches
+the hole (`3/21 ≈ 0.143`).
+
+**The horizon collapses, it does not grow.** Scaling it up as the camera nears
+is physically the right instinct and visually a black wall. It shrinks to
+nothing between fall 0.15 and 0.55 instead, which reads as diving into the
+singularity, while the disk scales up and whips past — that is the part that
+should feel fast. `warp.js` carries the rest.
 
 ## Rules that are load-bearing
 

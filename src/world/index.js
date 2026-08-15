@@ -28,6 +28,9 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { createBlackHole } from './blackhole.js';
+import { createWarp } from './warp.js';
+import { createStars } from './stars.js';
+import { createStreet } from './street.js';
 
 /* ---------------------------------------------------------------- palette */
 /* Rust and navy are the brand, and they anchor the flight — the mark at the
@@ -67,20 +70,25 @@ const hue = i => SPECTRUM[((i % SPECTRUM.length) + SPECTRUM.length) % SPECTRUM.l
    across the wheel with it. Fog and background share one colour so the horizon
    never shows a seam. */
 const SKY = [
-  { t: 0.00, sky: 0x06052A, key: 0x6C63FF, amb: 0x2A1C8E, exposure: 1.10 },
-  { t: 0.13, sky: 0x0A0B62, key: 0x27D8FF, amb: 0x2E27B4, exposure: 1.14 },
-  { t: 0.26, sky: 0x120A78, key: 0xFF9E5E, amb: 0x3A2ACC, exposure: 1.20 },
-  { t: 0.40, sky: 0x1A0C86, key: 0xFFD08A, amb: 0x4630CE, exposure: 1.22 },
-  { t: 0.54, sky: 0x2A0F82, key: 0xFFFFFF, amb: 0x5535C4, exposure: 1.20 },
-  { t: 0.70, sky: 0x4A1478, key: 0xFFE0F4, amb: 0x7A2FB0, exposure: 1.18 },
-  { t: 0.80, sky: 0x9E2A80, key: 0xFFB07A, amb: 0xB84A8A, exposure: 1.18 },
-  { t: 0.87, sky: 0xE8834A, key: 0xFFE9C4, amb: 0xE0A070, exposure: 1.18 },
-  { t: 0.93, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.16 },
-  { t: 1.00, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.16 }
+  { t: 0.00, sky: 0x06052A, key: 0x6C63FF, amb: 0x2A1C8E, exposure: 0.98 },
+  { t: 0.13, sky: 0x0A0B62, key: 0x27D8FF, amb: 0x2E27B4, exposure: 1.00 },
+  { t: 0.26, sky: 0x120A78, key: 0xFF9E5E, amb: 0x3A2ACC, exposure: 1.04 },
+  { t: 0.40, sky: 0x1A0C86, key: 0xFFD08A, amb: 0x4630CE, exposure: 1.05 },
+  { t: 0.54, sky: 0x2A0F82, key: 0xFFFFFF, amb: 0x5535C4, exposure: 1.04 },
+  { t: 0.70, sky: 0x4A1478, key: 0xFFE0F4, amb: 0x7A2FB0, exposure: 1.02 },
+  { t: 0.80, sky: 0x9E2A80, key: 0xFFB07A, amb: 0xB84A8A, exposure: 1.02 },
+  { t: 0.87, sky: 0xE8834A, key: 0xFFE9C4, amb: 0xE0A070, exposure: 1.02 },
+  { t: 0.93, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.00 },
+  { t: 1.00, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.00 }
 ];
 
 /* Where each chapter lives on the curve. Objects read their own local
    0 → 1 progress out of this so a chapter can animate independently. */
+/* The window, in raw curve position, over which the camera falls through the
+   black hole. The curve reaches it at 3/21. */
+const FALL_T0 = 0.086;
+const FALL_T1 = 0.143;
+
 const CH = {
   field:    [0.00, 0.15],
   city:     [0.13, 0.40],
@@ -366,7 +374,7 @@ export function createWorld(canvas, opts) {
   if (wantBloom) {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    bloom = new UnrealBloomPass(new Vector2(1, 1), 0.46, 0.7, 0.8);
+    bloom = new UnrealBloomPass(new Vector2(1, 1), 0.34, 0.72, 0.86);
     composer.addPass(bloom);
     /* tone mapping and colour space move to the end of the chain; without
        this the composer hands back a linear buffer and the whole page washes
@@ -400,8 +408,8 @@ export function createWorld(canvas, opts) {
   /* Two more lamps flanking it, cycling around the wheel as the flight
      advances, so a surface the camera passes is lit from three hues at once
      and never resolves to a single flat colour. */
-  const lampA = new PointLight(C.magenta, 30, 80, 2);
-  const lampB = new PointLight(C.cyan, 30, 80, 2);
+  const lampA = new PointLight(C.magenta, 22, 120, 2);
+  const lampB = new PointLight(C.cyan, 22, 120, 2);
   scene.add(lampA, lampB);
 
   /* ============================================== CHAPTER 1 — THE FIELD */
@@ -414,6 +422,10 @@ export function createWorld(canvas, opts) {
   const blackHole = createBlackHole({ horizon: 7, outer: 34, mid: 0xFFA23C, cool: C.rust });
   blackHole.group.position.set(0, 0, -62);
   field.add(blackHole.group);
+
+  /* the streaks the fall turns into — see warp.js */
+  const warp = createWarp({ z: -62, quality, hue });
+  field.add(warp.mesh);
 
   /* Debris caught in the hole's gravity, one shard per spectrum stop. */
   const shards = new Group();
@@ -443,35 +455,10 @@ export function createWorld(canvas, opts) {
   ringGlow.position.set(0, 0, -70);
   field.add(ringGlow);
 
-  /* Dust — one field spanning the whole journey, fogged so it reads as depth.
-     Every mote takes a hue off the wheel and is drawn additively, so the
-     empty space between chapters is confetti rather than grey static. */
-  const dustCount = Math.round(3200 * quality);
-  {
-    const pos = new Float32Array(dustCount * 3);
-    const col = new Float32Array(dustCount * 3);
-    const c = new Color();
-    for (let i = 0; i < dustCount; i++) {
-      pos[i * 3]     = (Math.random() - 0.5) * 190;
-      pos[i * 3 + 1] = Math.random() * 58 - 16;
-      pos[i * 3 + 2] = 30 - Math.random() * 760;
-      c.setHex(hue(Math.floor(Math.random() * SPECTRUM.length)));
-      /* a fifth of them stay near-white so the field still reads as depth
-         and not only as colour */
-      if (Math.random() < 0.2) c.setHex(C.cream);
-      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
-    }
-    const geo = new BufferGeometry();
-    geo.setAttribute('position', new BufferAttribute(pos, 3));
-    geo.setAttribute('color', new BufferAttribute(col, 3));
-    geo.boundingSphere = new Sphere(new Vector3(0, 0, -350), 620);
-    const dust = new Points(geo, new PointsMaterial({
-      vertexColors: true, size: 0.55, sizeAttenuation: true,
-      transparent: true, opacity: 0.85, depthWrite: false,
-      blending: AdditiveBlending, fog: true
-    }));
-    scene.add(dust);
-  }
+  /* A real sky rather than coloured dust — sizes, diffraction spikes and
+     per-star twinkle. See stars.js. */
+  const stars = createStars({ count: Math.round(3400 * quality), spectrum: SPECTRUM });
+  scene.add(stars.points);
 
   /* ============================================== CHAPTER 2 — THE CITY */
   const city = new Group();
@@ -557,7 +544,7 @@ export function createWorld(canvas, opts) {
   const ground = new Mesh(
     new PlaneGeometry(1000, 420),
     new MeshStandardMaterial({
-      color: 0x120A44, roughness: 0.14, metalness: 0.94, envMapIntensity: 1.8
+      color: 0x120A44, roughness: 0.34, metalness: 0.88, envMapIntensity: 1.6
     })
   );
   ground.rotation.x = -Math.PI / 2;
@@ -565,7 +552,15 @@ export function createWorld(canvas, opts) {
   city.add(ground);
   /* The street grid runs the whole wheel across its width, so the floor of
      the city is a spectrum rather than a single accent. */
-  city.add(gridLines(560, 250, 46, 22, (CITY_Z0 + CITY_Z1) / 2, null, 0.38));
+  city.add(gridLines(560, 250, 46, 22, (CITY_Z0 + CITY_Z1) / 2, null, 0.24));
+
+  /* Street level: asphalt, kerbs, lane markings, food stalls and lamps. The
+     camera drops to about three metres for the back half of this chapter, and
+     up to now there was nothing down there to drop to. */
+  city.add(createStreet({
+    z0: CITY_Z0, z1: CITY_Z1, halfWidth: 15, hue, quality,
+    stalls: 30, lamps: 34
+  }));
 
   /* beams above the lit blocks — the businesses that get found */
   const beams = new Group();
@@ -853,7 +848,10 @@ export function createWorld(canvas, opts) {
 
   function frame(now) {
     raf = requestAnimationFrame(frame);
-    const dt = Math.min((now - last) / 1000, 0.05);
+    /* Clamped so a stalled tab does not jump the flight, but not so tightly
+       that a slow device starves the damped follower: at 20fps a 0.05 ceiling
+       let the camera trail the scrollbar by a visible second. */
+    const dt = Math.min((now - last) / 1000, 0.1);
     last = now;
     if (!visible) return;
 
@@ -905,24 +903,29 @@ export function createWorld(canvas, opts) {
     lampB.color.setHSL(((spin + 0.42) % 1), 0.85, 0.62);
     lampA.position.set(camera.position.x - 10, camera.position.y + 5, camera.position.z - 6);
     lampB.position.set(camera.position.x + 10, camera.position.y - 3, camera.position.z - 6);
-    lampA.intensity = lampB.intensity = lerp(34, 0, daylight);
+    lampA.intensity = lampB.intensity = lerp(20, 0, daylight);
+    stars.update(clock, renderer.getPixelRatio(), daylight);
     rimWarm.intensity = lerp(1.5, 0.5, daylight);
     rimCool.intensity = lerp(1.3, 0.4, daylight);
     if (bloom) {
-      const fallFlash = smooth(clamp((span(t, CH.field) - 0.52) / 0.36, 0, 1));
+      const fallFlash = smooth(clamp((t - FALL_T0) / (FALL_T1 - FALL_T0), 0, 1));
       /* strong through the black hole and the neon city, restrained once the
          sky turns — bloom on a cream sky is just fog */
-      bloom.strength = lerp(0.5, 0.22, daylight) + fallFlash * 0.5;
-      bloom.threshold = lerp(0.78, 0.9, daylight);
+      bloom.strength = lerp(0.36, 0.18, daylight) + fallFlash * 0.34;
+      bloom.threshold = lerp(0.86, 0.94, daylight);
     }
 
     /* ---- ch.1 field ---- */
     const pField = span(t, CH.field);
-    /* The hole holds full strength for the first two thirds of the chapter —
-       the length of the headline — then the camera falls in and it blows out
-       past the lens. `1 - fall` is also what pumps the bloom for the flash. */
-    const fall = smooth(clamp((pField - 0.52) / 0.36, 0, 1));
-    blackHole.update(dt, clock, 1 - fall, camera);
+    /* FALL_T0/FALL_T1 are raw curve positions, not eased chapter progress.
+       Driving this off span() put the fall at t≈0.055 — right in the middle
+       of the opening headline's full-opacity window, which is why the shipped
+       build showed a giant cut-off black sphere behind live copy. The camera
+       reaches the hole at t = 3/21 ≈ 0.143, so the fall now runs from just
+       after the headline starts dissolving to exactly that arrival. */
+    const fall = smooth(clamp((t - FALL_T0) / (FALL_T1 - FALL_T0), 0, 1));
+    blackHole.update(dt, clock, fall, camera);
+    warp.update(fall);
     shards.children.forEach((s, i) => {
       s.rotation.x += s.userData.spin * dt;
       s.rotation.y += s.userData.spin * dt * 0.7;
