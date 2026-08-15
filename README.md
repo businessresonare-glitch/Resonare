@@ -77,6 +77,40 @@ viewport on a phone.
 
 ---
 
+## The whole homepage as one file
+
+```
+npm run build:single        # -> dist/resonare.html   (~1.2MB)
+```
+
+`dist/resonare.html` is the homepage with every asset folded in: stylesheets,
+scripts, the bundled 3D world, the fonts as base64 woff2 and the five project
+screenshots as base64 JPEGs. It opens from a `file://` URL with **no server, no
+assets folder and no network** — verified with every http request blocked.
+
+Two deliberate differences from `index.html`:
+
+1. **Cross-page links become in-page anchors.** A standalone file has no
+   `about.html` to navigate to, and each of those pages' subjects already has a
+   chapter or a section on the homepage — Studio → `#process`,
+   Services → `#ch-build`, Work → `#ch-work`, Contact → `#contact`.
+2. **The screenshots are re-encoded to 1100px.** On the homepage they are only
+   ever textures on a 13-unit plane in the 3D work corridor, never the
+   full-size images `work.html` shows, so the extra pixels were about 340KB of
+   base64 nobody could see.
+
+The multi-page site is still the real one — this is for emailing, for a host
+that takes a single upload, or for showing the work on a laptop with no
+internet.
+
+> **If you edit the build script:** every insertion into the HTML must go
+> through a replacer *function*, never a string. String replacements expand
+> `$&`, `` $` ``, `$'` and `$1`, and minified three.js contains a literal `$&`
+> — which silently rewrote itself to `</body>` in the middle of the WebGL state
+> cache and left a syntax error 280KB into a 500KB script.
+
+---
+
 ## ⚠️ One-time setup: turn on quote emails
 
 **Until you do this, briefs will not arrive by email.** The form still works —

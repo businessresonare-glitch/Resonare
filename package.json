@@ -5,6 +5,8 @@
   "description": "Marketing site for RESONARE. Static HTML/CSS/JS; the only built file is assets/world.js.",
   "scripts": {
     "build:world": "esbuild src/world/boot.js --bundle --format=iife --minify --target=es2019 --outfile=assets/world.js",
+    "build:single": "node tools/build-single.mjs",
+    "build": "npm run build:world && npm run build:single",
     "serve": "python3 -m http.server 8080"
   },
   "devDependencies": {
