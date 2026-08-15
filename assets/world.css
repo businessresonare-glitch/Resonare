@@ -457,3 +457,50 @@ body.no-world .world-cue{ display:none; }
   .glass-grid{ margin-top:30px; }
 }
 @media(max-height:780px){ .world-cue{ display:none; } }
+
+
+/* ==========================================================================
+   CENTRED
+
+   The copy was a left column with the world running past on the right. It now
+   sits in the middle of the frame, over the flight, the way the reference
+   site does it — which also means the scrim stops being a left-hand wash and
+   becomes a vignette, and every chapter gets the same composition instead of
+   one bespoke one for the last.
+   ========================================================================== */
+.chapter-inner{ justify-content:center; text-align:center; }
+.chapter-col{ max-width:900px; margin:0 auto; }
+.chapter--wide .chapter-col{ max-width:1060px; }
+.chapter p.lede{ margin-left:auto; margin-right:auto; max-width:56ch; }
+.chapter-actions,
+.chapter-stats{ justify-content:center; }
+.work-list{ margin-left:auto; margin-right:auto; max-width:820px; }
+.work-row{ justify-content:space-between; }
+.glass{ text-align:left; }
+#ch-open .chapter-col{ max-width:960px; }
+
+/* the scrim follows: a vignette, not a left-hand column wash */
+.world-veil{
+  background:
+    radial-gradient(120% 92% at 50% 50%, rgba(5,4,31,0) 26%, rgba(5,4,31,.55) 74%, rgba(5,4,31,.86) 100%),
+    linear-gradient(to bottom, rgba(5,4,31,.72) 0%, rgba(5,4,31,.18) 24%, rgba(5,4,31,.18) 72%, rgba(5,4,31,.72) 100%);
+}
+@media(max-width:900px){
+  .world-veil{
+    background:
+      radial-gradient(130% 80% at 50% 46%, rgba(5,4,31,.12) 20%, rgba(5,4,31,.6) 76%, rgba(5,4,31,.9) 100%),
+      linear-gradient(to bottom, rgba(5,4,31,.78) 0%, rgba(5,4,31,.38) 28%, rgba(5,4,31,.38) 66%, rgba(5,4,31,.9) 100%);
+  }
+}
+.world.is-light .world-veil{
+  background:
+    radial-gradient(120% 92% at 50% 50%, rgba(246,242,233,0) 24%, rgba(246,242,233,.5) 72%, rgba(246,242,233,.82) 100%),
+    linear-gradient(to bottom, rgba(246,242,233,.6) 0%, rgba(246,242,233,0) 26%, rgba(246,242,233,0) 70%, rgba(246,242,233,.72) 100%);
+}
+
+/* the cue centres with everything else */
+.world-cue{ left:50%; transform:translateX(-50%); }
+
+@media(max-width:820px){
+  .chapter-col, #ch-open .chapter-col{ max-width:100%; }
+}

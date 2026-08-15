@@ -23,7 +23,8 @@ output file, not linked.
 | `blackhole.js`| the opening: horizon, photon ring, accretion disk shader, lensed arcs |
 | `warp.js`     | the fall through the horizon — a shell of stretching light streaks |
 | `stars.js`    | the sky: size distribution, diffraction spikes, per-star twinkle |
-| `street.js`   | ground level in the city: road, kerbs, food stalls, lamps, trails |
+| `ocean.js`    | the reef: seabed, coral, kelp, fish, sharks, god rays, bubbles |
+| `echo.js`     | the resonance motif in 3D — the transition, the sonar, the work |
 | `boot.js`     | finds the canvas, maps page scroll to curve `t`, handles the fallbacks |
 
 ## The one idea
@@ -48,7 +49,7 @@ while the words are on screen.
 ```
    z ~ +18   camera start
    z  -62    the black hole, and the warp        CH.field  (fall: FALL_T0→FALL_T1)
-   z  -84 … -238   the city of local businesses  CH.city
+   z -106 … -272   the reef of local businesses CH.city
    z -322    the site assembling itself          CH.assembly
    z -346 … -450   the corridor of real work     CH.gallery
    z -586    the enquiries chart                 CH.rise
@@ -74,16 +75,16 @@ Four things do the heavy lifting:
 - **`SKY` swings through the wheel too** — indigo night, electric blue, violet,
   magenta dusk, gold dawn, cream — and fog, background, key and fill all read
   from it.
-- **Unlit materials for anything that should look like neon.** The lit city
-  towers are `MeshBasicMaterial` + `instanceColor`: the material ignores the
-  lighting and paints the instance colour flat at full strength, which is one
-  draw call for ten hues. (Per-instance *emissive* is impossible inside an
-  `InstancedMesh` — `instanceColor` only multiplies the diffuse term.)
+- **Unlit materials for anything bioluminescent.** The lit coral is
+  `MeshBasicMaterial` + `instanceColor`: the material ignores the lighting and
+  paints the instance colour flat at full strength, which is one draw call for
+  ten hues. (Per-instance *emissive* is impossible inside an `InstancedMesh` —
+  `instanceColor` only multiplies the diffuse term.)
 
-Watch the street width in the city if you touch anything there. An unlit
-material has no shading to sell its form, so a tower that passes within a few
-units of the lens reads as a flat coloured wall rather than a building; the
-`|x| < 15` corridor exists for that reason.
+The reef keeps a clear corridor at `|x| < 15` for the same reason the city did:
+an unlit material has no shading to sell its form, so anything that passes
+within a few units of the lens reads as a flat coloured shape rather than an
+object.
 
 ## Making it look real
 
@@ -101,25 +102,38 @@ Realism here is rendering technique, not imported meshes. Four things carry it:
   extra full-screen passes and a phone spends that budget better on frame rate.
   Note the `OutputPass` at the end of the chain — without it the composer hands
   back a linear buffer and the page washes out by about a stop and a half.
-- **Facade textures.** A tower is a stretched cube; 760 flat-lit cubes read as
-  a bar chart. One shared canvas of windows — lit in runs, not per-cell noise,
-  because runs read as occupancy — turns them into buildings. The stretching
-  from per-instance scaling is what varies the floor heights for free.
-- **Metal and roughness that mean something.** The road is metalness 0.9, which
-  is why it is wet. Watch the roughness though: at 0.10 every travelling lamp
-  became one hard specular blob sitting in the corner of the frame. 0.34
-  spreads it into a sheen.
+- **Scrolling caustics.** One tiling canvas of soft blobs on the seabed's
+  emissive map, offset in two directions at different speeds. It is the single
+  texture that makes a flat sand plane read as submerged.
+- **Sway in the vertex shader, not on the CPU.** Four hundred kelp blades
+  animate for free via `onBeforeCompile`. Two things to know if you touch it:
+  the amplitude is keyed to height above the holdfast, so the geometry has to
+  be translated to sit at y=0 (on a centred plane, half the blade is below zero
+  and never moves), and the amplitude is in LOCAL units before the instance
+  scale — the first version used 0.02 and moved each blade by about a
+  centimetre.
 
-One rule the street chapter taught: **`toneMapped: false` is for a handful of
-neon signs, never for a hundred street lights.** It sends a colour straight to
-linear 1.0, above every bloom threshold, so two hundred lamps and lane markings
-turned the whole frame milky. The neon tower faces keep it; nothing in
-`street.js` does.
+One rule worth keeping: **`toneMapped: false` is for a handful of accents,
+never for a hundred lights.** It sends a colour straight to linear 1.0, above
+every bloom threshold. The city's two hundred street lights used it and turned
+the whole frame milky.
 
 Bloom is also why the black hole needs restraint. Its inner lip was `exp(-rn *
 13) * 2.6`; with bloom on, that smeared straight across the shadow and the hole
 stopped being a hole. It is `exp(-rn * 24) * 0.85` now, and the disk starts at
 1.62 horizon radii rather than 1.28 so the shadow has room to read.
+
+## Why a reef and not a city
+
+The city was the obvious shot for "every local business competing for one
+search", which is exactly why it was dull — every agency site already has a
+neon skyline. The ocean says the same thing in the brand's own language:
+RESONARE is resonance, and underwater a search *is* an echo. A ping goes out
+and what it finds lights up. The chapter's copy did not change a word.
+
+`echo.js` carries that motif in three places — as the black hole's transition,
+as sonar over the reef, and through the work corridor. If you add a fourth,
+use the same module rather than a new ring.
 
 ## The fall
 

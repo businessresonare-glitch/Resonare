@@ -3,9 +3,9 @@
    One continuous camera flight, scrubbed by the page scroll.
 
    The whole homepage is a single connected 3D space laid out along -Z. The
-   camera never cuts: it flies out of the dark, through the resonance rings,
-   over a city of local businesses, into a site as it assembles itself,
-   down a corridor of real work, up into the light, and lands on the mark.
+   camera never cuts: it hangs off a black hole, falls through it on an echo,
+   crosses a reef of local businesses, enters a site as it assembles itself,
+   flies a corridor of real work, rises into the light, and lands on the mark.
 
    Six chapters, one curve. Scroll position 0 → 1 maps to curve t 0 → 1, and
    everything else (fog colour, light colour, exposure, per-chapter object
@@ -30,7 +30,8 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { createBlackHole } from './blackhole.js';
 import { createWarp } from './warp.js';
 import { createStars } from './stars.js';
-import { createStreet } from './street.js';
+import { createReef } from './ocean.js';
+import { createEcho } from './echo.js';
 
 /* ---------------------------------------------------------------- palette */
 /* Rust and navy are the brand, and they anchor the flight — the mark at the
@@ -71,11 +72,12 @@ const hue = i => SPECTRUM[((i % SPECTRUM.length) + SPECTRUM.length) % SPECTRUM.l
    never shows a seam. */
 const SKY = [
   { t: 0.00, sky: 0x06052A, key: 0x6C63FF, amb: 0x2A1C8E, exposure: 0.98 },
-  { t: 0.13, sky: 0x0A0B62, key: 0x27D8FF, amb: 0x2E27B4, exposure: 1.00 },
-  { t: 0.26, sky: 0x120A78, key: 0xFF9E5E, amb: 0x3A2ACC, exposure: 1.04 },
-  { t: 0.40, sky: 0x1A0C86, key: 0xFFD08A, amb: 0x4630CE, exposure: 1.05 },
-  { t: 0.54, sky: 0x2A0F82, key: 0xFFFFFF, amb: 0x5535C4, exposure: 1.04 },
-  { t: 0.70, sky: 0x4A1478, key: 0xFFE0F4, amb: 0x7A2FB0, exposure: 1.02 },
+  { t: 0.14, sky: 0x03182E, key: 0x8FE8FF, amb: 0x0A3A5E, exposure: 1.02 },
+  { t: 0.24, sky: 0x064A66, key: 0xBFF2FF, amb: 0x0E5A7C, exposure: 1.08 },
+  { t: 0.36, sky: 0x0A7290, key: 0xDFFAFF, amb: 0x1478A0, exposure: 1.10 },
+  { t: 0.48, sky: 0x1A2E80, key: 0xFFFFFF, amb: 0x3A34A8, exposure: 1.06 },
+  { t: 0.62, sky: 0x2A0F82, key: 0xFFFFFF, amb: 0x5535C4, exposure: 1.04 },
+  { t: 0.72, sky: 0x4A1478, key: 0xFFE0F4, amb: 0x7A2FB0, exposure: 1.02 },
   { t: 0.80, sky: 0x9E2A80, key: 0xFFB07A, amb: 0xB84A8A, exposure: 1.02 },
   { t: 0.87, sky: 0xE8834A, key: 0xFFE9C4, amb: 0xE0A070, exposure: 1.02 },
   { t: 0.93, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.00 },
@@ -419,13 +421,27 @@ export function createWorld(canvas, opts) {
   /* The opening is a supermassive black hole — see blackhole.js. The camera
      holds off it for the length of the headline, then falls straight through
      the horizon into the city. */
-  const blackHole = createBlackHole({ horizon: 7, outer: 34, mid: 0xFFA23C, cool: C.rust });
-  blackHole.group.position.set(0, 0, -62);
+  const blackHole = createBlackHole({ horizon: 8, outer: 30, mid: 0xFFA23C, cool: C.rust });
+  /* Below the copy, not behind it. With the type centred, a horizon sitting
+     at the camera's own eye line lands squarely under the lede and the
+     buttons; dropped fifteen metres it reads as something the flight is
+     passing over, and the disk arcs up behind the headline instead. */
+  blackHole.group.position.set(0, -32, -64);
   field.add(blackHole.group);
 
   /* the streaks the fall turns into — see warp.js */
   const warp = createWarp({ z: -62, quality, hue });
   field.add(warp.mesh);
+
+  /* And the echo it leaves behind. The hole collapses, the echo washes out
+     over the camera, and the reef is on the other side of it — which is how
+     the black hole stops existing instead of hanging in front of the next
+     chapter the way it did before. */
+  const transition = createEcho({
+    count: 5, radius: 90, thickness: 0.006, colors: [0xFFF3DE, C.gold, C.ember, C.cyan, C.mint]
+  });
+  transition.group.position.set(0, -18, -62);
+  field.add(transition.group);
 
   /* Debris caught in the hole's gravity, one shard per spectrum stop. */
   const shards = new Group();
@@ -460,126 +476,22 @@ export function createWorld(canvas, opts) {
   const stars = createStars({ count: Math.round(3400 * quality), spectrum: SPECTRUM });
   scene.add(stars.points);
 
-  /* ============================================== CHAPTER 2 — THE CITY */
-  const city = new Group();
+  /* ============================================== CHAPTER 2 — THE REEF */
+  /* Was a neon city. See ocean.js for why it is not any more: a search IS an
+     echo, and "most of them never light up" is literally true of a reef at
+     depth. The chapter's copy did not change a word. */
+  const REEF_Z0 = -106, REEF_Z1 = -272;
+  const reef = createReef({ z0: REEF_Z0, z1: REEF_Z1, hue, quality, width: 230, glow: glowTexture() });
+  const city = reef.group;
   scene.add(city);
 
-  const CITY_Z0 = -84, CITY_Z1 = -238;
-  const blockCount = Math.round(760 * quality);
-  const litCount = Math.round(blockCount * 0.28);
-
-  /* Two meshes rather than one, for two different reasons.
-
-     The unlit towers are lit by the scene, so they take a MeshStandardMaterial
-     and `instanceColor` tints each one — but across a cool arc (indigo, azure,
-     violet, teal) at varying brightness rather than one navy, so the skyline
-     has hue variation even in shadow.
-
-     The lit ones take a MeshBasicMaterial. `instanceColor` multiplies the
-     diffuse term only, so per-instance *emissive* is impossible inside an
-     InstancedMesh — but an unlit material ignores the lighting entirely and
-     paints the instance colour flat at full strength, which is exactly what a
-     neon sign looks like. One draw call, ten hues. */
-  const blockGeo = new BoxGeometry(1, 1, 1);
-  const facade = facadeTexture();
-  const darkBlocks = new InstancedMesh(
-    blockGeo,
-    new MeshStandardMaterial({
-      color: 0xffffff, roughness: 0.34, metalness: 0.72,
-      map: facade, emissiveMap: facade, emissive: 0xffffff, emissiveIntensity: 0.55,
-      envMapIntensity: 1.4
-    }),
-    blockCount - litCount
-  );
-  const litBlocks = new InstancedMesh(
-    blockGeo,
-    new MeshBasicMaterial({ color: 0xffffff, map: facade, toneMapped: false }),
-    litCount
-  );
-  darkBlocks.instanceMatrix.setUsage(DynamicDrawUsage);
-
-  const COOL = [C.indigo, C.azure, C.violet, C.mint, C.magenta];
-  const litSpots = [];
-  {
-    const dummy = new Object3D();
-    const col = new Color();
-    let d = 0, l = 0;
-    for (let i = 0; i < blockCount; i++) {
-      /* The street has to be wide enough that no tower ever fills the frame.
-         At |x| < 8 a 5-unit-wide block sat two metres off the lens and read as
-         a flat magenta wall rather than a building — unlit materials have no
-         shading to sell the form that close up. */
-      let x = (Math.random() - 0.5) * 230;
-      if (Math.abs(x) < 15) x += Math.sign(x || 1) * 16;
-      const z = lerp(CITY_Z0, CITY_Z1, Math.random());
-      const h = 1.2 + Math.pow(Math.random(), 2.1) * 16;
-      const w = 2.2 + Math.random() * 3.4;
-      dummy.position.set(x, h / 2, z);
-      dummy.rotation.y = Math.random() * 0.4 - 0.2;
-      dummy.scale.set(w, h, w * (0.7 + Math.random() * 0.6));
-      dummy.updateMatrix();
-
-      if (l < litCount && Math.random() < 0.3) {
-        const c = hue(l * 3 + (l % 2));
-        litBlocks.setMatrixAt(l, dummy.matrix);
-        litBlocks.setColorAt(l, col.setHex(c));
-        litSpots.push([x, z, c]);
-        l++;
-      } else if (d < blockCount - litCount) {
-        darkBlocks.setMatrixAt(d, dummy.matrix);
-        col.setHex(COOL[d % COOL.length]).multiplyScalar(0.34 + Math.random() * 0.62);
-        darkBlocks.setColorAt(d, col);
-        d++;
-      }
-    }
-    darkBlocks.count = d;
-    litBlocks.count = l;
-  }
-  darkBlocks.instanceColor.needsUpdate = true;
-  litBlocks.instanceColor.needsUpdate = true;
-  city.add(darkBlocks);
-  city.add(litBlocks);
-
-  /* the ground, and a grid over it so speed is legible */
-  const ground = new Mesh(
-    new PlaneGeometry(1000, 420),
-    new MeshStandardMaterial({
-      color: 0x120A44, roughness: 0.34, metalness: 0.88, envMapIntensity: 1.6
-    })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.set(0, -0.05, (CITY_Z0 + CITY_Z1) / 2);
-  city.add(ground);
-  /* The street grid runs the whole wheel across its width, so the floor of
-     the city is a spectrum rather than a single accent. */
-  city.add(gridLines(560, 250, 46, 22, (CITY_Z0 + CITY_Z1) / 2, null, 0.24));
-
-  /* Street level: asphalt, kerbs, lane markings, food stalls and lamps. The
-     camera drops to about three metres for the back half of this chapter, and
-     up to now there was nothing down there to drop to. */
-  city.add(createStreet({
-    z0: CITY_Z0, z1: CITY_Z1, halfWidth: 15, hue, quality,
-    stalls: 30, lamps: 34
-  }));
-
-  /* beams above the lit blocks — the businesses that get found */
-  const beams = new Group();
-  city.add(beams);
-  /* Each beam takes its tower's own colour, so the shafts over the skyline
-     are as varied as the signs under them. */
-  for (let n = 0; n < Math.min(litSpots.length, 40); n++) {
-    const [x, z, c] = litSpots[n];
-    const beam = new Mesh(
-      new PlaneGeometry(2.6, 52),
-      new MeshBasicMaterial({
-        map: glowTexture(), color: c, transparent: true, opacity: 0,
-        blending: AdditiveBlending, depthWrite: false, fog: false, toneMapped: false
-      })
-    );
-    beam.position.set(x, 24, z);
-    beam.userData.phase = Math.random() * 6.28;
-    beams.add(beam);
-  }
+  /* sonar: the ping that goes out and finds them */
+  const sonar = createEcho({
+    count: 3, radius: 62, thickness: 0.008, period: 4.6,
+    colors: [C.cyan, C.mint, C.azure]
+  });
+  sonar.group.position.set(0, 9, (REEF_Z0 + REEF_Z1) / 2 + 30);
+  city.add(sonar.group);
 
   /* ============================================ CHAPTER 3 — THE ASSEMBLY */
   /* A website building itself: panels scattered in the dark converge into a
@@ -886,6 +798,10 @@ export function createWorld(canvas, opts) {
     /* ---- atmosphere ---- */
     const exposure = sampleSky(t, skyColor, keyColor, ambColor);
     scene.fog.color.copy(skyColor);
+    /* Visibility closes right down under water and opens again as the flight
+       surfaces. Fog is doing the job a depth-of-field pass would, for free. */
+    const submerged = Math.min(span(t, [0.15, 0.26]), 1 - span(t, [0.40, 0.50]));
+    scene.fog.far = lerp(small ? 150 : 190, small ? 88 : 112, submerged);
     key.color.copy(keyColor);
     amb.color.copy(ambColor);
     hemi.color.copy(skyColor).lerp(_c1.setHex(C.cyan), 0.55);
@@ -904,7 +820,9 @@ export function createWorld(canvas, opts) {
     lampA.position.set(camera.position.x - 10, camera.position.y + 5, camera.position.z - 6);
     lampB.position.set(camera.position.x + 10, camera.position.y - 3, camera.position.z - 6);
     lampA.intensity = lampB.intensity = lerp(20, 0, daylight);
-    stars.update(clock, renderer.getPixelRatio(), daylight);
+    /* Stars fade out under water as well as into daylight — a starfield seen
+       through forty metres of ocean is the one thing that breaks the shot. */
+    stars.update(clock, renderer.getPixelRatio(), Math.max(daylight, submerged));
     rimWarm.intensity = lerp(1.5, 0.5, daylight);
     rimCool.intensity = lerp(1.3, 0.4, daylight);
     if (bloom) {
@@ -926,6 +844,7 @@ export function createWorld(canvas, opts) {
     const fall = smooth(clamp((t - FALL_T0) / (FALL_T1 - FALL_T0), 0, 1));
     blackHole.update(dt, clock, fall, camera);
     warp.update(fall);
+    transition.update(clock, camera, Math.sin(Math.PI * clamp(fall, 0, 1)), fall);
     shards.children.forEach((s, i) => {
       s.rotation.x += s.userData.spin * dt;
       s.rotation.y += s.userData.spin * dt * 0.7;
@@ -937,10 +856,8 @@ export function createWorld(canvas, opts) {
 
     /* ---- ch.2 city ---- */
     const pCity = span(t, CH.city);
-    beams.children.forEach(b => {
-      b.material.opacity = 0.55 * pCity * (1 - pCity * 0.35) * (0.6 + 0.4 * Math.sin(clock * 1.6 + b.userData.phase));
-      b.lookAt(camera.position.x, b.position.y, camera.position.z);
-    });
+    if (city.visible) reef.update(clock, camera);
+    sonar.update(clock, camera, pCity * (1 - pCity * 0.3));
 
     /* ---- ch.3 assembly ---- */
     const pAsm = span(t, CH.assembly);
@@ -1007,8 +924,12 @@ export function createWorld(canvas, opts) {
 
     /* ---- cull the chapters behind and ahead of us ---- */
     const z = camera.position.z;
-    field.visible    = z >  -118;
-    city.visible     = z >  -290 && z < -20;
+    /* Hard cut, not a distance test. The screenshot that started this showed
+         the horizon hanging in front of the next chapter, because a z-based
+         cull kept the field alive well past the fall. Once the fall is done
+         the black hole does not exist. */
+    field.visible    = t < FALL_T1 + 0.004;
+    city.visible     = z >  -320 && z < -40;
     assembly.visible = t > 0.32 && t < 0.58;
     gallery.visible  = z <  -280 && z > -520;
     rise.visible     = t > 0.68;

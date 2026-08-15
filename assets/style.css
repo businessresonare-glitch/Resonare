@@ -2338,3 +2338,76 @@ h1 em, h2 em, h3 em, h4 em{
 }
 .section-index{ font-size:12.5px; }
 .footer-bottom{ font-size:12.5px; }
+
+
+/* ==========================================================================
+   WHATSAPP DOCK — two numbers, and a glow that does not repaint
+
+   The studio answers on a Malaysian and a Nepali number, so the button opens
+   a small menu rather than dialling one of them by guess.
+
+   The glow is a scaling, fading pseudo-element behind the button, not an
+   animated box-shadow. A box-shadow keyframe repaints the button on every
+   frame; a transform/opacity keyframe is handed to the compositor. That was
+   the difference between the old halo costing frames and this one costing
+   none — it is the same reason the original wa-glow was removed.
+   ========================================================================== */
+.wa-dock{ position:relative; display:flex; flex-direction:column; align-items:flex-end; }
+
+.social-whatsapp{
+  position:relative; isolation:isolate;
+  height:52px; min-width:52px; border-radius:26px; padding:0 15px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border:1px solid rgba(0,0,0,.10); cursor:pointer;
+  background:#25D366 !important; color:#fff;
+  box-shadow:0 6px 18px -8px rgba(9,80,40,.75);
+  transition:transform .3s var(--ease), background .3s var(--ease);
+}
+.social-whatsapp:hover{ background:#1DB954 !important; transform:translateY(-2px); }
+.social-whatsapp svg{ position:relative; z-index:1; }
+
+.wa-halo{
+  position:absolute; inset:-2px; border-radius:inherit; z-index:-1;
+  background:radial-gradient(circle, rgba(37,211,102,.85) 0%, rgba(37,211,102,.35) 45%, rgba(37,211,102,0) 72%);
+  animation:wa-halo 2.6s var(--ease) infinite;
+  will-change:transform, opacity;
+}
+@keyframes wa-halo{
+  0%   { transform:scale(.9);  opacity:.15; }
+  55%  { transform:scale(2.1); opacity:0; }
+  100% { transform:scale(2.1); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){ .wa-halo{ animation:none; opacity:.28; transform:scale(1.5); } }
+
+/* --- the menu ----------------------------------------------------------- */
+.wa-menu{
+  position:absolute; bottom:calc(100% + 12px); right:0;
+  display:flex; flex-direction:column; gap:2px; padding:7px;
+  min-width:210px; border-radius:16px;
+  background:rgba(10,9,40,.92);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:0 22px 50px -22px rgba(0,0,0,.8);
+  transform-origin:bottom right;
+  animation:wa-menu-in .28s var(--ease);
+}
+.wa-menu[hidden]{ display:none; }
+@keyframes wa-menu-in{ from{ opacity:0; transform:translateY(8px) scale(.96); } }
+.wa-menu a{
+  display:flex; flex-direction:column; gap:1px;
+  padding:11px 14px; border-radius:11px; color:#fff;
+  transition:background .22s var(--ease);
+}
+.wa-menu a:hover{ background:rgba(37,211,102,.18); }
+.wa-menu a b{ font-size:14px; font-weight:700; letter-spacing:-.01em; }
+.wa-menu a span{
+  font-size:12.5px; font-weight:600; letter-spacing:.03em;
+  color:rgba(255,255,255,.62);
+}
+@media (prefers-reduced-motion: reduce){ .wa-menu{ animation:none; } }
+
+@media(max-width:700px){
+  .sticky-socials{ align-items:center; }
+  .wa-menu{ right:auto; left:50%; transform:translateX(-50%); transform-origin:bottom center; }
+}

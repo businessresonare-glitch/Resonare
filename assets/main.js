@@ -285,8 +285,12 @@ document.querySelectorAll('.service-card').forEach(card => {
       if (travel <= 0) return;
       const span = vh / travel;
       const local = -r.top / travel;
-      const vis = ease(ramp(local, -span * 0.855, -span * 0.27)) *
-                  (1 - ease(ramp(local, 1 + span * 0.145, 1 + span * 0.73)));
+      /* Symmetric by construction: the outgoing window is the incoming one
+         shifted by exactly 1 + span, so the two cross at the midpoint. Kept
+         short — with both panels centred, a long dissolve puts two headlines
+         in the middle of the frame at once. */
+      const vis = ease(ramp(local, -span * 0.70, -span * 0.30)) *
+                  (1 - ease(ramp(local, 1 + span * 0.30, 1 + span * 0.70)));
       c.style.setProperty('--vis', vis.toFixed(3));
     });
 
@@ -539,6 +543,33 @@ attachTilt('.service-card', 2.6, -8);
       return;
     }
     observer.observe(h);
+  });
+})();
+
+/* ============ WHATSAPP DOCK ============
+   Two numbers, so the button opens a menu rather than picking one. Closes on
+   Escape, on an outside click, and after a choice — a popover that survives
+   the navigation it just triggered is a popover you have to dismiss twice. */
+(function initWhatsApp(){
+  const toggle = document.getElementById('waToggle');
+  const menu = document.getElementById('waMenu');
+  if (!toggle || !menu) return;
+
+  const setOpen = (open) => {
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(menu.hidden);
+  });
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('click', (e) => {
+    if (!menu.hidden && !menu.contains(e.target) && e.target !== toggle) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !menu.hidden){ setOpen(false); toggle.focus(); }
   });
 })();
 

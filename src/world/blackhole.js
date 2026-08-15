@@ -121,7 +121,7 @@ const FRAG = /* glsl */`
     /* the lensed copies taper away from the equator into crescents */
     float arc = mix(1.0, pow(abs(vPos.y) / max(r, 0.001), 1.15), uArc);
 
-    float b = (dens * 1.05 + lip) * beam * edge * arc;
+    float b = (dens * 1.35 + lip * 1.2) * beam * edge * arc;
     gl_FragColor = vec4(col * b, clamp(b, 0.0, 1.0) * uOpacity);
     if (gl_FragColor.a < 0.004) discard;
   }
