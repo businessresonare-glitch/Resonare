@@ -51,6 +51,36 @@ while the words are on screen.
    z -700    the mark, in daylight               CH.arrival
 ```
 
+## Colour
+
+Rust and navy are the brand and they anchor the ends of the flight — the night
+you start in, the mark you land on. Everything in between is drawn from
+`SPECTRUM` in `index.js`, a ten-stop wheel, and the rule is simple: **nothing in
+the world is grey.** Take an accent with `hue(i)` rather than picking a hex.
+
+Four things do the heavy lifting:
+
+- **Two opposed rim lights.** A warm rose rim against a cool cyan rim gives
+  every surface two differently-coloured edges and a hue gradient across the
+  middle. One white rim gives you a silver edge and a flat middle.
+- **Two flanking lamps that walk the wheel** as `t` advances (`lampA` / `lampB`,
+  `setHSL` off the scroll value), so a surface is lit by three hues at once and
+  by different ones a chapter later. Both stand down into the daylight, where
+  the sky is doing the lighting.
+- **`SKY` swings through the wheel too** — indigo night, electric blue, violet,
+  magenta dusk, gold dawn, cream — and fog, background, key and fill all read
+  from it.
+- **Unlit materials for anything that should look like neon.** The lit city
+  towers are `MeshBasicMaterial` + `instanceColor`: the material ignores the
+  lighting and paints the instance colour flat at full strength, which is one
+  draw call for ten hues. (Per-instance *emissive* is impossible inside an
+  `InstancedMesh` — `instanceColor` only multiplies the diffuse term.)
+
+Watch the street width in the city if you touch anything there. An unlit
+material has no shading to sell its form, so a tower that passes within a few
+units of the lens reads as a flat coloured wall rather than a building; the
+`|x| < 15` corridor exists for that reason.
+
 ## Rules that are load-bearing
 
 **Nothing in the canvas may carry meaning.** Every word, number and link on the

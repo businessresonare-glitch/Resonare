@@ -25,28 +25,51 @@ import {
 } from 'three';
 
 /* ---------------------------------------------------------------- palette */
+/* Rust and navy are the brand, and they anchor the flight — the mark at the
+   end is rust, the night at the start is navy. Everything travelling through
+   that space is drawn from a full spectrum. A world lit by one hue reads as a
+   colour cast rather than a place. */
 const C = {
-  void:    0x04031A,
+  void:    0x05041F,
   navy:    0x0A0952,
-  navyLit: 0x1A1878,
+  navyLit: 0x241FA8,
   rust:    0xB52F24,
-  ember:   0xDE5A3C,
-  gold:    0xF4C77E,
+  ember:   0xFF6B35,
+  gold:    0xFFB627,
   cream:   0xF6F2E9,
-  ink:     0x0B0A1E
+  ink:     0x0B0A1E,
+
+  rose:    0xFF3B6B,
+  magenta: 0xFF4FD8,
+  violet:  0xA95CFF,
+  indigo:  0x6C63FF,
+  azure:   0x2E8BFF,
+  cyan:    0x27D8FF,
+  mint:    0x2EE6A8,
+  lime:    0xB6FF3B
 };
 
-/* Atmosphere keyframes. The journey runs night → ember → dawn → daylight;
-   fog and background share one colour so the horizon never shows a seam. */
+/* The wheel, in the order the flight walks it. Every chapter draws its
+   accents from here by index, so nothing in the world is ever grey. */
+const SPECTRUM = [
+  C.rose, C.ember, C.gold, C.lime, C.mint, C.cyan, C.azure, C.indigo,
+  C.violet, C.magenta
+];
+const hue = i => SPECTRUM[((i % SPECTRUM.length) + SPECTRUM.length) % SPECTRUM.length];
+
+/* Atmosphere keyframes. The journey runs indigo night → electric blue →
+   violet → magenta dusk → gold dawn → daylight, and the key/fill lights swing
+   across the wheel with it. Fog and background share one colour so the horizon
+   never shows a seam. */
 const SKY = [
-  { t: 0.00, sky: 0x04031A, key: 0xDE5A3C, amb: 0x1A1878, exposure: 1.05 },
-  { t: 0.13, sky: 0x08073C, key: 0xE8815E, amb: 0x1E1C86, exposure: 1.08 },
-  { t: 0.26, sky: 0x0A0952, key: 0xFFD9B0, amb: 0x2A2794, exposure: 1.14 },
-  { t: 0.40, sky: 0x0C0A58, key: 0xFFE6C6, amb: 0x2A2794, exposure: 1.16 },
-  { t: 0.54, sky: 0x140F52, key: 0xFFFFFF, amb: 0x33307E, exposure: 1.14 },
-  { t: 0.70, sky: 0x24144A, key: 0xFFFFFF, amb: 0x4A3878, exposure: 1.12 },
-  { t: 0.80, sky: 0x6B2C4C, key: 0xFFB07A, amb: 0x8A4358, exposure: 1.14 },
-  { t: 0.87, sky: 0xD79A66, key: 0xFFE9C4, amb: 0xCE9A80, exposure: 1.16 },
+  { t: 0.00, sky: 0x06052A, key: 0x6C63FF, amb: 0x2A1C8E, exposure: 1.10 },
+  { t: 0.13, sky: 0x0A0B62, key: 0x27D8FF, amb: 0x2E27B4, exposure: 1.14 },
+  { t: 0.26, sky: 0x120A78, key: 0xFF9E5E, amb: 0x3A2ACC, exposure: 1.20 },
+  { t: 0.40, sky: 0x1A0C86, key: 0xFFD08A, amb: 0x4630CE, exposure: 1.22 },
+  { t: 0.54, sky: 0x2A0F82, key: 0xFFFFFF, amb: 0x5535C4, exposure: 1.20 },
+  { t: 0.70, sky: 0x4A1478, key: 0xFFE0F4, amb: 0x7A2FB0, exposure: 1.18 },
+  { t: 0.80, sky: 0x9E2A80, key: 0xFFB07A, amb: 0xB84A8A, exposure: 1.18 },
+  { t: 0.87, sky: 0xE8834A, key: 0xFFE9C4, amb: 0xE0A070, exposure: 1.18 },
   { t: 0.93, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.16 },
   { t: 1.00, sky: 0xF6F2E9, key: 0xFFFFFF, amb: 0xE8DFCC, exposure: 1.16 }
 ];
@@ -56,7 +79,7 @@ const SKY = [
 const CH = {
   field:    [0.00, 0.15],
   city:     [0.13, 0.40],
-  assembly: [0.36, 0.57],
+  assembly: [0.33, 0.57],
   gallery:  [0.54, 0.76],
   rise:     [0.64, 0.84],
   arrival:  [0.84, 0.97]
@@ -144,26 +167,35 @@ function glowPlane(size, color, opacity) {
 
 /* Rounded-rectangle card texture. Used for the review slabs so the copy in
    the 3D space is the real copy, not lorem geometry. */
-function cardTexture(quote, name, role) {
+function cardTexture(quote, name, role, tone) {
   const w = 512, h = 340, cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
   const g = cv.getContext('2d');
-  g.fillStyle = '#FFFFFF';
-  g.fillRect(0, 0, w, h);
+  const ink = '#' + tone.toString(16).padStart(6, '0');
 
-  g.fillStyle = '#B52F24';
-  for (let i = 0; i < 5; i++) star(g, 40 + i * 26, 48, 9);
+  /* a tinted card, not a white one, with a solid colour spine down its left
+     edge — three white rectangles floating in a coloured world looked like
+     three holes punched in it */
+  const wash = g.createLinearGradient(0, 0, w, h);
+  wash.addColorStop(0, '#FFFFFF');
+  wash.addColorStop(1, ink + '22');
+  g.fillStyle = wash;
+  g.fillRect(0, 0, w, h);
+  g.fillStyle = ink;
+  g.fillRect(0, 0, 12, h);
+
+  for (let i = 0; i < 5; i++) star(g, 52 + i * 26, 48, 9);
 
   g.fillStyle = '#0B0A1E';
   g.font = '500 25px ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif';
-  wrap(g, quote, 40, 112, w - 80, 34);
+  wrap(g, quote, 46, 112, w - 88, 34);
 
-  g.fillStyle = '#B52F24';
+  g.fillStyle = ink;
   g.font = '700 19px ui-sans-serif, system-ui, sans-serif';
-  g.fillText(name, 40, h - 66);
+  g.fillText(name, 46, h - 66);
   g.fillStyle = '#6A6980';
   g.font = '400 17px ui-sans-serif, system-ui, sans-serif';
-  g.fillText(role, 40, h - 38);
+  g.fillText(role, 46, h - 38);
 
   const tex = new CanvasTexture(cv);
   tex.colorSpace = SRGBColorSpace;
@@ -171,6 +203,7 @@ function cardTexture(quote, name, role) {
   return tex;
 
   function star(ctx, cx, cy, r) {
+    ctx.fillStyle = ink;
     ctx.beginPath();
     for (let i = 0; i < 10; i++) {
       const rad = i % 2 ? r * 0.45 : r;
@@ -237,21 +270,34 @@ export function createWorld(canvas, opts) {
   const lookPath = curve(LOOK);
 
   /* -------------------------------------------------------------- lighting */
-  const hemi = new HemisphereLight(C.cream, C.navy, 1.05);
+  const hemi = new HemisphereLight(C.cyan, C.magenta, 1.15);
   scene.add(hemi);
-  const amb = new AmbientLight(ambColor, 0.8);
+  const amb = new AmbientLight(ambColor, 0.85);
   scene.add(amb);
   const key = new DirectionalLight(keyColor, 2.2);
   key.position.set(12, 26, 10);
   scene.add(key);
-  const rim = new DirectionalLight(C.ember, 1.1);
-  rim.position.set(-16, 6, -30);
-  scene.add(rim);
-  /* Travels with the camera so nothing the flight passes goes flat black.
-     Warm white rather than ember — an ember lamp turned the whole city into
-     one red canyon instead of a blue city with red lights in it. */
-  const lamp = new PointLight(0xFFE0C4, 26, 110, 2);
+  /* Two rims from opposite sides in opposing hues. One white rim gives you a
+     silver edge on everything; a warm rim against a cool rim gives every
+     surface in the world two different coloured edges and a hue gradient
+     across the middle, which is most of what makes the flight read as
+     colourful rather than tinted. */
+  const rimWarm = new DirectionalLight(C.rose, 1.5);
+  rimWarm.position.set(-18, 8, -30);
+  scene.add(rimWarm);
+  const rimCool = new DirectionalLight(C.cyan, 1.3);
+  rimCool.position.set(20, -6, -14);
+  scene.add(rimCool);
+
+  /* Travels with the camera so nothing the flight passes goes flat black. */
+  const lamp = new PointLight(0xFFE0C4, 22, 110, 2);
   scene.add(lamp);
+  /* Two more lamps flanking it, cycling around the wheel as the flight
+     advances, so a surface the camera passes is lit from three hues at once
+     and never resolves to a single flat colour. */
+  const lampA = new PointLight(C.magenta, 30, 80, 2);
+  const lampB = new PointLight(C.cyan, 30, 80, 2);
+  scene.add(lampA, lampB);
 
   /* ============================================== CHAPTER 1 — THE FIELD */
   const field = new Group();
@@ -260,38 +306,80 @@ export function createWorld(canvas, opts) {
   const rings = new Group();
   rings.position.set(0, 0, -60);
   field.add(rings);
+  /* Five rings, five hues, walking the wheel outward from magenta to gold.
+     The camera passes through all of them, so this is the first thing the
+     visitor sees and it sets the rule for the rest of the flight. */
+  const RING_HUES = [C.magenta, C.violet, C.azure, C.mint, C.gold];
   for (let i = 0; i < 5; i++) {
     const r = 5 + i * 4.6;
+    const c = RING_HUES[i];
     const ring = new Mesh(
-      new TorusGeometry(r, 0.16 + i * 0.03, 8, 96),
+      new TorusGeometry(r, 0.18 + i * 0.035, 10, 110),
       new MeshStandardMaterial({
-        color: C.rust, emissive: C.ember,
-        emissiveIntensity: 1.5 - i * 0.18, roughness: 0.35, metalness: 0.2
+        color: c, emissive: c,
+        emissiveIntensity: 1.5 - i * 0.12, roughness: 0.28, metalness: 0.35
       })
     );
     ring.userData.spin = (i % 2 ? 1 : -1) * (0.12 + i * 0.05);
     ring.userData.tilt = i * 0.06;
+    ring.userData.glow = glowPlane(r * 2.6, c, 0.16);
+    ring.userData.glow.position.z = -1.2 - i * 0.2;
     rings.add(ring);
+    rings.add(ring.userData.glow);
   }
-  const ringGlow = glowPlane(46, C.ember, 0.5);
+
+  /* Shards drifting through the rings, one per spectrum stop. */
+  const shards = new Group();
+  shards.position.set(0, 0, -58);
+  field.add(shards);
+  for (let i = 0; i < 14; i++) {
+    const c = hue(i);
+    const s = new Mesh(
+      new BoxGeometry(0.8 + Math.random() * 1.6, 0.8 + Math.random() * 1.6, 0.5),
+      new MeshStandardMaterial({
+        color: c, emissive: c, emissiveIntensity: 0.75,
+        roughness: 0.25, metalness: 0.5
+      })
+    );
+    const a = (i / 14) * Math.PI * 2;
+    const rad = 8 + Math.random() * 18;
+    s.position.set(Math.cos(a) * rad, Math.sin(a) * rad * 0.7, (Math.random() - 0.5) * 40);
+    s.userData.spin = (Math.random() - 0.5) * 1.2;
+    s.userData.phase = Math.random() * 6.28;
+    s.userData.baseY = s.position.y;
+    shards.add(s);
+  }
+
+  const ringGlow = glowPlane(52, C.violet, 0.42);
   ringGlow.position.set(0, 0, -61.5);
   field.add(ringGlow);
 
-  /* dust — one field spanning the whole journey, fogged so it reads as depth */
-  const dustCount = Math.round(2600 * quality);
+  /* Dust — one field spanning the whole journey, fogged so it reads as depth.
+     Every mote takes a hue off the wheel and is drawn additively, so the
+     empty space between chapters is confetti rather than grey static. */
+  const dustCount = Math.round(3200 * quality);
   {
     const pos = new Float32Array(dustCount * 3);
+    const col = new Float32Array(dustCount * 3);
+    const c = new Color();
     for (let i = 0; i < dustCount; i++) {
       pos[i * 3]     = (Math.random() - 0.5) * 190;
       pos[i * 3 + 1] = Math.random() * 58 - 16;
       pos[i * 3 + 2] = 30 - Math.random() * 760;
+      c.setHex(hue(Math.floor(Math.random() * SPECTRUM.length)));
+      /* a fifth of them stay near-white so the field still reads as depth
+         and not only as colour */
+      if (Math.random() < 0.2) c.setHex(C.cream);
+      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
     }
     const geo = new BufferGeometry();
     geo.setAttribute('position', new BufferAttribute(pos, 3));
+    geo.setAttribute('color', new BufferAttribute(col, 3));
     geo.boundingSphere = new Sphere(new Vector3(0, 0, -350), 620);
     const dust = new Points(geo, new PointsMaterial({
-      color: C.cream, size: 0.42, sizeAttenuation: true,
-      transparent: true, opacity: 0.55, depthWrite: false, fog: true
+      vertexColors: true, size: 0.55, sizeAttenuation: true,
+      transparent: true, opacity: 0.85, depthWrite: false,
+      blending: AdditiveBlending, fog: true
     }));
     scene.add(dust);
   }
@@ -302,34 +390,46 @@ export function createWorld(canvas, opts) {
 
   const CITY_Z0 = -84, CITY_Z1 = -238;
   const blockCount = Math.round(760 * quality);
-  const litCount = Math.round(blockCount * 0.1);
+  const litCount = Math.round(blockCount * 0.28);
 
-  /* Two meshes rather than one: `instanceColor` multiplies the diffuse term
-     only, so a per-instance emissive glow is impossible inside a single
-     InstancedMesh. The businesses that get found need to actually emit. */
+  /* Two meshes rather than one, for two different reasons.
+
+     The unlit towers are lit by the scene, so they take a MeshStandardMaterial
+     and `instanceColor` tints each one — but across a cool arc (indigo, azure,
+     violet, teal) at varying brightness rather than one navy, so the skyline
+     has hue variation even in shadow.
+
+     The lit ones take a MeshBasicMaterial. `instanceColor` multiplies the
+     diffuse term only, so per-instance *emissive* is impossible inside an
+     InstancedMesh — but an unlit material ignores the lighting entirely and
+     paints the instance colour flat at full strength, which is exactly what a
+     neon sign looks like. One draw call, ten hues. */
   const blockGeo = new BoxGeometry(1, 1, 1);
   const darkBlocks = new InstancedMesh(
     blockGeo,
-    new MeshStandardMaterial({ color: 0xffffff, roughness: 0.68, metalness: 0.18 }),
+    new MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.35 }),
     blockCount - litCount
   );
   const litBlocks = new InstancedMesh(
     blockGeo,
-    new MeshStandardMaterial({
-      color: C.ember, emissive: C.ember, emissiveIntensity: 0.9,
-      roughness: 0.4, metalness: 0.2
-    }),
+    new MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),
     litCount
   );
   darkBlocks.instanceMatrix.setUsage(DynamicDrawUsage);
+
+  const COOL = [C.indigo, C.azure, C.violet, C.mint, C.magenta];
   const litSpots = [];
   {
     const dummy = new Object3D();
     const col = new Color();
     let d = 0, l = 0;
     for (let i = 0; i < blockCount; i++) {
-      let x = (Math.random() - 0.5) * 210;
-      if (Math.abs(x) < 8) x += Math.sign(x || 1) * 9;   /* keep the street clear */
+      /* The street has to be wide enough that no tower ever fills the frame.
+         At |x| < 8 a 5-unit-wide block sat two metres off the lens and read as
+         a flat magenta wall rather than a building — unlit materials have no
+         shading to sell the form that close up. */
+      let x = (Math.random() - 0.5) * 230;
+      if (Math.abs(x) < 15) x += Math.sign(x || 1) * 16;
       const z = lerp(CITY_Z0, CITY_Z1, Math.random());
       const h = 1.2 + Math.pow(Math.random(), 2.1) * 16;
       const w = 2.2 + Math.random() * 3.4;
@@ -338,12 +438,15 @@ export function createWorld(canvas, opts) {
       dummy.scale.set(w, h, w * (0.7 + Math.random() * 0.6));
       dummy.updateMatrix();
 
-      if (l < litCount && Math.random() < 0.1) {
-        litBlocks.setMatrixAt(l++, dummy.matrix);
-        litSpots.push([x, z]);
+      if (l < litCount && Math.random() < 0.3) {
+        const c = hue(l * 3 + (l % 2));
+        litBlocks.setMatrixAt(l, dummy.matrix);
+        litBlocks.setColorAt(l, col.setHex(c));
+        litSpots.push([x, z, c]);
+        l++;
       } else if (d < blockCount - litCount) {
         darkBlocks.setMatrixAt(d, dummy.matrix);
-        col.setHex(C.navyLit).multiplyScalar(0.5 + Math.random() * 0.5);
+        col.setHex(COOL[d % COOL.length]).multiplyScalar(0.34 + Math.random() * 0.62);
         darkBlocks.setColorAt(d, col);
         d++;
       }
@@ -352,32 +455,37 @@ export function createWorld(canvas, opts) {
     litBlocks.count = l;
   }
   darkBlocks.instanceColor.needsUpdate = true;
+  litBlocks.instanceColor.needsUpdate = true;
   city.add(darkBlocks);
   city.add(litBlocks);
 
   /* the ground, and a grid over it so speed is legible */
   const ground = new Mesh(
     new PlaneGeometry(600, 260),
-    new MeshStandardMaterial({ color: 0x0D0B32, roughness: 0.94, metalness: 0.08 })
+    new MeshStandardMaterial({ color: 0x180C52, roughness: 0.62, metalness: 0.55 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(0, -0.05, (CITY_Z0 + CITY_Z1) / 2);
   city.add(ground);
-  city.add(gridLines(560, 250, 46, 22, (CITY_Z0 + CITY_Z1) / 2, C.ember, 0.16));
+  /* The street grid runs the whole wheel across its width, so the floor of
+     the city is a spectrum rather than a single accent. */
+  city.add(gridLines(560, 250, 46, 22, (CITY_Z0 + CITY_Z1) / 2, null, 0.38));
 
   /* beams above the lit blocks — the businesses that get found */
   const beams = new Group();
   city.add(beams);
-  for (let n = 0; n < Math.min(litSpots.length, 26); n++) {
-    const [x, z] = litSpots[n];
+  /* Each beam takes its tower's own colour, so the shafts over the skyline
+     are as varied as the signs under them. */
+  for (let n = 0; n < Math.min(litSpots.length, 40); n++) {
+    const [x, z, c] = litSpots[n];
     const beam = new Mesh(
-      new PlaneGeometry(2.2, 48),
+      new PlaneGeometry(2.6, 52),
       new MeshBasicMaterial({
-        map: glowTexture(), color: C.ember, transparent: true, opacity: 0,
-        blending: AdditiveBlending, depthWrite: false, fog: false
+        map: glowTexture(), color: c, transparent: true, opacity: 0,
+        blending: AdditiveBlending, depthWrite: false, fog: false, toneMapped: false
       })
     );
-    beam.position.set(x, 22, z);
+    beam.position.set(x, 24, z);
     beam.userData.phase = Math.random() * 6.28;
     beams.add(beam);
   }
@@ -389,22 +497,33 @@ export function createWorld(canvas, opts) {
   assembly.position.set(0, 0, -322);
   scene.add(assembly);
 
+  /* x, y, w, h, colour. A real page is not eleven grey boxes and one accent —
+     it is a palette. Each panel is a different stop on the wheel, with the
+     wide header and footer bars kept pale so the composition still reads as
+     a page rather than a swatch chart. */
   const LAYOUT = [
-    /* x, y, w, h, accent */
-    [  0.0,  7.6, 30.0, 1.5, 0], [-11.5,  4.2,  7.0, 3.6, 1],
-    [ -2.0,  4.6, 14.0, 4.6, 0], [  9.5,  4.4,  9.0, 4.2, 0],
-    [-11.5, -0.4,  7.0, 5.4, 0], [ -2.0, -1.0, 14.0, 6.2, 1],
-    [  9.5, -0.6,  9.0, 5.8, 0], [-11.5, -6.2,  7.0, 4.4, 0],
-    [ -2.0, -6.6, 14.0, 3.6, 0], [  9.5, -6.4,  9.0, 4.0, 1],
-    [  0.0, -10.4, 30.0, 2.0, 0]
+    [  0.0,  7.6, 30.0, 1.5, C.cream  ], [-11.5,  4.2,  7.0, 3.6, C.magenta],
+    [ -2.0,  4.6, 14.0, 4.6, C.ember  ], [  9.5,  4.4,  9.0, 4.2, C.cyan   ],
+    [-11.5, -0.4,  7.0, 5.4, C.gold   ], [ -2.0, -1.0, 14.0, 6.2, C.violet ],
+    [  9.5, -0.6,  9.0, 5.8, C.mint   ], [-11.5, -6.2,  7.0, 4.4, C.azure  ],
+    [ -2.0, -6.6, 14.0, 3.6, C.rose   ], [  9.5, -6.4,  9.0, 4.0, C.lime   ],
+    [  0.0, -10.4, 30.0, 2.0, C.cream ]
   ];
+  /* The camera meets this slab from about 90 units out, where the original
+     30-unit page occupied a fifth of the frame and the scatter threw half its
+     panels past the edges — the chapter opened on an empty screen with a few
+     coloured chips in the corner. Scaled up, it is a wall of colour that
+     resolves into a page as you approach it. */
+  const S = 1.34;
   const panels = [];
-  for (const [x, y, w, h, accent] of LAYOUT) {
+  for (const [x0, y0, w0, h0, tone] of LAYOUT) {
+    const x = x0 * S, y = y0 * S, w = w0 * S, h = h0 * S;
+    const pale = tone === C.cream;
     const mat = new MeshStandardMaterial({
-      color: accent ? C.ember : C.cream,
-      emissive: accent ? C.rust : 0x2A2860,
-      emissiveIntensity: accent ? 0.55 : 0.14,
-      roughness: 0.5, metalness: 0.05, transparent: true, opacity: 1,
+      color: tone,
+      emissive: tone,
+      emissiveIntensity: pale ? 0.18 : 0.62,
+      roughness: 0.42, metalness: 0.18, transparent: true, opacity: 1,
       side: DoubleSide
     });
     const p = new Mesh(new PlaneGeometry(w, h), mat);
@@ -414,22 +533,29 @@ export function createWorld(canvas, opts) {
        the chapter opened on an empty navy screen and the site only appeared
        once it had already finished assembling. */
     p.userData.away = new Vector3(
-      x + (Math.random() - 0.5) * 46,
-      y + (Math.random() - 0.5) * 34,
-      (Math.random() - 0.5) * 44 - 14
+      x + (Math.random() - 0.5) * 30,
+      y + (Math.random() - 0.5) * 24,
+      (Math.random() - 0.5) * 40 - 10
     );
     p.userData.spin = (Math.random() - 0.5) * 2.4;
     assembly.add(p);
     panels.push(p);
   }
   const siteFrame = new LineSegments(
-    new EdgesGeometry(new BoxGeometry(33, 22, 0.6)),
-    new LineBasicMaterial({ color: C.gold, transparent: true, opacity: 0 })
+    new EdgesGeometry(new BoxGeometry(33 * S, 22 * S, 0.8)),
+    new LineBasicMaterial({ color: C.cyan, transparent: true, opacity: 0, toneMapped: false })
   );
   assembly.add(siteFrame);
-  const assemblyGlow = glowPlane(60, C.gold, 0);
-  assemblyGlow.position.z = -3;
-  assembly.add(assemblyGlow);
+  /* Three glows behind the slab in three hues, offset from each other, so the
+     halo around the assembled page is a gradient instead of one gold wash. */
+  const assemblyGlows = [
+    [C.magenta, -18, 6], [C.cyan, 18, 3], [C.gold, 0, -12]
+  ].map(([c, gx, gy]) => {
+    const g = glowPlane(60, c, 0);
+    g.position.set(gx, gy, -4);
+    assembly.add(g);
+    return g;
+  });
 
   /* ============================================= CHAPTER 4 — THE GALLERY */
   const gallery = new Group();
@@ -446,9 +572,16 @@ export function createWorld(canvas, opts) {
     const z = GAL_Z0 - i * GAL_STEP;
     const w = 13.5, h = w / 1.746;
 
+    /* Each screenshot gets its own coloured frame and its own coloured halo —
+       a corridor of black-bezelled screens is a corridor of black rectangles
+       between the moments a shot is square-on to the camera. */
+    const tone = hue(i * 2 + 1);
     const backing = new Mesh(
-      new PlaneGeometry(w + 0.7, h + 0.7),
-      new MeshStandardMaterial({ color: C.ink, roughness: 0.85, metalness: 0.1, side: DoubleSide })
+      new PlaneGeometry(w + 0.8, h + 0.8),
+      new MeshStandardMaterial({
+        color: tone, emissive: tone, emissiveIntensity: 0.45,
+        roughness: 0.3, metalness: 0.4, side: DoubleSide
+      })
     );
     const shot = new Mesh(
       new PlaneGeometry(w, h),
@@ -461,8 +594,8 @@ export function createWorld(canvas, opts) {
     backing.userData.float = Math.random() * 6.28;
     backing.userData.baseY = backing.position.y;
     gallery.add(backing);
-    const halo = glowPlane(w * 1.5, C.gold, 0.13);
-    halo.position.set(side * 9.9, backing.position.y, z - 0.5);
+    const halo = glowPlane(w * 1.8, tone, 0.34);
+    halo.position.set(side * 10.4, backing.position.y, z - 0.6);
     gallery.add(halo);
 
     loader.load(src, tex => {
@@ -475,47 +608,72 @@ export function createWorld(canvas, opts) {
   });
   /* a tube of light down the corridor centre */
   {
-    const tube = new Mesh(
-      new BoxGeometry(0.5, 0.5, 190),
-      new MeshBasicMaterial({ color: C.ember, transparent: true, opacity: 0.5, fog: false })
-    );
-    tube.position.set(0, -3.2, GAL_Z0 - 68);
-    gallery.add(tube);
+    /* Two light rails down the corridor in opposing hues, floor and ceiling,
+       so the space between the screens is lit rather than empty. */
+    [[-3.4, C.magenta], [6.8, C.cyan]].forEach(([y, c]) => {
+      const rail = new Mesh(
+        new BoxGeometry(0.32, 0.32, 190),
+        new MeshBasicMaterial({ color: c, transparent: true, opacity: 0.7, fog: false, toneMapped: false })
+      );
+      rail.position.set(0, y, GAL_Z0 - 68);
+      gallery.add(rail);
+    });
   }
 
   /* =============================================== CHAPTER 5 — THE RISE */
   const rise = new Group();
   rise.position.set(0, 0, -586);
   scene.add(rise);
+  /* The chart climbs the wheel as it climbs: violet at the low end through to
+     gold at the top. The rising line is the point of the chapter, and a
+     spectrum makes the rise legible from any distance. */
+  const BAR_HUES = [
+    C.violet, C.indigo, C.azure, C.cyan, C.mint, C.lime, C.gold, C.ember, C.rose
+  ];
   const bars = [];
   for (let i = 0; i < 9; i++) {
     const target = 6 + Math.pow(i / 8, 1.55) * 34;
+    const c = BAR_HUES[i];
     const bar = new Mesh(
       new BoxGeometry(3.2, 1, 3.2),
       new MeshStandardMaterial({
-        color: i > 5 ? C.gold : C.ember,
-        emissive: i > 5 ? C.gold : C.rust,
-        emissiveIntensity: 0.35, roughness: 0.32, metalness: 0.35
+        color: c, emissive: c,
+        emissiveIntensity: 0.5, roughness: 0.22, metalness: 0.55
       })
     );
     bar.position.set(-20 + i * 5, 0, 0);
     bar.userData.target = target;
+    bar.userData.tone = c;
     rise.add(bar);
     bars.push(bar);
+
+    /* a matching halo behind each column */
+    const halo = glowPlane(16, c, 0.3);
+    halo.position.set(bar.position.x, 0, -3);
+    bar.userData.halo = halo;
+    rise.add(halo);
   }
-  rise.add(gridLines(150, 70, 14, 7, 0, C.gold, 0.2));
+  rise.add(gridLines(150, 70, 14, 7, 0, null, 0.4));
 
   /* ============================================ CHAPTER 6 — THE ARRIVAL */
   const arrival = new Group();
   arrival.position.set(0, 6.5, -700);
   scene.add(arrival);
+  /* The resonance rings, echoing outward in the same order the opening rings
+     ran — so the flight ends on the shape it started with, in the same hues,
+     now on daylight instead of night. The centre dot stays brand rust: it is
+     the logo, and it is the one thing here that is not up for reinterpretation. */
+  const MARK_HUES = [C.rust, C.magenta, C.violet, C.azure, C.mint];
   const markRings = [];
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 5; i++) {
     const ring = new Mesh(
-      new RingGeometry(5 + i * 5.6, 5.34 + i * 5.6, 128),
-      new MeshBasicMaterial({ color: C.rust, transparent: true, opacity: 0.5 - i * 0.09, side: DoubleSide, fog: false })
+      new RingGeometry(4.4 + i * 5.0, 5.02 + i * 5.0, 128),
+      new MeshBasicMaterial({
+        color: MARK_HUES[i], transparent: true, opacity: 0.9 - i * 0.08,
+        side: DoubleSide, fog: false
+      })
     );
-    ring.userData.delay = i * 0.16;
+    ring.userData.delay = i * 0.13;
     arrival.add(ring);
     markRings.push(ring);
   }
@@ -529,9 +687,10 @@ export function createWorld(canvas, opts) {
   /* Fixed slots rather than a ring of them: on a circle one card always ends
      up dead centre, directly behind the call-to-action. */
   const CARD_SLOTS = [[-25, 2, 18], [25, -9, 12], [-21, -12, 26], [23, 11, 20]];
+  const CARD_HUES = [C.magenta, C.azure, C.ember, C.mint];
   const cards = [];
   (options.reviews || []).forEach((r, i) => {
-    const tex = cardTexture(r.quote, r.name, r.role);
+    const tex = cardTexture(r.quote, r.name, r.role, CARD_HUES[i % CARD_HUES.length]);
     const card = new Mesh(
       new PlaneGeometry(12.5, 8.3),
       new MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, side: DoubleSide })
@@ -554,19 +713,35 @@ export function createWorld(canvas, opts) {
   scene.add(dome);
 
   /* -------------------------------------------------------------- utility */
+  /* `color: null` paints the grid across the spectrum instead of one hue —
+     each line takes the next stop on the wheel, vertex-coloured. */
   function gridLines(w, d, cols, rows, z, color, opacity) {
-    const pts = [];
+    const pts = [], cols3 = [];
+    const c = new Color();
+    let n = 0;
+    const push = (x1, z1, x2, z2) => {
+      pts.push(x1, 0, z1, x2, 0, z2);
+      if (color === null) {
+        c.setHex(hue(n++));
+        cols3.push(c.r, c.g, c.b, c.r, c.g, c.b);
+      }
+    };
     for (let i = 0; i <= cols; i++) {
       const x = -w / 2 + (w / cols) * i;
-      pts.push(x, 0, z - d / 2, x, 0, z + d / 2);
+      push(x, z - d / 2, x, z + d / 2);
     }
     for (let j = 0; j <= rows; j++) {
       const zz = z - d / 2 + (d / rows) * j;
-      pts.push(-w / 2, 0, zz, w / 2, 0, zz);
+      push(-w / 2, zz, w / 2, zz);
     }
     const geo = new BufferGeometry();
     geo.setAttribute('position', new BufferAttribute(new Float32Array(pts), 3));
-    return new LineSegments(geo, new LineBasicMaterial({ color, transparent: true, opacity }));
+    if (color === null) geo.setAttribute('color', new BufferAttribute(new Float32Array(cols3), 3));
+    return new LineSegments(geo, new LineBasicMaterial({
+      color: color === null ? 0xffffff : color,
+      vertexColors: color === null,
+      transparent: true, opacity
+    }));
   }
 
   /* ================================================================ loop */
@@ -619,24 +794,47 @@ export function createWorld(canvas, opts) {
     scene.fog.color.copy(skyColor);
     key.color.copy(keyColor);
     amb.color.copy(ambColor);
-    hemi.color.copy(skyColor).lerp(_c1.setHex(C.cream), 0.55);
+    hemi.color.copy(skyColor).lerp(_c1.setHex(C.cyan), 0.55);
+    hemi.groundColor.copy(skyColor).lerp(_c1.setHex(C.magenta), 0.45);
     renderer.toneMappingExposure = exposure;
-    lamp.intensity = lerp(46, 6, smooth(clamp((t - 0.72) / 0.24, 0, 1)));
+
+    /* The two flanking lamps walk the wheel as the flight advances — a
+       surface the camera passes is lit by three hues at once, and by
+       different ones a chapter later. Both stand down into the daylight,
+       where the sky is doing the lighting. */
+    const daylight = smooth(clamp((t - 0.80) / 0.16, 0, 1));
+    lamp.intensity = lerp(24, 5, daylight);
+    const spin = t * 6.2 + clock * 0.12;
+    lampA.color.setHSL((spin % 1), 0.85, 0.6);
+    lampB.color.setHSL(((spin + 0.42) % 1), 0.85, 0.62);
+    lampA.position.set(camera.position.x - 10, camera.position.y + 5, camera.position.z - 6);
+    lampB.position.set(camera.position.x + 10, camera.position.y - 3, camera.position.z - 6);
+    lampA.intensity = lampB.intensity = lerp(34, 0, daylight);
+    rimWarm.intensity = lerp(1.5, 0.5, daylight);
+    rimCool.intensity = lerp(1.3, 0.4, daylight);
 
     /* ---- ch.1 field ---- */
     const pField = span(t, CH.field);
     rings.children.forEach((r, i) => {
+      if (!r.userData.spin) { r.lookAt(camera.position); return; }   /* the glows */
       r.rotation.z += r.userData.spin * dt;
       r.rotation.x = Math.sin(clock * 0.4 + i) * 0.18 + r.userData.tilt;
-      r.material.emissiveIntensity = (1.5 - i * 0.18) * (1 - pField * 0.55);
+      r.material.emissiveIntensity = (1.5 - i * 0.12) * (1 - pField * 0.45);
+      r.userData.glow.material.opacity = 0.16 * (1 - pField);
     });
-    ringGlow.material.opacity = 0.5 * (1 - pField);
+    shards.children.forEach((s, i) => {
+      s.rotation.x += s.userData.spin * dt;
+      s.rotation.y += s.userData.spin * dt * 0.7;
+      s.position.y = s.userData.baseY + Math.sin(clock * 0.6 + s.userData.phase) * 1.6;
+      s.material.emissiveIntensity = 0.75 * (1 - pField * 0.6);
+    });
+    ringGlow.material.opacity = 0.42 * (1 - pField);
     ringGlow.lookAt(camera.position);
 
     /* ---- ch.2 city ---- */
     const pCity = span(t, CH.city);
-    beams.children.forEach((b, i) => {
-      b.material.opacity = 0.42 * pCity * (1 - pCity * 0.4) * (0.6 + 0.4 * Math.sin(clock * 1.6 + b.userData.phase));
+    beams.children.forEach(b => {
+      b.material.opacity = 0.55 * pCity * (1 - pCity * 0.35) * (0.6 + 0.4 * Math.sin(clock * 1.6 + b.userData.phase));
       b.lookAt(camera.position.x, b.position.y, camera.position.z);
     });
 
@@ -658,9 +856,11 @@ export function createWorld(canvas, opts) {
       p.rotation.y = lerp(p.userData.spin * 0.6, 0, build);
       p.material.opacity = Math.min(build * 1.4, 1) * (1 - open);
     }
-    siteFrame.material.opacity = build * 0.65 * (1 - open);
+    siteFrame.material.opacity = build * 0.8 * (1 - open);
     siteFrame.rotation.y = Math.sin(clock * 0.3) * 0.04;
-    assemblyGlow.material.opacity = build * 0.35 * (1 - open);
+    assemblyGlows.forEach((g, i) => {
+      g.material.opacity = build * 0.42 * (1 - open) * (0.7 + 0.3 * Math.sin(clock * 0.7 + i * 2.1));
+    });
 
     /* ---- ch.4 gallery ---- */
     gallery.children.forEach(o => {
@@ -675,7 +875,12 @@ export function createWorld(canvas, opts) {
       const h = Math.max(0.001, b.userData.target * local);
       b.scale.y = h;
       b.position.y = h / 2;
-      b.material.emissiveIntensity = 0.3 + local * 0.5;
+      b.material.emissiveIntensity = 0.35 + local * 0.75;
+      const halo = b.userData.halo;
+      halo.scale.setScalar(0.5 + local * 1.6);
+      halo.position.y = h * 0.6;
+      halo.material.opacity = 0.34 * local;
+      halo.lookAt(camera.position);
     });
 
     /* ---- ch.6 arrival ---- */
@@ -683,7 +888,7 @@ export function createWorld(canvas, opts) {
     markRings.forEach((r, i) => {
       const w = smooth(clamp((pArr - r.userData.delay) / 0.42, 0, 1));
       r.scale.setScalar(0.62 + w * 0.38);
-      r.material.opacity = w * (0.9 - i * 0.16);
+      r.material.opacity = w * (0.9 - i * 0.08);
       r.rotation.z += dt * 0.06 * (i % 2 ? 1 : -1);
     });
     markCore.scale.setScalar(0.2 + pArr * 0.8);

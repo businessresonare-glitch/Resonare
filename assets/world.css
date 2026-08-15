@@ -19,7 +19,7 @@
 .world{
   position:relative;
   z-index:1;
-  background:#04031A;
+  background:#05041F;
 }
 .world-stage{
   position:sticky; top:0;
@@ -39,12 +39,12 @@
 .world-veil{
   position:absolute; inset:0; pointer-events:none; z-index:1;
   background:
-    linear-gradient(100deg, rgba(4,3,26,.88) 0%, rgba(4,3,26,.66) 32%, rgba(4,3,26,.18) 54%, rgba(4,3,26,0) 70%),
-    linear-gradient(to bottom, rgba(4,3,26,.62) 0%, rgba(4,3,26,0) 22%, rgba(4,3,26,0) 74%, rgba(4,3,26,.52) 100%);
+    linear-gradient(100deg, rgba(5,4,31,.88) 0%, rgba(5,4,31,.66) 32%, rgba(5,4,31,.18) 54%, rgba(5,4,31,0) 70%),
+    linear-gradient(to bottom, rgba(5,4,31,.62) 0%, rgba(5,4,31,0) 22%, rgba(5,4,31,0) 74%, rgba(5,4,31,.52) 100%);
 }
 @media(max-width:900px){
   .world-veil{
-    background:linear-gradient(to bottom, rgba(4,3,26,.72) 0%, rgba(4,3,26,.30) 30%, rgba(4,3,26,.30) 62%, rgba(4,3,26,.86) 100%);
+    background:linear-gradient(to bottom, rgba(5,4,31,.72) 0%, rgba(5,4,31,.30) 30%, rgba(5,4,31,.30) 62%, rgba(5,4,31,.86) 100%);
   }
 }
 
@@ -282,12 +282,14 @@
    night-to-day arc still reads, and nothing sits on flat black. */
 body.no-world .world-stage{
   background:
-    radial-gradient(120% 90% at 78% 12%, rgba(222,90,60,.30), transparent 58%),
-    radial-gradient(90% 70% at 12% 88%, rgba(26,24,120,.60), transparent 62%),
-    linear-gradient(180deg, #04031A 0%, #0A0952 34%, #1A1140 62%, #59264A 82%, #C98C5E 100%);
+    radial-gradient(80% 60% at 82% 8%,  rgba(39,216,255,.34), transparent 60%),
+    radial-gradient(70% 55% at 12% 34%, rgba(255,79,216,.30), transparent 62%),
+    radial-gradient(90% 60% at 66% 72%, rgba(169,92,255,.34), transparent 64%),
+    radial-gradient(70% 50% at 18% 92%, rgba(255,107,53,.34), transparent 62%),
+    linear-gradient(180deg, #06052A 0%, #0A0B62 22%, #1A0C86 44%, #4A1478 66%, #9E2A80 82%, #E8834A 93%, #F6F2E9 100%);
 }
 body.no-world .world-veil{
-  background:linear-gradient(100deg, rgba(4,3,26,.72) 0%, rgba(4,3,26,.34) 46%, rgba(4,3,26,.14) 100%);
+  background:linear-gradient(100deg, rgba(5,4,31,.72) 0%, rgba(5,4,31,.34) 46%, rgba(5,4,31,.14) 100%);
 }
 body.no-world .world-cue{ display:none; }
 
@@ -299,7 +301,7 @@ body.no-world .world-cue{ display:none; }
   background:var(--cream);
   border-radius:38px 38px 0 0;
   margin-top:-38px;
-  box-shadow:0 -40px 90px -30px rgba(4,3,26,.55);
+  box-shadow:0 -40px 90px -30px rgba(5,4,31,.55);
 }
 @media(max-width:700px){ .ground{ border-radius:26px 26px 0 0; margin-top:-26px; } }
 
@@ -381,7 +383,7 @@ body.no-world .world-cue{ display:none; }
      phone scrim has to be a good deal heavier than the desktop one. */
   .world-veil{
     background:linear-gradient(to bottom,
-      rgba(4,3,26,.80) 0%, rgba(4,3,26,.58) 26%,
-      rgba(4,3,26,.58) 62%, rgba(4,3,26,.90) 100%);
+      rgba(5,4,31,.80) 0%, rgba(5,4,31,.58) 26%,
+      rgba(5,4,31,.58) 62%, rgba(5,4,31,.90) 100%);
   }
 }
