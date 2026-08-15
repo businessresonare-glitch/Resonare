@@ -35,7 +35,7 @@
 
   var CONFIG = {
     email: 'business.resonare@gmail.com',
-    whatsapp: '9779767278212',                 // +977 976 727 8212
+    whatsapp: '60104259239',                   // +60 10-425 9239
     endpoint: 'https://formsubmit.co/ajax/business.resonare@gmail.com',
     timeout: 15000
   };

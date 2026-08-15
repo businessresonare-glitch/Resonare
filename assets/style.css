@@ -68,7 +68,15 @@ body{
 img{max-width:100%; display:block;}
 a{color:inherit; text-decoration:none;}
 ul{list-style:none;}
-h1,h2,h3,h4{font-family:var(--font-display); font-weight:700; letter-spacing:0; line-height:1.04;}
+/* One voice across the site: the grotesk at 800 with tight tracking carries
+   every heading, and the display serif is reserved for the italic word inside
+   one. The old split — serif headings here, grotesk on the homepage — read as
+   two sites wearing the same logo. */
+h1,h2,h3,h4{font-family:var(--font-ui); font-weight:800; letter-spacing:-0.032em; line-height:1.04;}
+h1 em, h2 em, h3 em, h4 em{
+  font-family:var(--font-display); font-style:italic; font-weight:400;
+  letter-spacing:-0.005em;
+}
 .mono{font-family:var(--font-label);}
 .section-pad{padding:120px 7vw;}
 @media(max-width:900px){ .section-pad{padding:80px 6vw;} }
@@ -537,17 +545,36 @@ body.loaded .hero-visual{ opacity:1; transform:none; transition-delay:.5s; }
 .final-cta .btn{ position:relative; z-index:2;}
 .final-cta .btn-light:hover{ box-shadow:0 20px 44px -14px rgba(0,0,0,.4); }
 
-/* ============ STICKY SOCIALS ============ */
-.sticky-socials{ position:fixed; right:26px; bottom:26px; z-index:80; display:flex; flex-direction:column; gap:12px;
+/* ============ STICKY CONTACT DOCK ============
+   The old dock was a green circle inside a pulsing 18px green halo on top of
+   a 26px black drop shadow, wearing a generic speech-bubble outline instead of
+   the WhatsApp glyph. Rebuilt flat: brand green, the real mark, one honest
+   shadow, and a label that slides out on hover instead of a glow. */
+.sticky-socials{ position:fixed; right:26px; bottom:26px; z-index:80; display:flex; flex-direction:column; align-items:flex-end; gap:10px;
   opacity:0; transform:translateY(16px); transition:opacity .7s var(--ease) .5s, transform .7s var(--ease) .5s;}
 body.loaded .sticky-socials{ opacity:1; transform:translateY(0); }
 @media (prefers-reduced-motion: reduce){ .sticky-socials{ opacity:1; transform:none; } }
-.sticky-socials a{ width:46px; height:46px; border-radius:50%; background:var(--navy-deep); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -10px rgba(0,0,0,.4); transition:transform .3s var(--ease), background .3s var(--ease);}
-.sticky-socials a:hover{ transform:translateY(-4px) scale(1.06); background:var(--rust);}
-.sticky-socials a.whatsapp-glow{ background:#25D366; animation:wa-glow 2.2s ease-in-out infinite; }
-.sticky-socials a.whatsapp-glow:hover{ background:#1ebe5a; }
-@keyframes wa-glow{ 0%,100%{ box-shadow:0 12px 26px -10px rgba(0,0,0,.4), 0 0 0 0 rgba(37,211,102,.55); } 50%{ box-shadow:0 12px 26px -10px rgba(0,0,0,.4), 0 0 18px 6px rgba(37,211,102,.55); } }
-@media(max-width:700px){ .sticky-socials{ display:none;} }
+.sticky-socials a{
+  height:52px; min-width:52px; padding:0; border-radius:26px;
+  display:inline-flex; align-items:center; justify-content:center; gap:0;
+  color:#fff; background:var(--ink);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 8px 20px -10px rgba(11,10,30,.5);
+  transition:transform .3s var(--ease), background .3s var(--ease), gap .35s var(--ease), padding .35s var(--ease);
+}
+.sticky-socials a:hover{ transform:translateY(-2px); background:var(--rust); }
+.sticky-socials a svg{ flex:none; }
+.social-whatsapp{ background:#25D366 !important; border-color:rgba(0,0,0,.10) !important; color:#fff; }
+.social-whatsapp:hover{ background:#1DB954 !important; }
+.social-label{
+  display:inline-block; max-width:0; overflow:hidden; white-space:nowrap;
+  font-size:14px; font-weight:600; letter-spacing:.01em;
+  transition:max-width .38s var(--ease), margin .38s var(--ease);
+}
+.social-whatsapp:hover .social-label,
+.social-whatsapp:focus-visible .social-label{ max-width:110px; margin:0 6px 0 8px; }
+@media (prefers-reduced-motion: reduce){ .social-label{ transition:none; } }
+@media(hover:none){ .social-label{ display:none; } }
 
 /* ============ FOOTER ============ */
 footer.site-footer{ background:var(--ink); color:#fff; padding:80px 7vw 34px;}
@@ -607,61 +634,6 @@ footer p{ color:rgba(255,255,255,.55); font-size:14.5px; margin-top:10px; max-wi
 @media (prefers-reduced-motion: reduce){ .preloader{ transition:opacity .3s ease; } .preloader.hidden{ transform:none; opacity:0; visibility:hidden; } }
 [data-count]{ font-variant-numeric:tabular-nums; }
 
-/* ============ RESONANCE MARK ============ */
-.resonance-mark{ position:relative; display:inline-flex; align-items:center; justify-content:center; width:1em; height:1em; flex-shrink:0; vertical-align:middle; }
-.resonance-mark svg{ overflow:visible; display:block; width:100%; height:100%; }
-.resonance-mark .rm-dot{ fill:var(--rust-light); }
-.resonance-mark .rm-ring{ fill:none; stroke:var(--rust-light); stroke-width:2.4; opacity:0; transform-origin:20px 20px; animation:rm-ping 2.6s cubic-bezier(.2,.6,.35,1) infinite; }
-.resonance-mark .rm-ring:nth-child(2){ animation-delay:.85s; }
-.resonance-mark .rm-ring:nth-child(3){ animation-delay:1.7s; }
-@keyframes rm-ping{ 0%{ r:5; opacity:.85; stroke-width:2.4; } 100%{ r:19; opacity:0; stroke-width:.2; } }
-.brand .resonance-mark, .footer-brand .resonance-mark{ font-size:15px; margin-left:1px; transform:none; }
-.preloader-mark .resonance-mark{ font-size:22px; margin-left:2px; }
-@media (prefers-reduced-motion: reduce){ .resonance-mark .rm-ring{ animation:none; opacity:.5; r:8; } }
-
-/* ==========================================================================
-   RESONANCE CURSOR
-   A core dot that tracks the pointer 1:1 and a ring that trails behind it
-   like an echo — the brand mark, made interactive. No CSS transition sits on
-   transform: every frame is written by rAF, which is what the old build got
-   wrong (a .12s transition restarting each mousemove = permanent lag).
-   ========================================================================== */
-.cursor{ position:fixed; top:0; left:0; width:0; height:0; z-index:9999; pointer-events:none;
-  opacity:0; transition:opacity .25s var(--ease-out); }
-.cursor.is-visible{ opacity:1; }
-.cursor.is-hidden{ opacity:0; }
-
-.cursor-dot,
-.cursor-ring{ position:absolute; top:0; left:0; border-radius:50%; will-change:transform; }
-
-.cursor-dot{ width:7px; height:7px; margin:-3.5px 0 0 -3.5px; background:#fff; }
-.cursor-ring{ width:32px; height:32px; margin:-16px 0 0 -16px;
-  border:1.4px solid rgba(255,255,255,.42);
-  transition:border-color .3s var(--ease-out), background .3s var(--ease-out); }
-
-.cursor.on-light .cursor-dot{ background:var(--rust); }
-.cursor.on-light .cursor-ring{ border-color:rgba(181,47,36,.38); }
-
-.cursor.is-active .cursor-ring{ border-color:rgba(255,255,255,.75); background:rgba(255,255,255,.06); }
-.cursor.is-active.on-light .cursor-ring{ border-color:var(--rust); background:rgba(181,47,36,.05); }
-
-/* click = a resonance ping, the same gesture as the logo mark */
-.cursor-ping{ position:fixed; width:20px; height:20px; margin:-10px 0 0 -10px; border-radius:50%;
-  border:1.5px solid rgba(255,255,255,.75); pointer-events:none; z-index:9998;
-  animation:cursor-ping .62s cubic-bezier(.16,.84,.28,1) forwards; }
-.cursor-ping.on-light{ border-color:var(--rust); }
-@keyframes cursor-ping{ from{ transform:scale(.35); opacity:.9; } to{ transform:scale(3.1); opacity:0; } }
-
-/* only fine pointers lose the native cursor, and never inside a form field */
-body.cursor-custom,
-body.cursor-custom *{ cursor:none; }
-body.cursor-custom input,
-body.cursor-custom textarea,
-body.cursor-custom select{ cursor:auto; }
-
-@media(max-width:900px), (pointer:coarse){ .cursor, .cursor-ping{ display:none !important; } }
-@media (prefers-reduced-motion: reduce){ .cursor, .cursor-ping{ display:none !important; } }
-
 /* ============ SCROLL CUE ============ */
 .scroll-cue{ position:absolute; left:50%; bottom:34px; transform:translateX(-50%); z-index:3; display:flex; flex-direction:column; align-items:center; gap:10px;
   color:rgba(255,255,255,.55); transition:color .3s var(--ease), transform .3s var(--ease);}
@@ -685,18 +657,6 @@ body.cursor-custom select{ cursor:auto; }
 @keyframes geo-glow{ 0%,100%{ filter:brightness(1);} 50%{ filter:brightness(1.15);} }
 @media(max-width:980px){ .geo-orb{ display:none; } }
 
-/* ============ SECTION DOTS (home only) ============ */
-.section-dots{ position:fixed; right:26px; top:50%; transform:translateY(-50%); z-index:90; display:flex; flex-direction:column; gap:16px; align-items:center;
-  opacity:0; transition:opacity .7s var(--ease) .6s;}
-body.loaded .section-dots{ opacity:1; }
-@media (prefers-reduced-motion: reduce){ .section-dots{ opacity:1; } }
-.section-dots button{ width:9px; height:9px; border-radius:50%; background:rgba(11,10,30,.18); border:none; cursor:pointer; padding:0; position:relative; transition:background .3s var(--ease), transform .3s var(--ease);}
-.section-dots button::after{ content:attr(data-label); position:absolute; right:20px; top:50%; transform:translateY(-50%); background:var(--ink); color:#fff; font-family:var(--font-label); font-size:11px; padding:6px 12px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .25s var(--ease), transform .25s var(--ease);}
-.section-dots button:hover::after{ opacity:1; transform:translateY(-50%) translateX(-4px); }
-.section-dots button.active{ background:var(--rust); transform:scale(1.35); }
-.section-dots[data-dark="true"] button{ background:rgba(255,255,255,.28); }
-.section-dots[data-dark="true"] button.active{ background:var(--rust-light); }
-@media(max-width:1100px){ .section-dots{ display:none; } }
 
 /* ============ MISC PAGE UTILITIES ============ */
 .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
@@ -948,7 +908,7 @@ h1 em, h2 em, h3 em{ font-style:italic; }        /* the italic is the emphasis *
 .breadcrumb,
 .footer-bottom,
 .mono,
-.section-dots button::after{
+.world-rail a{
   font-family:var(--font-mono);
   font-weight:500;
   letter-spacing:var(--track-label);
@@ -1319,46 +1279,9 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    3D SURFACES
    ========================================================================== */
 
-/* A canvas scene sits behind its section's content and never eats a tap. */
-.r3d-stage{
-  position:absolute; inset:0; width:100%; height:100%;
-  pointer-events:none; z-index:0; display:block;
-}
-[data-r3d-host]{ position:relative; }
-/* Lift real content above the canvas — but not the caption, which is
-   absolutely positioned inside the frame. Without excluding it, this rule
-   (specificity 0,2,0) outranks .r3d-caption (0,1,0) and forces it back into
-   flow at the top of the frame. */
-[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption){ position:relative; z-index:1; }
 
-/* A framed, interactive scene — used where the artwork is the subject rather
-   than a backdrop. */
-.r3d-frame{
-  position:relative; border-radius:var(--radius-lg); overflow:hidden;
-  background:
-    radial-gradient(120% 100% at 50% 0%, rgba(108,107,232,.20), transparent 60%),
-    linear-gradient(160deg, #0D0B5E, #080748 60%, #06052F);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:0 40px 90px -50px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.07);
-  aspect-ratio:1/1;
-}
-.r3d-frame .r3d-stage{ pointer-events:auto; }
-.r3d-frame::after{                              /* a soft vignette so glow falls off */
-  content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
-  background:radial-gradient(120% 120% at 50% 50%, transparent 52%, rgba(6,5,47,.75));
-}
-.r3d-caption{
-  position:absolute; left:20px; bottom:18px; z-index:3; pointer-events:none;
-  font-family:var(--font-mono); font-size:var(--fs-2xs); font-weight:500;
-  letter-spacing:var(--track-label); text-transform:uppercase;
-  color:rgba(255,255,255,.55);
-}
-.r3d-caption b{ display:block; color:#fff; font-family:var(--font-display);
-  font-size:17px; letter-spacing:-.02em; text-transform:none; margin-top:5px; }
 
 @media(max-width:700px){
-  .r3d-frame{ aspect-ratio:4/3; }
-  .r3d-caption{ left:16px; bottom:14px; }
 }
 
 /* Real depth on cards: children lift on their own Z plane rather than the
@@ -1577,7 +1500,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 /* The contact column stacks: badge, then the live 3D piece. */
 .contact-aside{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
 @media(max-width:980px){
-  .contact-grid .r3d-frame{ max-width:420px; }
 }
 
 /* An emphasised run is split per word so it can wrap; each word therefore
@@ -1608,36 +1530,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    so the artwork frames the message instead of fighting it.
    ========================================================================== */
 
-/* Home hero: text left, mockup right — the field lives on the right and
-   dissolves before it reaches the headline. */
-.hero > .r3d-stage{
-  opacity:.62;
-  -webkit-mask-image:linear-gradient(100deg, transparent 4%, rgba(0,0,0,.28) 34%, rgba(0,0,0,.85) 62%, #000 100%);
-  mask-image:linear-gradient(100deg, transparent 4%, rgba(0,0,0,.28) 34%, rgba(0,0,0,.85) 62%, #000 100%);
-}
-/* Stacked on mobile the copy spans the full width, so the field retreats to
-   the top and bottom edges instead of the right. */
-@media(max-width:980px){
-  .hero > .r3d-stage{
-    opacity:.5;
-    -webkit-mask-image:linear-gradient(180deg, #000 0%, rgba(0,0,0,.15) 26%, transparent 46%, transparent 72%, rgba(0,0,0,.5) 100%);
-    mask-image:linear-gradient(180deg, #000 0%, rgba(0,0,0,.15) 26%, transparent 46%, transparent 72%, rgba(0,0,0,.5) 100%);
-  }
-}
-
-/* Interior page heroes are single-column and centre-left aligned: fade the
-   field in from the right and keep it off the first screenful of text. */
-.page-hero > .r3d-stage{
-  -webkit-mask-image:linear-gradient(105deg, transparent 10%, rgba(0,0,0,.35) 45%, #000 95%);
-  mask-image:linear-gradient(105deg, transparent 10%, rgba(0,0,0,.35) 45%, #000 95%);
-}
-
-/* Dark content bands: hold the artwork to the edges, clear of the copy. */
-.signal-section > .r3d-stage,
-.work > .r3d-stage{
-  -webkit-mask-image:radial-gradient(120% 90% at 50% 50%, transparent 18%, rgba(0,0,0,.55) 52%, #000 90%);
-  mask-image:radial-gradient(120% 90% at 50% 50%, transparent 18%, rgba(0,0,0,.55) 52%, #000 90%);
-}
 
 /* ==========================================================================
    HERO RHYTHM ON SMALL SCREENS
@@ -1750,13 +1642,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   .page-hero{ padding:104px 6vw 52px; }
 }
 
-/* The framed scenes are tall squares; on a two-column row that leaves the
-   text column floating in the middle of a lot of nothing. A 5:4 frame and
-   top-aligned columns tighten the whole block. */
-.r3d-frame{ aspect-ratio:5/4; }
-.two-col:has(.r3d-frame){ align-items:center; gap:56px; }
-@media(max-width:900px){ .r3d-frame{ aspect-ratio:4/3; } }
-
 /* The contact columns are very different heights: supporting copy plus the
    live scene on the left, a compact card on the right. Pinning the card keeps
    it in view for the whole scroll instead of leaving half the row empty. */
@@ -1764,7 +1649,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   .contact-grid{ align-items:start; }
   .contact-grid > *:last-child{ position:sticky; top:104px; }
 }
-.contact-grid .r3d-frame{ max-width:440px; }
 
 /* The breathing blob is a very large blurred gradient; animating its scale
    repaints most of the hero every frame and measured 5fps of the mobile
@@ -1790,7 +1674,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   .quote-step-label,
   .quote-step-hint,
   .footer-bottom,
-  .r3d-caption,
   .quote-ref,
   .breadcrumb,
   .section-index,
@@ -1845,42 +1728,14 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    already parked and the embers cost only 2fps. The expense was not how many
    animations run but *what they animate*:
 
-     - rm-ping animated the SVG `r` and `stroke-width` attributes. Those are
-       geometry, so every frame re-rasterised the vector, on twelve marks at
-       once (header, footer, drawer, preloader) whether on screen or not.
+     - rm-ping animated the SVG `r` and `stroke-width` attributes on twelve
+       resonance marks at once, on and off screen alike.
      - wa-glow animated box-shadow, which repaints on every frame.
 
-   Both are rewritten to drive transform and opacity only, which the
-   compositor can handle without repainting, and the rain is thinned on small
-   screens. Identical visual result.
+   Both effects are gone entirely now — the marks and the halo were removed
+   with the rest of the glow decoration — and the line rain is thinned on
+   small screens.
    ========================================================================== */
-.resonance-mark .rm-ring{
-  transform-box:fill-box; transform-origin:center;
-  animation-name:rm-ping-t;
-  will-change:transform, opacity;
-}
-@keyframes rm-ping-t{
-  0%   { transform:scale(1);   opacity:.85; }
-  100% { transform:scale(3.8); opacity:0; }   /* r:5 x 3.8 = the old r:19 */
-}
-@media (prefers-reduced-motion: reduce){
-  .resonance-mark .rm-ring{ animation:none; opacity:.5; transform:scale(1.6); }
-}
-
-/* The pulse is a scaling ring behind the button, not a repainted shadow. */
-.sticky-socials a.whatsapp-glow{ animation:none; position:relative; }
-.sticky-socials a.whatsapp-glow::after{
-  content:""; position:absolute; inset:0; border-radius:inherit; z-index:-1;
-  box-shadow:0 0 18px 6px rgba(37,211,102,.55);
-  animation:wa-pulse 2.2s ease-in-out infinite;
-  will-change:transform, opacity;
-}
-@keyframes wa-pulse{
-  0%,100%{ transform:scale(.92); opacity:0; }
-  50%    { transform:scale(1.06); opacity:1; }
-}
-@media (prefers-reduced-motion: reduce){ .sticky-socials a.whatsapp-glow::after{ animation:none; opacity:.6; } }
-
 /* Sixteen falling lines is a desktop flourish; a phone keeps six. */
 @media(max-width:900px){
   .line-rain i:nth-child(n+7){ display:none; }
@@ -1893,28 +1748,9 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    decorative motion stands down and the meaningful motion stays:
 
      out - the falling line rain (texture only)
-     out - the resonance ping on marks that are duplicates of the header one
-           (footer, drawer, preloader) - they were animating off-screen
-     in  - the header mark's ping, the WhatsApp pulse, the ember flow and the
-           counters, all of which carry brand or state. */
+     in  - the ember flow and the counters, which carry brand or state. */
 @media(max-width:900px){
   .line-rain{ display:none; }
-  .footer-brand .resonance-mark .rm-ring,
-  .mobile-drawer .resonance-mark .rm-ring,
-  .preloader-mark .resonance-mark .rm-ring{ animation:none; opacity:.45; transform:scale(1.7); }
-}
-
-/* The stacked mobile hero is ~1500px tall, so a full-bleed backdrop canvas was
-   rendering 1504px of glow per frame on a 844px screen — and the mobile mask
-   fades the field out below the first screenful anyway. Capping the canvas to
-   roughly a viewport removes about 45% of the fill for no visible change. */
-.hero > .r3d-stage,
-.page-hero > .r3d-stage{
-  bottom:auto;
-  height:min(100%, 100svh);
-}
-@supports not (height:100svh){
-  .hero > .r3d-stage, .page-hero > .r3d-stage{ height:min(100%, 100vh); }
 }
 
 /* ==========================================================================
@@ -1944,9 +1780,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
 .footer-brand .brand-mark{ height:1.25em; }
 .preloader-mark .brand-mark{ height:1.2em; }
 
-/* The trailing dot matches the logo's red rather than the UI rust. */
-.resonance-mark .rm-dot{ fill:var(--brand-red); }
-.resonance-mark .rm-ring{ stroke:var(--brand-red); }
 
 @media(max-width:520px){
   .brand{ font-size:17px; }
@@ -2017,8 +1850,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   object-fit:cover; z-index:0; pointer-events:none;
   will-change:opacity;
 }
-/* Once real video is playing the canvas scene retires rather than stacking. */
-.cine-hero.has-video > .r3d-stage{ opacity:0 !important; transition:opacity .6s ease; }
 
 /* A readability scrim. The reference prompts use no overlay because their
    footage is dark; ours has to survive whatever file gets dropped in, and
@@ -2029,7 +1860,6 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
     linear-gradient(180deg, rgba(5,4,46,.72) 0%, rgba(5,4,46,.30) 38%, rgba(5,4,46,.55) 78%, rgba(5,4,46,.92) 100%),
     radial-gradient(115% 80% at 22% 42%, rgba(5,4,46,.55), transparent 68%);
 }
-.cine-hero > *:not(.hero-video):not(.r3d-stage):not(::after){ position:relative; z-index:2; }
 .cine-hero .cine-inner{ position:relative; z-index:2; }
 
 .cine-inner{
@@ -2146,12 +1976,10 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
    CINEMATIC HERO — corrections found by inspecting the rendered page
    ========================================================================== */
 
-/* 1. Stacking. `[data-r3d-host] > *:not(.r3d-stage):not(.r3d-caption)` scores
-      0,3,0 and was pinning the hero content to z-index 1 — the same layer as
-      the ::after scrim, which paints later and therefore on top. The headline
-      was being dimmed by its own readability scrim. */
-.cine-hero[data-r3d-host] > .cine-inner,
-.cine-hero[data-r3d-host] > .cine-foot{ position:relative; z-index:3; }
+/* 1. Stacking. The hero content has to outrank the ::after readability
+      scrim, which paints later and would otherwise dim the headline it
+      exists to make readable. */
+.cine-hero > .cine-inner{ z-index:2; }
 .cine-hero::after{ z-index:1; }
 
 /* 2. The emphasis gradient lives on the word, not the <em>. A transformed
@@ -2223,4 +2051,267 @@ body.nav-open{ position:fixed; width:100%; overflow:hidden; }
   .cine-badge{ font-size:13px; }
   .cine-badge .chip{ font-size:12px; letter-spacing:.05em; }
   .cine-stat span{ font-size:12px; letter-spacing:.09em; }
+}
+
+/* ==========================================================================
+   2026 REFRESH
+   The pieces the rebuilt homepage needs, plus the header/footer changes that
+   apply site-wide. Everything above this line is the original design system;
+   this block is what changed with the scroll world.
+   ========================================================================== */
+
+:root{
+  --ember:#DE5A3C;
+  --void:#04031A;
+}
+
+/* `overflow-x:hidden` on <body> can turn the body into the scroll container
+   for `position:sticky`, which is exactly what the world stage depends on.
+   `clip` clips without creating one. */
+@supports (overflow-x: clip){
+  html, body{ overflow-x:clip; }
+}
+body.page-home{ background:var(--void); }
+
+/* --------------------------------------------------------------- skip link */
+.skip-link{
+  position:fixed; top:10px; left:10px; z-index:1000;
+  padding:12px 20px; border-radius:100px;
+  background:#fff; color:var(--ink); font-weight:600; font-size:14px;
+  transform:translateY(-160%); transition:transform .25s var(--ease);
+}
+.skip-link:focus-visible{ transform:none; }
+
+/* ------------------------------------------------------------------ header */
+/* Over the world the header is glass; once the page lands on cream it takes
+   a solid bar so the nav never sits on a light photo. */
+header.site-header.is-over-world:not(.scrolled){ background:transparent; }
+header.site-header.scrolled{
+  background:rgba(6,5,32,.72);
+  backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  box-shadow:none;
+}
+.brand-word{ letter-spacing:.16em; font-weight:800; font-family:var(--font-wordmark); }
+.drawer-tel{
+  margin-top:22px; font-family:var(--font-mono); font-size:14px;
+  letter-spacing:.06em; color:rgba(255,255,255,.62);
+}
+
+/* ------------------------------------------------------------------ button */
+.btn-glass{
+  background:rgba(255,255,255,.08); color:#fff;
+  border-color:rgba(255,255,255,.20);
+  backdrop-filter:blur(16px) saturate(150%);
+  -webkit-backdrop-filter:blur(16px) saturate(150%);
+}
+.btn-glass:hover{ background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.34); transform:translateY(-3px); }
+
+/* -------------------------------------------------- chapter heading reveal */
+/* Blocks rise and sharpen rather than animating per character: at 104px a
+   char-by-char stagger reflows the line while it plays. */
+.chapter h1[data-rise],
+.chapter h2[data-rise]{
+  filter:blur(16px);
+  transform:translateY(34px);
+  transition:opacity 1.05s var(--ease), transform 1.05s var(--ease), filter 1.05s var(--ease);
+}
+.chapter.is-in h1[data-rise],
+.chapter.is-in h2[data-rise]{ filter:blur(0); transform:none; }
+@media (prefers-reduced-motion: reduce){
+  .chapter h1[data-rise], .chapter h2[data-rise]{ filter:none; transform:none; transition:none; }
+}
+
+/* ----------------------------------------------------------------- process */
+.process-band{ background:#fff; }
+.process-list{
+  display:grid; gap:20px; counter-reset:step;
+  grid-template-columns:repeat(auto-fit, minmax(228px, 1fr));
+}
+.process-list li{
+  padding:30px 26px 32px; border-radius:20px;
+  background:var(--cream); border:1px solid rgba(11,10,30,.07);
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease);
+}
+.process-list li:hover{ transform:translateY(-5px); box-shadow:var(--shadow-2); }
+.process-list li > span{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:.2em;
+  color:var(--rust); display:block; margin-bottom:18px;
+}
+.process-list li h3{
+  font-family:var(--font-ui); font-weight:800; font-size:21px;
+  letter-spacing:-0.02em; margin-bottom:8px;
+}
+.process-list li p{ font-size:14.5px; color:var(--ink-soft); line-height:1.6; }
+
+/* ------------------------------------------------------------ contact band */
+.contact-band{
+  background:
+    radial-gradient(110% 90% at 82% 8%, rgba(222,90,60,.30), transparent 60%),
+    linear-gradient(150deg, var(--ink) 0%, #14113F 60%, #241543 100%);
+  color:#fff;
+}
+.contact-band-inner{
+  display:grid; gap:52px; align-items:start;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  max-width:1220px; margin:0 auto;
+}
+@media(max-width:900px){ .contact-band-inner{ grid-template-columns:1fr; gap:36px; } }
+.contact-band h2{
+  font-family:var(--font-ui); font-weight:800; letter-spacing:-0.035em;
+  font-size:clamp(30px,4.2vw,52px); line-height:1.02; color:#fff; margin:16px 0 18px;
+}
+.contact-band p{ color:rgba(255,255,255,.68); max-width:44ch; font-size:16.5px; }
+.contact-lines{ display:flex; flex-direction:column; gap:12px; }
+.contact-line{
+  display:flex; align-items:center; gap:16px;
+  padding:20px 22px; border-radius:18px; min-width:0;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);
+  transition:background .35s var(--ease), transform .35s var(--ease), border-color .35s var(--ease);
+}
+.contact-line:hover{ background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26); transform:translateX(5px); }
+.contact-line svg{ flex:none; color:var(--ember); }
+.contact-line div{ min-width:0; }
+.contact-line b{ display:block; font-size:16px; font-weight:700; letter-spacing:-0.01em; overflow-wrap:anywhere; }
+.contact-line span{
+  display:block; margin-top:2px; font-family:var(--font-mono);
+  font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.5);
+}
+
+/* ------------------------------------------------------------------ footer */
+.footer-bottom{
+  display:flex; flex-wrap:wrap; gap:8px 26px; align-items:center;
+  justify-content:space-between;
+}
+/* Credited, not announced — the founders belong in the small print with the
+   copyright line, not in a portrait grid. */
+.footer-founders{ color:rgba(255,255,255,.34); }
+
+/* ---------------------------------------------------------- ground headings */
+/* The display serif stays for the interior pages; the homepage's landed
+   sections match the chapters above them and use the grotesk. */
+.ground .section-heading h2{
+  font-family:var(--font-ui); font-weight:800; letter-spacing:-0.035em; line-height:1.02;
+}
+
+/* --------------------------------------------------------- process list */
+.process-list{ list-style:none; }
+
+/* Pricing figures now match the grotesk headings rather than the display
+   serif — "Custom quote" set in Instrument Serif read as a pull quote. */
+.plan-price{ font-family:var(--font-ui); font-weight:800; letter-spacing:-0.035em; }
+
+/* ------------------------------------------------------------ the stack */
+/* Replaces the two interactive 3D panels. They were a canvas with a caption
+   and nothing to say; four numbered layers say the same thing and are
+   readable, indexable and free. */
+.stack-layers{ list-style:none; display:flex; flex-direction:column; gap:12px; }
+.stack-layers li{
+  position:relative; padding:20px 24px 22px 26px;
+  border-radius:16px; background:#fff;
+  border:1px solid rgba(11,10,30,.08);
+  box-shadow:var(--shadow-1);
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease);
+}
+.stack-layers li::before{
+  content:""; position:absolute; left:0; top:16px; bottom:16px; width:3px;
+  border-radius:0 3px 3px 0; background:linear-gradient(180deg,var(--rust-light),var(--rust));
+}
+.stack-layers li:hover{ transform:translateX(5px); box-shadow:var(--shadow-2); }
+.stack-layers li span{
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--rust); display:block; margin-bottom:7px;
+}
+.stack-layers li b{
+  display:block; font-family:var(--font-ui); font-weight:800; font-size:18px;
+  letter-spacing:-0.02em; margin-bottom:5px;
+}
+.stack-layers li p{ font-size:14.5px; line-height:1.6; color:var(--ink-soft); }
+
+/* --------------------------------------------------------- studio credit */
+/* Deliberately quiet: a credit line in the body copy, not a founders section
+   with portraits. */
+.studio-credit{
+  margin-top:22px; padding-top:18px;
+  border-top:1px solid rgba(11,10,30,.1);
+  font-size:13.5px; line-height:1.6; color:var(--ink-soft); opacity:.8;
+}
+
+/* ------------------------------------------------- interior page heroes */
+/* The 3D canvas that used to sit behind these is gone — the flight is the
+   homepage's alone. A drifting aurora keeps the band from being a flat
+   gradient and costs one composited layer. */
+.cine-hero::before{
+  content:""; position:absolute; inset:-18%; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(44% 40% at 76% 22%, rgba(222,90,60,.40), transparent 64%),
+    radial-gradient(42% 38% at 18% 74%, rgba(34,30,150,.78), transparent 66%),
+    radial-gradient(32% 32% at 52% 46%, rgba(244,199,126,.14), transparent 70%);
+  animation:cine-drift 26s ease-in-out infinite alternate;
+  will-change:transform;
+}
+@keyframes cine-drift{
+  from{ transform:translate3d(-2%,-1.5%,0) scale(1); }
+  to  { transform:translate3d(3%,2%,0) scale(1.14); }
+}
+@media (prefers-reduced-motion: reduce){ .cine-hero::before{ animation:none; } }
+.cine-hero > *{ position:relative; z-index:2; }
+
+/* ==========================================================================
+   TYPOGRAPHY — one voice
+
+   The Digilab pass further up sets every heading in Instrument Serif at 400.
+   That was a different site. The rebuilt homepage is Manrope at 800 with hard
+   negative tracking, and a serif interior page next to it reads as a
+   different studio, so the whole site moves to the grotesk and the serif
+   keeps exactly one job: the italic word inside a headline.
+
+   Sizes come down a step at the same time — a 800-weight grotesk occupies far
+   more of its box than a 400-weight high-contrast serif at the same px.
+   ========================================================================== */
+h1,h2,h3,h4{
+  font-family:var(--font-ui);
+  font-weight:800;
+  letter-spacing:-.034em;
+  line-height:1.03;
+}
+h1 em, h2 em, h3 em, h4 em{
+  font-family:var(--font-display);
+  font-style:italic; font-weight:400;
+  letter-spacing:-.005em;
+}
+
+.hero h1{ font-size:clamp(40px,5.8vw,76px); letter-spacing:-.036em; }
+.page-hero h1{ font-size:clamp(36px,5.2vw,68px); letter-spacing:-.036em; }
+.cine-hero h1{ font-size:clamp(38px,5.6vw,80px); letter-spacing:-.036em; line-height:1.0; max-width:19ch; }
+.section-heading h2{ font-size:clamp(30px,3.9vw,50px); line-height:1.05; }
+.signal-copy h2,
+.contact-info h2{ font-size:clamp(28px,3.5vw,44px); line-height:1.06; }
+.final-cta h2{ font-size:clamp(30px,4.6vw,58px); line-height:1.03; }
+.service-card h3,
+.work-body h3{ font-size:23px; letter-spacing:-.024em; }
+.process-row h3{ font-size:25px; letter-spacing:-.024em; }
+.value-card h3{ font-size:20px; letter-spacing:-.022em; }
+
+/* Figures are display type too — same face, same tightness. */
+.plan-price,
+.stat-tile b,
+.trust-chip b,
+.impact-stats b,
+.cine-stat b,
+.work-meta b,
+.quote-legend{
+  font-family:var(--font-ui);
+  font-weight:800;
+  letter-spacing:-.032em;
+}
+.plan-price{ font-size:40px; }
+.stat-tile b{ font-size:46px; font-weight:800; }
+.cine-stat b{ font-size:30px; }
+.quote-legend{ font-size:23px; }
+.mobile-drawer nav a{
+  font-family:var(--font-ui); font-weight:800;
+  font-size:clamp(30px,8.4vw,42px); letter-spacing:-.034em;
 }

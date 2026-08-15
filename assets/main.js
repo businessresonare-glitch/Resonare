@@ -27,7 +27,7 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
       setTimeout(() => { pre.classList.add('hidden'); pre.style.display = 'none'; }, 150);
     };
     window.addEventListener('load', finish);
-    setTimeout(finish, 3500);          // same failsafe as the animated path
+    setTimeout(finish, 2000);          // same failsafe as the animated path
     return;
   }
 
@@ -38,8 +38,12 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
   /* Failsafe. The bar's ceiling is 92% until `load` fires, and `load` waits on
      every subresource — so one slow or blocked third-party request left the
      preloader parked at 92% forever with the whole site sealed behind it. A
-     visitor must never be locked out by an asset that is not theirs. */
-  const FAILSAFE_MS = 3500;
+     visitor must never be locked out by an asset that is not theirs.
+
+     Two seconds, not the old three and a half: the homepage's `load` now
+     waits on a 512KB world bundle, and a splash that outlives the thing it
+     is covering is just a delay with a logo on it. */
+  const FAILSAFE_MS = 2000;
   setTimeout(() => { loaded = true; }, FAILSAFE_MS);
 
   function tick() {
@@ -208,151 +212,99 @@ document.querySelectorAll('.service-card').forEach(card => {
 });
 
 /* ==========================================================================
-   POINTER LAYER — cursor, magnetic buttons, card tilt.
+   THE WORLD — chapter reveals and the chapter rail
 
-   Why the old cursor felt broken:
-     1. CSS put `transition: transform .12s` on the dot while JS rewrote that
-        same transform on every mousemove, so the transition restarted each
-        frame and the dot permanently trailed the pointer.
-     2. The native cursor was never hidden, so you saw the OS arrow *and* a
-        lagging dot.
-     3. Tone detection only looked for a dark ancestor, so the white cards
-        floating inside the dark hero turned the dot white-on-white.
-   Everything below is written per animation frame with no transform
-   transitions anywhere.
+   The flight itself lives in assets/world.js. This half only cares about the
+   type: which chapter is on screen, and which rail label should be lit.
+
+   There is deliberately no custom cursor and no glowing dot column any more.
+   Both were decoration that fought the content — the cursor duplicated the
+   pointer at a permanent lag, and the dots pulsed a red halo over whatever
+   they sat on. A hairline rail with real labels does the same job and stays
+   quiet.
    ========================================================================== */
-const darkZoneSelector = '.hero, .page-hero, .signal-section, .impact, .reviews, .final-cta, .work, .site-footer, .mobile-drawer, .site-header.scrolled';
+(function initChapters(){
+  const chapters = Array.from(document.querySelectorAll('.chapter'));
+  if (!chapters.length) return;
 
-(function initCursor(){
-  const root = document.getElementById('cursor');
-  if (!root || reduceMotion || !finePointer) return;
-
-  const dot  = root.querySelector('.cursor-dot');
-  const ring = root.querySelector('.cursor-ring');
-  if (!dot || !ring) return;
-
-  document.body.classList.add('cursor-custom');
-
-  const INTERACTIVE = 'a, button, .btn, [role="button"], label, .service-card, .work-card, .plan-card, .tech-cell, .trust-chip, .impact-card, .review-card, .section-dots button, .sticky-socials a';
-  const FIELDS = 'input, textarea, select';
-
-  let pointerX = window.innerWidth / 2;
-  let pointerY = window.innerHeight / 2;
-  let ringX = pointerX, ringY = pointerY;
-  let ringScale = 1, dotScale = 1;
-  let hovering = false, pressed = false, onLight = false;
-  let lastTarget = null;
-
-  /* Walk up from the hovered element until a surface with a real background
-     colour is found, and judge tone from its luminance. Falls back to the
-     section list when the surface is a gradient or image. */
-  function surfaceIsLight(el){
-    let node = el;
-    while (node && node !== document.documentElement){
-      const cs = getComputedStyle(node);
-      if (cs.backgroundImage && cs.backgroundImage !== 'none') return null;
-      const m = cs.backgroundColor.match(/rgba?\(([^)]+)\)/);
-      if (m){
-        const parts = m[1].split(',').map(Number);
-        const alpha = parts.length > 3 ? parts[3] : 1;
-        if (alpha > 0.5){
-          const lum = (0.2126 * parts[0] + 0.7152 * parts[1] + 0.0722 * parts[2]) / 255;
-          return lum > 0.55;
-        }
-      }
-      node = node.parentElement;
-    }
-    return null;
-  }
-
-  function readTone(el){
-    const measured = surfaceIsLight(el);
-    if (measured !== null) return measured;
-    return !el.closest(darkZoneSelector);
-  }
-
-  function updateTarget(el){
-    if (el === lastTarget) return;
-    lastTarget = el;
-
-    if (el.closest(FIELDS)){
-      root.classList.add('is-hidden');
-      return;
-    }
-    root.classList.remove('is-hidden');
-
-    hovering = !!el.closest(INTERACTIVE);
-    root.classList.toggle('is-active', hovering);
-
-    onLight = readTone(el);
-    root.classList.toggle('on-light', onLight);
-  }
-
-  function frame(){
-    ringX += (pointerX - ringX) * 0.19;
-    ringY += (pointerY - ringY) * 0.19;
-
-    const ringTarget = pressed ? 0.82 : hovering ? 1.85 : 1;
-    const dotTarget  = pressed ? 0.5  : hovering ? 0.32 : 1;
-    ringScale += (ringTarget - ringScale) * 0.18;
-    dotScale  += (dotTarget  - dotScale)  * 0.22;
-
-    ring.style.transform = 'translate3d(' + ringX.toFixed(2) + 'px,' + ringY.toFixed(2) + 'px,0) scale(' + ringScale.toFixed(3) + ')';
-    dot.style.transform  = 'translate3d(' + pointerX + 'px,' + pointerY + 'px,0) scale(' + dotScale.toFixed(3) + ')';
-
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-
-  window.addEventListener('mousemove', (e) => {
-    pointerX = e.clientX;
-    pointerY = e.clientY;
-    if (!root.classList.contains('is-visible')) root.classList.add('is-visible');
-    if (e.target instanceof Element) updateTarget(e.target);
-  }, { passive:true });
-
-  window.addEventListener('mousedown', (e) => {
-    pressed = true;
-    if (e.target instanceof Element && e.target.closest(FIELDS)) return;
-    const ping = document.createElement('span');
-    ping.className = 'cursor-ping' + (onLight ? ' on-light' : '');
-    ping.style.left = e.clientX + 'px';
-    ping.style.top  = e.clientY + 'px';
-    document.body.appendChild(ping);
-    setTimeout(() => ping.remove(), 640);
-  });
-  window.addEventListener('mouseup', () => { pressed = false; });
-
-  document.addEventListener('mouseleave', () => root.classList.remove('is-visible'));
-  document.addEventListener('mouseenter', () => root.classList.add('is-visible'));
-  window.addEventListener('blur', () => { pressed = false; root.classList.remove('is-visible'); });
-
-  /* the pointer can land on a different element without moving — after a
-     scroll, or after the preloader clears — so re-read the tone then */
-  window.addEventListener('scroll', () => {
-    const el = document.elementFromPoint(pointerX, pointerY);
-    if (el) { lastTarget = null; updateTarget(el); }
-  }, { passive:true });
-})();
-
-/* ============ SECTION DOT NAV (only present on pages with data-target sections) ============ */
-const dotButtons = document.querySelectorAll('.section-dots button');
-const dotNav = document.getElementById('sectionDots');
-if (dotButtons.length) {
-  const trackedSections = Array.from(dotButtons).map(btn => document.querySelector(btn.dataset.target)).filter(Boolean);
-  dotButtons.forEach(btn => { btn.addEventListener('click', () => smoothScrollTo(btn.dataset.target)); });
-  const darkSectionEls = Array.from(document.querySelectorAll('[data-dot-dark]'));
-  const sectionObserver = new IntersectionObserver((entries) => {
+  /* --- copy reveals: once, on entry, never rewound --- */
+  const revealer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const idx = trackedSections.indexOf(entry.target);
-        if (idx > -1) { dotButtons.forEach(b => b.classList.remove('active')); dotButtons[idx].classList.add('active'); }
-        if (dotNav) dotNav.setAttribute('data-dark', darkSectionEls.includes(entry.target) ? 'true' : 'false');
-      }
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      revealer.unobserve(entry.target);
     });
-  }, { threshold: 0.5 });
-  trackedSections.forEach(sec => sectionObserver.observe(sec));
-}
+  }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+  chapters.forEach(c => revealer.observe(c));
+  /* the first chapter is above the fold — it must not wait for a scroll */
+  chapters[0].classList.add('is-in');
+
+  /* --- the rail --- */
+  const rail = document.getElementById('worldRail');
+  if (!rail) return;
+
+  const links = chapters.map((chapter, i) => {
+    const a = document.createElement('a');
+    a.href = '#' + chapter.id;
+    a.innerHTML = '<em></em><i></i>';
+    a.querySelector('em').textContent = chapter.dataset.rail || ('0' + (i + 1));
+    a.addEventListener('click', (e) => { e.preventDefault(); smoothScrollTo('#' + chapter.id, -1); });
+    rail.appendChild(a);
+    return a;
+  });
+
+  /* Each chapter is taller than the viewport and holds a sticky panel, so a
+     chapter has three phases: sliding in, pinned, sliding out. `local` is 0
+     the moment it pins and 1 the moment it unpins, and goes negative or past
+     one during the two slides.
+
+       local = -top / (height - viewport)
+       span  = viewport / (height - viewport)
+
+     Two consecutive panels are always exactly `1 + span` apart in local, so
+     the outgoing window is the incoming one shifted by that amount and the
+     two dissolve through each other rather than stacking. Deriving both from
+     the geometry means the chapter height can change in CSS without
+     retuning anything here. */
+  const ramp = (x, a, b) => { const t = (x - a) / (b - a); return t < 0 ? 0 : t > 1 ? 1 : t; };
+  const ease = t => t * t * (3 - 2 * t);
+
+  let queued = false;
+  function sync(){
+    queued = false;
+    const vh = window.innerHeight;
+    const mid = vh * 0.5;
+    let active = 0;
+
+    chapters.forEach((c, i) => {
+      const r = c.getBoundingClientRect();
+      if (r.top <= mid && r.bottom > mid) active = i;
+
+      if (reduceMotion) return;
+      const travel = r.height - vh;
+      if (travel <= 0) return;
+      const span = vh / travel;
+      const local = -r.top / travel;
+      const vis = ease(ramp(local, -span * 0.855, -span * 0.27)) *
+                  (1 - ease(ramp(local, 1 + span * 0.145, 1 + span * 0.73)));
+      c.style.setProperty('--vis', vis.toFixed(3));
+    });
+
+    links.forEach((a, i) => a.classList.toggle('is-active', i === active));
+
+    const world = document.getElementById('world');
+    if (world){
+      const r = world.getBoundingClientRect();
+      rail.classList.toggle('is-live', r.top < window.innerHeight * 0.4 && r.bottom > window.innerHeight * 0.6);
+    }
+  }
+  function request(){ if (!queued){ queued = true; requestAnimationFrame(sync); } }
+
+  if (lenis) lenis.on('scroll', request);
+  else window.addEventListener('scroll', request, { passive:true });
+  window.addEventListener('resize', request, { passive:true });
+  sync();
+})();
 
 /* ============ MAGNETIC BUTTONS ============
    Offsets go into --btn-x / --btn-y instead of an inline transform, so the
@@ -554,6 +506,10 @@ attachTilt('.service-card', 2.6, -8);
 
   headings.forEach(h => {
     if (h.closest('.preloader')) return;
+    /* Chapter headings on the homepage are revealed as whole blocks by the
+       [data-rise] pass — running a per-character stagger on top of a block
+       fade gives you two easings fighting over the same pixels. */
+    if (h.closest('.chapter')) return;
     /* Cinematic hero headlines are owned by assets/hero.js, which splits them
        per word for the blur-in. Letting this pass run too nested one splitter
        inside the other and produced 38 "words" for a ten-word headline. */
