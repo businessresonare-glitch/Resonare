@@ -25,6 +25,7 @@ output file, not linked.
 | `stars.js`    | the sky: size distribution, diffraction spikes, per-star twinkle |
 | `ocean.js`    | the reef: seabed, coral, kelp, fish, sharks, god rays, bubbles |
 | `echo.js`     | the resonance motif in 3D — the transition, the sonar, the work |
+| `textures.js` | every procedural map, and the one place anisotropy is applied |
 | `boot.js`     | finds the canvas, maps page scroll to curve `t`, handles the fallbacks |
 
 ## The one idea
@@ -86,6 +87,32 @@ an unlit material has no shading to sell its form, so anything that passes
 within a few units of the lens reads as a flat coloured shape rather than an
 object.
 
+## Sharpness, and why 16K is not the answer
+
+Read the header of `textures.js` before changing any map size. The short
+version: one 16384² RGBA texture is 1.07 GB of video memory, `MAX_TEXTURE_SIZE`
+is 4096 on most phones, and the reef needs five maps. It is not a matter of
+effort — the allocation fails.
+
+What actually decides sharpness here, in order of effect:
+
+1. **Multisampling.** A post chain bypasses the renderer's own MSAA, so every
+   edge in the scene was aliased regardless of texture size. The composer takes
+   a 4× multisampled `WebGLRenderTarget` now. This was worth more than every
+   other item on this list combined.
+2. **Anisotropic filtering.** The seabed is viewed at a grazing angle, the
+   exact case trilinear filtering smears. `sharpen()` maxes it, and every
+   texture in the world goes through that function — if you add a map, put it
+   through `sharpen()` or it will be visibly softer than everything near it.
+3. **Device pixel ratio** (capped at 2 desktop, 1.6 small).
+4. **Texel count**, last.
+
+And tiling beats stretching: the seabed repeats a 1024² caustic map 3×11,
+which puts far more texel detail under the camera than one stretched 4K map
+would. But tile too hard and you get moire — 26×90 put the ripple period below
+one pixel at the far end of the floor and the sand shimmered. Stay above the
+Nyquist limit of the grazing view and let anisotropy do the rest.
+
 ## Making it look real
 
 Realism here is rendering technique, not imported meshes. Four things carry it:
@@ -117,6 +144,11 @@ One rule worth keeping: **`toneMapped: false` is for a handful of accents,
 never for a hundred lights.** It sends a colour straight to linear 1.0, above
 every bloom threshold. The city's two hundred street lights used it and turned
 the whole frame milky.
+
+And one for `echo.js`: an echo is an **overlay**, not an object in the water.
+It runs `depthTest: false` at `renderOrder` 20. Depth-sorted against the seabed
+instead, half of every ring vanished below the sand and what survived read as a
+hard dark arc across the reef.
 
 Bloom is also why the black hole needs restraint. Its inner lip was `exp(-rn *
 13) * 2.6`; with bloom on, that smeared straight across the shadow and the hole

@@ -21,7 +21,8 @@ import {
   MeshBasicMaterial, MeshStandardMaterial, Object3D, PerspectiveCamera,
   PlaneGeometry, PointLight, Points, PointsMaterial, RingGeometry,
   RepeatWrapping, SRGBColorSpace, Scene, Sphere, TextureLoader,
-  Vector2, Vector3, WebGLRenderer, ACESFilmicToneMapping, PMREMGenerator
+  Vector2, Vector3, WebGLRenderer, WebGLRenderTarget, HalfFloatType,
+  ACESFilmicToneMapping, PMREMGenerator
 } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -32,6 +33,12 @@ import { createWarp } from './warp.js';
 import { createStars } from './stars.js';
 import { createReef } from './ocean.js';
 import { createEcho } from './echo.js';
+import { initTextures, sharpen, glowTexture } from './textures.js';
+
+/* one shared sprite for every glow in the world — building a 512² canvas per
+   call was fine at 128² and is not at this size */
+let _glow = null;
+const glow = () => (_glow || (_glow = glowTexture()));
 
 /* ---------------------------------------------------------------- palette */
 /* Rust and navy are the brand, and they anchor the flight — the mark at the
@@ -147,73 +154,11 @@ function sampleSky(t, outSky, outKey, outAmb) {
 }
 const _c1 = new Color();
 
-/* A soft radial sprite, drawn once. Every glow in the world is this texture
-   on an additive plane — cheaper and steadier than a bloom pass, and it
-   survives on phones that would drop frames under postprocessing. */
-let _glowTex = null;
-function glowTexture() {
-  if (_glowTex) return _glowTex;
-  const s = 128, cv = document.createElement('canvas');
-  cv.width = cv.height = s;
-  const g = cv.getContext('2d');
-  const grd = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
-  grd.addColorStop(0.00, 'rgba(255,255,255,1)');
-  grd.addColorStop(0.18, 'rgba(255,255,255,.62)');
-  grd.addColorStop(0.45, 'rgba(255,255,255,.16)');
-  grd.addColorStop(1.00, 'rgba(255,255,255,0)');
-  g.fillStyle = grd;
-  g.fillRect(0, 0, s, s);
-  _glowTex = new CanvasTexture(cv);
-  _glowTex.colorSpace = SRGBColorSpace;
-  return _glowTex;
-}
-
-/* ==========================================================================
-   FACADE TEXTURE
-
-   A tower is a stretched cube. Lit flat it reads as a coloured brick, and 760
-   coloured bricks read as a bar chart, not a city. What sells it as a building
-   is windows: a grid of small emissive cells, most of them off, a few on, at a
-   density the eye reads as floors.
-
-   Drawn once into one canvas and shared by every tower — the instances vary by
-   colour and scale, and the stretching that causes is what gives the skyline
-   its variety of floor heights for free.
-   ========================================================================== */
-let _facadeTex = null;
-function facadeTexture() {
-  if (_facadeTex) return _facadeTex;
-  const w = 256, h = 512, cv = document.createElement('canvas');
-  cv.width = w; cv.height = h;
-  const g = cv.getContext('2d');
-  g.fillStyle = '#05041a';
-  g.fillRect(0, 0, w, h);
-
-  const cols = 10, rows = 34;
-  const cw = w / cols, ch = h / rows;
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const on = Math.random();
-      /* Windows come in runs — a whole floor lit, then three dark. Random
-         per-cell noise reads as static; runs read as occupancy. */
-      const floorLit = (y * 7919 % 11) < 4;
-      const lit = floorLit ? on < 0.72 : on < 0.14;
-      const v = lit ? 0.55 + Math.random() * 0.45 : 0.02 + Math.random() * 0.05;
-      g.fillStyle = `rgba(255,255,255,${v.toFixed(3)})`;
-      g.fillRect(x * cw + cw * 0.18, y * ch + ch * 0.22, cw * 0.64, ch * 0.5);
-    }
-  }
-  _facadeTex = new CanvasTexture(cv);
-  _facadeTex.colorSpace = SRGBColorSpace;
-  _facadeTex.wrapS = _facadeTex.wrapT = RepeatWrapping;
-  return _facadeTex;
-}
-
 function glowPlane(size, color, opacity) {
   const m = new Mesh(
     new PlaneGeometry(size, size),
     new MeshBasicMaterial({
-      map: glowTexture(), color, transparent: true, opacity,
+      map: glow(), color, transparent: true, opacity,
       blending: AdditiveBlending, depthWrite: false, fog: false
     })
   );
@@ -224,7 +169,7 @@ function glowPlane(size, color, opacity) {
 /* Rounded-rectangle card texture. Used for the review slabs so the copy in
    the 3D space is the real copy, not lorem geometry. */
 function cardTexture(quote, name, role, tone) {
-  const w = 512, h = 340, cv = document.createElement('canvas');
+  const w = 1024, h = 680, cv = document.createElement('canvas');
   cv.width = w; cv.height = h;
   const g = cv.getContext('2d');
   const ink = '#' + tone.toString(16).padStart(6, '0');
@@ -232,31 +177,28 @@ function cardTexture(quote, name, role, tone) {
   /* a tinted card, not a white one, with a solid colour spine down its left
      edge — three white rectangles floating in a coloured world looked like
      three holes punched in it */
-  const wash = g.createLinearGradient(0, 0, w, h);
+  const wash = g.createLinearGradient(0, 0, w / 2, h / 2);
   wash.addColorStop(0, '#FFFFFF');
   wash.addColorStop(1, ink + '22');
   g.fillStyle = wash;
-  g.fillRect(0, 0, w, h);
+  g.fillRect(0, 0, w / 2, h / 2);
   g.fillStyle = ink;
-  g.fillRect(0, 0, 12, h);
+  g.fillRect(0, 0, 12, h / 2);
 
   for (let i = 0; i < 5; i++) star(g, 52 + i * 26, 48, 9);
 
   g.fillStyle = '#0B0A1E';
   g.font = '500 25px ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif';
-  wrap(g, quote, 46, 112, w - 88, 34);
+  wrap(g, quote, 46, 112, w / 2 - 88, 34);
 
   g.fillStyle = ink;
   g.font = '700 19px ui-sans-serif, system-ui, sans-serif';
-  g.fillText(name, 46, h - 66);
+  g.fillText(name, 46, h / 2 - 66);
   g.fillStyle = '#6A6980';
   g.font = '400 17px ui-sans-serif, system-ui, sans-serif';
-  g.fillText(role, 46, h - 38);
+  g.fillText(role, 46, h / 2 - 38);
 
-  const tex = new CanvasTexture(cv);
-  tex.colorSpace = SRGBColorSpace;
-  tex.anisotropy = 4;
-  return tex;
+  return sharpen(new CanvasTexture(cv), true);
 
   function star(ctx, cx, cy, r) {
     ctx.fillStyle = ink;
@@ -310,9 +252,11 @@ export function createWorld(canvas, opts) {
   }
   if (!renderer.getContext()) return null;
 
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 1.5 : 1.85));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 1.6 : 2));
   renderer.toneMapping = ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
+
+  initTextures(renderer);
 
   const scene = new Scene();
   const skyColor = new Color(C.void);
@@ -374,7 +318,13 @@ export function createWorld(canvas, opts) {
   let composer = null, bloom = null;
   const wantBloom = !small && !reduced;
   if (wantBloom) {
-    composer = new EffectComposer(renderer);
+    /* The renderer's own antialiasing is bypassed the moment a post chain
+       exists — RenderPass draws into the composer's target, not the canvas —
+       so every edge in the scene was aliased regardless of texture size. A
+       multisampled target is the single biggest sharpness win here, worth
+       more than any resolution change. */
+    const rt = new WebGLRenderTarget(1, 1, { type: HalfFloatType, samples: 4 });
+    composer = new EffectComposer(renderer, rt);
     composer.addPass(new RenderPass(scene, camera));
     bloom = new UnrealBloomPass(new Vector2(1, 1), 0.34, 0.72, 0.86);
     composer.addPass(bloom);
@@ -481,13 +431,13 @@ export function createWorld(canvas, opts) {
      echo, and "most of them never light up" is literally true of a reef at
      depth. The chapter's copy did not change a word. */
   const REEF_Z0 = -106, REEF_Z1 = -272;
-  const reef = createReef({ z0: REEF_Z0, z1: REEF_Z1, hue, quality, width: 230, glow: glowTexture() });
+  const reef = createReef({ z0: REEF_Z0, z1: REEF_Z1, hue, quality, width: 230, glow: glow() });
   const city = reef.group;
   scene.add(city);
 
   /* sonar: the ping that goes out and finds them */
   const sonar = createEcho({
-    count: 3, radius: 62, thickness: 0.008, period: 4.6,
+    count: 3, radius: 44, thickness: 0.01, period: 5.2,
     colors: [C.cyan, C.mint, C.azure]
   });
   sonar.group.position.set(0, 9, (REEF_Z0 + REEF_Z1) / 2 + 30);
@@ -602,8 +552,7 @@ export function createWorld(canvas, opts) {
     gallery.add(halo);
 
     loader.load(src, tex => {
-      tex.colorSpace = SRGBColorSpace;
-      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      sharpen(tex, true);
       shot.material.map = tex;
       shot.material.color.setHex(0xffffff);
       shot.material.needsUpdate = true;
@@ -979,6 +928,8 @@ export function createWorld(canvas, opts) {
   resize();
 
   return {
+    /* handy in the harness; harmless in production */
+    scene, camera,
     setProgress(p) {
       target = clamp(p, 0, 1);
       if (reduced) { current = target; render(current, 0.016); }

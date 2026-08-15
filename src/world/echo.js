@@ -37,9 +37,15 @@ export function createEcho(opts) {
       new RingGeometry(1 - thickness * 2, 1, 128),
       new MeshBasicMaterial({
         color: colors[i % colors.length], transparent: true, opacity: 0,
-        side: DoubleSide, blending: AdditiveBlending, depthWrite: false, fog: false
+        side: DoubleSide, blending: AdditiveBlending,
+        /* An echo is an overlay, not an object in the water: it must not be
+           depth-sorted against the seabed or half of every ring disappears
+           below the sand and the surviving half reads as a hard arc. Drawn
+           last, additively, over everything. */
+        depthWrite: false, depthTest: false, toneMapped: false, fog: false
       })
     );
+    m.renderOrder = 20;
     m.userData.offset = i / count;
     group.add(m);
     rings.push(m);

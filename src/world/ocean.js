@@ -32,39 +32,9 @@ import {
   AdditiveBlending, BufferAttribute, BufferGeometry, Color, ConeGeometry,
   CylinderGeometry, DoubleSide, Group, IcosahedronGeometry, InstancedMesh,
   Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, OctahedronGeometry,
-  PlaneGeometry, Points, ShaderMaterial, Sphere, SRGBColorSpace, CanvasTexture,
-  RepeatWrapping, Vector3
+  PlaneGeometry, Points, ShaderMaterial, Sphere, Vector2, Vector3
 } from 'three';
-
-/* --------------------------------------------------------------- caustics */
-/* Overlapping soft blobs on a tiling canvas. Scrolled in two directions at
-   different speeds it reads as light through moving water, which is the one
-   texture that makes a flat sand plane look submerged. */
-function causticTexture() {
-  const s = 256, cv = document.createElement('canvas');
-  cv.width = cv.height = s;
-  const g = cv.getContext('2d');
-  g.fillStyle = '#000000';
-  g.fillRect(0, 0, s, s);
-  g.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 90; i++) {
-    const x = Math.random() * s, y = Math.random() * s;
-    const r = 10 + Math.random() * 34;
-    for (const [dx, dy] of [[0, 0], [s, 0], [-s, 0], [0, s], [0, -s]]) {
-      const grd = g.createRadialGradient(x + dx, y + dy, 0, x + dx, y + dy, r);
-      grd.addColorStop(0, 'rgba(255,255,255,.5)');
-      grd.addColorStop(0.5, 'rgba(255,255,255,.12)');
-      grd.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = grd;
-      g.beginPath(); g.arc(x + dx, y + dy, r, 0, 6.284); g.fill();
-    }
-  }
-  const tex = new CanvasTexture(cv);
-  tex.colorSpace = SRGBColorSpace;
-  tex.wrapS = tex.wrapT = RepeatWrapping;
-  tex.repeat.set(6, 24);
-  return tex;
-}
+import { causticTexture, sandNormal, rockNormal } from './textures.js';
 
 /* Sway, injected into a standard material. Amplitude rises with height above
    the seabed so the holdfast stays put and the tip moves — which is the only
@@ -107,8 +77,10 @@ export function createReef(opts) {
   const swayMats = [];
 
   /* ---------------------------------------------------------- the seabed */
-  const caustics = causticTexture();
-  const floorGeo = new PlaneGeometry(width * 2.6, len * 1.4, 90, 90);
+  const caustics = causticTexture(1024);
+  const sand = sandNormal(512);
+  sand.repeat.set(7, 24);
+  const floorGeo = new PlaneGeometry(width * 2.6, len * 1.4, 140, 140);
   {
     /* gentle dunes, so the floor is not a sheet of card */
     const p = floorGeo.attributes.position;
@@ -120,8 +92,9 @@ export function createReef(opts) {
     floorGeo.computeVertexNormals();
   }
   const floor = new Mesh(floorGeo, new MeshStandardMaterial({
-    color: 0x1B3A56, roughness: 0.94, metalness: 0.05,
-    emissive: 0x2E7FA8, emissiveMap: caustics, emissiveIntensity: 0.55,
+    color: 0x1B3A56, roughness: 0.88, metalness: 0.06,
+    normalMap: sand, normalScale: new Vector2(0.85, 0.85),
+    emissive: 0x2E7FA8, emissiveMap: caustics, emissiveIntensity: 0.6,
     envMapIntensity: 0.7
   }));
   floor.rotation.x = -Math.PI / 2;
@@ -129,10 +102,16 @@ export function createReef(opts) {
   group.add(floor);
 
   /* ------------------------------------------------------- reef and coral */
+  const reefNormal = rockNormal(512);
+  reefNormal.repeat.set(1.6, 1.6);
   const rockCount = Math.round(320 * q);
   const rocks = new InstancedMesh(
     new IcosahedronGeometry(1, 1),
-    new MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, metalness: 0.1, flatShading: true, envMapIntensity: 0.8 }),
+    new MeshStandardMaterial({
+      color: 0xffffff, roughness: 0.86, metalness: 0.12,
+      normalMap: reefNormal, normalScale: new Vector2(1.3, 1.3),
+      envMapIntensity: 0.85
+    }),
     rockCount
   );
   for (let i = 0; i < rockCount; i++) {
@@ -163,7 +142,7 @@ export function createReef(opts) {
     let x = (Math.random() - 0.5) * width * 1.5;
     if (Math.abs(x) < 15) x += Math.sign(x || 1) * 16;
     const z = z0 - Math.random() * len;
-    const s = 0.5 + Math.random() * 1.5;
+    const s = 0.8 + Math.random() * 2.0;
     dummy.position.set(x, -2.9 + s, z);
     dummy.rotation.set((Math.random() - 0.5) * 0.4, Math.random() * 6.28, (Math.random() - 0.5) * 0.4);
     dummy.scale.set(s, s * (0.8 + Math.random() * 1.4), s);
@@ -190,7 +169,7 @@ export function createReef(opts) {
     const bp = bladeGeo.attributes.position;
     for (let i = 0; i < bp.count; i++) {
       const y = bp.getY(i);
-      bp.setX(i, bp.getX(i) * (1 - y * 0.72));
+      bp.setX(i, bp.getX(i) * (1 - y * 0.42));
       /* a slight natural lean so a still frame is not a row of soldiers */
       bp.setZ(i, y * y * 0.5);
     }
@@ -204,7 +183,7 @@ export function createReef(opts) {
     const h = 6 + Math.random() * 22;
     dummy.position.set(x, -3.2, z);
     dummy.rotation.set(0, Math.random() * 6.28, 0);
-    dummy.scale.set(0.5 + Math.random() * 0.9, h, 1);
+    dummy.scale.set(0.8 + Math.random() * 1.3, h, 1);
     dummy.updateMatrix();
     kelp.setMatrixAt(i, dummy.matrix);
   }
